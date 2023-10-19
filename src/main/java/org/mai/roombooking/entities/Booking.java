@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.mai.roombooking.entities.dto.BookingDTO;
+import org.mai.roombooking.entities.dto.BookingDetailsDTO;
 
 import java.time.LocalDateTime;
 
@@ -59,22 +60,22 @@ public class Booking {
 
 //    Ограничения
 
-    @PrePersist
-    public void prePersist() {
-        // Условие проверки, что начальное время меньше конечного времени
-
-        if (startTime != null && endTime != null && startTime.isAfter(endTime)) {
-            throw new IllegalArgumentException("Start time must be before end time.");
-        }
-
-        // Условие проверки, что если есть интервал повторения, то указаны и единица, и количество
-        if ((recurringInterval != null || recurringUnit != null || recurringEndTime != null) &&
-                (recurringInterval == null || recurringUnit == null || recurringEndTime == null)) {
-            throw new IllegalArgumentException("If there is a recurring interval, both unit and count must be specified.");
-        }
-
-        this.createdAt = LocalDateTime.now();
-    }
+//    @PrePersist
+//    public void prePersist() {
+//        // Условие проверки, что начальное время меньше конечного времени
+//
+//        if (startTime != null && endTime != null && startTime.isAfter(endTime)) {
+//            throw new IllegalArgumentException("Start time must be before end time.");
+//        }
+//
+//        // Условие проверки, что если есть интервал повторения, то указаны и единица, и количество
+//        if ((recurringInterval != null || recurringUnit != null || recurringEndTime != null) &&
+//                (recurringInterval == null || recurringUnit == null || recurringEndTime == null)) {
+//            throw new IllegalArgumentException("If there is a recurring interval, both unit and count must be specified.");
+//        }
+//
+//        this.createdAt = LocalDateTime.now();
+//    }
 
     public BookingDTO toDTO() {
         return BookingDTO.builder()
@@ -88,4 +89,17 @@ public class Booking {
                 .build();
     }
 
+    public BookingDetailsDTO toDetailsDTO() {
+        return BookingDetailsDTO.builder()
+                .bookingId(this.bookingId)
+                .room(this.room)
+                .user(this.user)
+                .bookingPurpose(this.bookingPurpose)
+                .startTime(this.startTime)
+                .endTime(this.endTime)
+                .recurringUnit(this.recurringUnit)
+                .recurringInterval(this.recurringInterval)
+                .recurrentEndTime(this.recurringEndTime)
+                .build();
+    }
 }

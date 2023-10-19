@@ -24,5 +24,4 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findBookingsInDateRangeForRoom(@Param("startDateTime") LocalDateTime startDateTime,
                                                  @Param("endDateTime") LocalDateTime endDateTime,
                                                  @Param("roomId") Long roomId);
-
 }

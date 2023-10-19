@@ -5,6 +5,7 @@ import org.mai.roombooking.entities.RecurrentUnit;
 import org.mai.roombooking.entities.Room;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.entities.dto.BookingDTO;
+import org.mai.roombooking.entities.dto.BookingDetailsDTO;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.services.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,22 +17,24 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/booking/rooms")
+@RequestMapping("/api/booking")
 public class BookingController {
 
-    @Autowired
-    private BookingService bookingService;
-    @Autowired
-    private BookingRepository bookingRepository;
+    private final BookingService bookingService;
 
-    @GetMapping("/get")
+    @Autowired
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
+
+    @GetMapping("/rooms/get")
     public List<BookingDTO> getBookingsByTimeRange(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime startTime,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime endTime) {
         return bookingService.getBookingsByTimeRange(startTime, endTime);
     }
 
-    @GetMapping("/{id}/get")
+    @GetMapping("/rooms/{id}/get")
     public List<BookingDTO> getBookingsByRoom(
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime startTime,
@@ -39,19 +42,11 @@ public class BookingController {
         return bookingService.getBookingsByRoomAndTimeRange(id, startTime, endTime);
     }
 
-    @GetMapping("/save")
-    public String save() {
-        Optional<Booking> bookingq = bookingRepository.findById(13L);
-        Booking booking = new Booking(100L,
-                new Room(3L, "usernae-test", 15, true),
-                new User(1L, "usernae-test", "usernae-test", "usernae-test", "usernae-test", "usernae-test"),
-                LocalDateTime.now(),
-                LocalDateTime.now().plusHours(5),
-                "PURPOSE test",
-                1,
-                RecurrentUnit.WEEKLY, LocalDateTime.now().plusHours(23), LocalDateTime.now());
-        bookingService.saveBooking(booking);
-        return "saved";
+    @GetMapping("/{id}/details")
+    public BookingDetailsDTO getBookingDetailsByRoomId(
+            @PathVariable Long id
+    ) {
+        return bookingService.getBookingDetailsById(id);
     }
 }
 
