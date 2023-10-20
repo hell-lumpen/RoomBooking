@@ -48,5 +48,11 @@ public class BookingController {
     ) {
         return bookingService.getBookingDetailsById(id);
     }
+
+    @GetMapping("/test")
+    public String test() {
+        return "secure test";
+    }
+
 }
 

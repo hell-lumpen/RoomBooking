@@ -3,13 +3,11 @@ package org.mai.roombooking.controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import org.mai.roombooking.entities.dto.UserLoginRequest;
 import org.mai.roombooking.entities.dto.UserRegistrationRequest;
+import org.mai.roombooking.entities.dto.AuthResponse;
 import org.mai.roombooking.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,20 +20,23 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserRegistrationRequest registrationRequest) {
-        authService.registerUser(registrationRequest);
-        return ResponseEntity.ok("User registered successfully");
+    public ResponseEntity<AuthResponse> registerUser(@RequestBody UserRegistrationRequest registrationRequest) {
+        return ResponseEntity.ok(authService.registerUser(registrationRequest));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody UserLoginRequest loginRequest) {
-        String token = authService.loginUser(loginRequest);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<AuthResponse> loginUser(@RequestBody UserLoginRequest loginRequest) {
+        return ResponseEntity.ok(authService.loginUser(loginRequest));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<String> logoutUser(HttpServletRequest request) {
-        authService.logoutUser(request);
-        return ResponseEntity.ok("User logged out successfully");
+    @GetMapping("/hui")
+    public String getHui() {
+        return "Hui";
     }
+
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logoutUser(HttpServletRequest request) {
+//        authService.logoutUser(request);
+//        return ResponseEntity.ok("User logged out successfully");
+//    }
 }
