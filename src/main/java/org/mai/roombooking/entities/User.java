@@ -24,7 +24,7 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
     @Column(name = "phone_number", unique = true, nullable = false)
@@ -33,8 +33,11 @@ public class User implements UserDetails {
     @Column(name = "fullname", nullable = false)
     private String fullName;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "is_account_locked", nullable = false)
+    private Boolean isAccountLocked;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -47,7 +50,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.passwordHash;
+        return this.password;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !this.isAccountLocked;
     }
 
     @Override

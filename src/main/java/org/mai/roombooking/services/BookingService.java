@@ -80,39 +80,39 @@ public class BookingService {
         RECURRING_RULES.put(RecurrentUnit.YEARLY, dateTime -> dateTime.plusYears(1));
     }
 
-    /**
-     * Раскрывает периодическое бронирование на отдельные разовые бронирования в заданном временном диапазоне.
-     *
-     * @param booking    периодическое бронирование, подлежащее раскрытию
-     * @param startTime  начальное время диапазона
-     * @param endTime    конечное время диапазона
-     * @return список DTO для разовых бронирований, полученных из раскрытия периодического бронирования
-     */
-    private List<BookingDTO> expandPeriodicBooking(Booking booking, LocalDateTime startTime, LocalDateTime endTime) {
-        List<BookingDTO> bookingDTOList = new ArrayList<>();
-        LocalDateTime tmpStartTime = booking.getStartTime();
-        LocalDateTime tmpEndTime = booking.getEndTime();
-
-        Function<LocalDateTime, LocalDateTime> incrementRule = RECURRING_RULES.get(booking.getRecurringUnit());
-
-        while (tmpEndTime.isBefore(booking.getRecurringEndTime())) {
-            if (!tmpEndTime.isBefore(startTime) && !tmpStartTime.isAfter(endTime)) {
-                bookingDTOList.add(BookingDTO.builder()
-                        .bookingId(booking.getBookingId())
-                        .roomName(booking.getRoom().getRoomName())
-                        .userFullName(booking.getUser().getFullName())
-                        .bookingPurpose(booking.getBookingPurpose())
-                        .isRecurrentBooking(true)
-                        .startTime(tmpStartTime)
-                        .endTime(tmpEndTime)
-                        .build());
-            }
-            tmpStartTime = incrementRule.apply(tmpStartTime);
-            tmpEndTime = incrementRule.apply(tmpEndTime);
-        }
-
-        return bookingDTOList;
-    }
+//    /**
+//     * Раскрывает периодическое бронирование на отдельные разовые бронирования в заданном временном диапазоне.
+//     *
+//     * @param booking    периодическое бронирование, подлежащее раскрытию
+//     * @param startTime  начальное время диапазона
+//     * @param endTime    конечное время диапазона
+//     * @return список DTO для разовых бронирований, полученных из раскрытия периодического бронирования
+//     */
+//    private List<BookingDTO> expandPeriodicBooking(Booking booking, LocalDateTime startTime, LocalDateTime endTime) {
+//        List<BookingDTO> bookingDTOList = new ArrayList<>();
+//        LocalDateTime tmpStartTime = booking.getStartTime();
+//        LocalDateTime tmpEndTime = booking.getEndTime();
+//
+//        Function<LocalDateTime, LocalDateTime> incrementRule = RECURRING_RULES.get(booking.getRecurringUnit());
+//
+//        while (tmpEndTime.isBefore(booking.getRecurringEndTime())) {
+//            if (!tmpEndTime.isBefore(startTime) && !tmpStartTime.isAfter(endTime)) {
+//                bookingDTOList.add(BookingDTO.builder()
+//                        .bookingId(booking.getBookingId())
+//                        .roomName(booking.getRoom().getRoomName())
+//                        .userFullName(booking.getUser().getFullName())
+//                        .bookingPurpose(booking.getBookingPurpose())
+//                        .isRecurrentBooking(true)
+//                        .startTime(tmpStartTime)
+//                        .endTime(tmpEndTime)
+//                        .build());
+//            }
+//            tmpStartTime = incrementRule.apply(tmpStartTime);
+//            tmpEndTime = incrementRule.apply(tmpEndTime);
+//        }
+//
+//        return bookingDTOList;
+//    }
 
     /**
      * Получает список бронирований в заданном временном диапазоне и конвертирует их в список DTO.
@@ -122,9 +122,9 @@ public class BookingService {
      * @param endTime   конечное время диапазона
      * @return List<BookingDTO> бронирований в указанном временном диапазоне
      */
-    public List<BookingDTO> getBookingsByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
-        List<Booking> bookingList = bookingRepository.findBookingsInDateRange(startTime, endTime);
-        return convertBookingToDTOAndExpandPeriodic(startTime, endTime, bookingList);
+    public Map<String, List<BookingDTO>> getBookingsByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+
+        return null;
     }
 
     /**
@@ -137,33 +137,34 @@ public class BookingService {
      * @return List<BookingDTO> бронирований в указанной комнате и временном диапазоне
      */
     public List<BookingDTO> getBookingsByRoomAndTimeRange(Long roomId, LocalDateTime startTime, LocalDateTime endTime) {
-        List<Booking> bookingList = bookingRepository.findBookingsInDateRangeForRoom(startTime, endTime, roomId);
-        return convertBookingToDTOAndExpandPeriodic(startTime, endTime, bookingList);
+//        List<Booking> bookingList = bookingRepository.findBookingsInDateRangeForRoom(startTime, endTime, roomId);
+//        return convertBookingToDTOAndExpandPeriodic(startTime, endTime, bookingList);
+        return null;
     }
 
-    /**
-     * Конвертирует список бронирований в список. Раскрывает периодические бронирования в виде списка разовых
-     * бронирований с помощью метода {@link #expandPeriodicBooking(Booking, LocalDateTime, LocalDateTime)}.
-     *
-     * @param startTime    начальное время диапазона
-     * @param endTime      конечное время диапазона
-     * @param bookingList  список бронирований для конвертации и раскрытия
-     * @return список DTO для бронирований с учетом периодичности
-     */
-    private List<BookingDTO> convertBookingToDTOAndExpandPeriodic(LocalDateTime startTime,
-                                                                  LocalDateTime endTime,
-                                                                  List<Booking> bookingList) {
-        List<BookingDTO> bookingDTOList = new ArrayList<>();
-        for (Booking booking : bookingList) {
-            if (booking.getRecurringUnit() != null) {
-                bookingDTOList.addAll(expandPeriodicBooking(booking, startTime, endTime));
-            } else {
-                bookingDTOList.add(booking.toDTO());
-            }
-        }
-
-        return bookingDTOList;
-    }
+//    /**
+//     * Конвертирует список бронирований в список. Раскрывает периодические бронирования в виде списка разовых
+//     * бронирований с помощью метода {@link #expandPeriodicBooking(Booking, LocalDateTime, LocalDateTime)}.
+//     *
+//     * @param startTime    начальное время диапазона
+//     * @param endTime      конечное время диапазона
+//     * @param bookingList  список бронирований для конвертации и раскрытия
+//     * @return список DTO для бронирований с учетом периодичности
+//     */
+//    private List<BookingDTO> convertBookingToDTOAndExpandPeriodic(LocalDateTime startTime,
+//                                                                  LocalDateTime endTime,
+//                                                                  List<Booking> bookingList) {
+//        List<BookingDTO> bookingDTOList = new ArrayList<>();
+//        for (Booking booking : bookingList) {
+//            if (booking.getRecurringUnit() != null) {
+//                bookingDTOList.addAll(expandPeriodicBooking(booking, startTime, endTime));
+//            } else {
+//                bookingDTOList.add(booking.toDTO());
+//            }
+//        }
+//
+//        return bookingDTOList;
+//    }
 
     /**
      * Возвращает расширенную информацию о бронировании, включая правило периодичности, если оно установлено.
@@ -173,8 +174,9 @@ public class BookingService {
      * @throws BookingNotFoundException если бронирование с указанным идентификатором не найдено
      */
     public BookingDetailsDTO getBookingDetailsById(Long bookingId) {
-        Optional<Booking> booking = bookingRepository.findById(bookingId);
-        return booking.map(Booking::toDetailsDTO)
-                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+//        Optional<Booking> booking = bookingRepository.findById(bookingId);
+//        return booking.map(Booking::toDetailsDTO)
+//                .orElseThrow(() -> new BookingNotFoundException(bookingId));
+        return null;
     }
 }

@@ -21,11 +21,11 @@ public class Room {
     private String roomName;
 
     @Column(name = "capacity", nullable = false)
-    private int capacity;
+    private Integer capacity;
 
     @Column(name = "has_computers", nullable = false)
-    private boolean hasComputers;
+    private Boolean hasComputers;
 
-    // Getters and setters
-
+    @Column(name = "has_projector", nullable = false)
+    private Boolean hasProjector;
 }

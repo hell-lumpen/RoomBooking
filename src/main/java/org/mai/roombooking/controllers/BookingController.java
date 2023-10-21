@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -28,7 +29,7 @@ public class BookingController {
     }
 
     @GetMapping("/rooms/get")
-    public List<BookingDTO> getBookingsByTimeRange(
+    public Map<String, List<BookingDTO>> getBookingsByTimeRange(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime startTime,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime endTime) {
         return bookingService.getBookingsByTimeRange(startTime, endTime);
@@ -50,9 +51,8 @@ public class BookingController {
     }
 
     @GetMapping("/test")
-    public String test() {
+    public String doSecureTest() {
         return "secure test";
     }
-
 }
 

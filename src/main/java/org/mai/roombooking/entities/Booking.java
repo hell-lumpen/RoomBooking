@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.mai.roombooking.entities.dto.BookingDTO;
-import org.mai.roombooking.entities.dto.BookingDetailsDTO;
 
 import java.time.LocalDateTime;
 
@@ -14,13 +12,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Table(name = "Bookings")
+@Table(name = "bookings")
 public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "booking_id")
-    private Long bookingId;
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "periodic_booking_id")
+    private Long periodicBookingId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id", nullable = false)
@@ -38,68 +39,11 @@ public class Booking {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime endTime;
 
-    @Column(name = "booking_purpose", length = 255)
+    @Column(name = "booking_purpose")
     private String bookingPurpose;
-
-    @Column(name = "recurring_interval")
-    private Integer recurringInterval;
-
-    @Column(name = "recurring_unit", length = 10)
-    @Enumerated(EnumType.STRING)
-    private RecurrentUnit recurringUnit;
-
-    @Column(name = "recurring_end_time")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", shape = JsonFormat.Shape.STRING)
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime recurringEndTime;
 
     @Column(name = "created_at")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", shape = JsonFormat.Shape.STRING)
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
-
-//    Ограничения
-
-//    @PrePersist
-//    public void prePersist() {
-//        // Условие проверки, что начальное время меньше конечного времени
-//
-//        if (startTime != null && endTime != null && startTime.isAfter(endTime)) {
-//            throw new IllegalArgumentException("Start time must be before end time.");
-//        }
-//
-//        // Условие проверки, что если есть интервал повторения, то указаны и единица, и количество
-//        if ((recurringInterval != null || recurringUnit != null || recurringEndTime != null) &&
-//                (recurringInterval == null || recurringUnit == null || recurringEndTime == null)) {
-//            throw new IllegalArgumentException("If there is a recurring interval, both unit and count must be specified.");
-//        }
-//
-//        this.createdAt = LocalDateTime.now();
-//    }
-
-    public BookingDTO toDTO() {
-        return BookingDTO.builder()
-                .bookingId(this.bookingId)
-                .roomName(this.room.getRoomName())
-                .userFullName(this.user.getFullName())
-                .bookingPurpose(this.bookingPurpose)
-                .startTime(this.startTime)
-                .endTime(this.endTime)
-                .isRecurrentBooking(this.recurringUnit != null)
-                .build();
-    }
-
-    public BookingDetailsDTO toDetailsDTO() {
-        return BookingDetailsDTO.builder()
-                .bookingId(this.bookingId)
-                .room(this.room)
-                .user(this.user)
-                .bookingPurpose(this.bookingPurpose)
-                .startTime(this.startTime)
-                .endTime(this.endTime)
-                .recurringUnit(this.recurringUnit)
-                .recurringInterval(this.recurringInterval)
-                .recurrentEndTime(this.recurringEndTime)
-                .build();
-    }
 }
