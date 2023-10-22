@@ -30,14 +30,16 @@ import java.util.stream.Collectors;
  */
 @Service
 public class BookingService {
-    @Autowired
-    BookingRepository bookingRepository;
 
-    @Autowired
-    UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
 
-    @Autowired
-    RoomRepository roomRepository;
+    BookingService(BookingRepository bookingRepository, UserRepository userRepository, RoomRepository roomRepository) {
+        this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
+    }
 
 
     /**
@@ -112,7 +114,16 @@ public class BookingService {
      * @return обновленное бронирование
      */
     public Booking updatePeriodicBooking(Long bookingId, RoomBookingRequestDTO request) {
-        return null;
+        var booking = bookingRepository.findById(bookingId)
+                .orElseThrow(()->new BookingNotFoundException(bookingId));
+
+        bookingRepository.findAllByPeriodicBookingId(booking.getPeriodicBookingId())
+                .forEach((bookingItem) -> {
+                    Booking bookingTmp = getBookingFromDTO(request);
+                    bookingTmp.setId(bookingItem.getId());
+                    bookingRepository.save(bookingTmp);
+                });
+        return booking;
     }
 
     /**
@@ -134,7 +145,7 @@ public class BookingService {
      * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
     public void deletePeriodicBooking(Long bookingId) {
-        // Реализация деталей
+        bookingRepository.deleteAllByPeriodicBookingId(bookingId);
     }
 
     /**
@@ -144,7 +155,7 @@ public class BookingService {
      * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
     public void deleteBooking(Long bookingId) {
-        // Реализация деталей
+        bookingRepository.deleteById(bookingId);
     }
 
     /**
@@ -154,9 +165,12 @@ public class BookingService {
      * @return созданное бронирование
      * @throws RoomNotFoundException   если комната не найдена по идентификатору
      * @throws UserNotFoundException   если пользователь не найден по идентификатору
-//     * @throws BookingConflictException если есть конфликт с существующим бронированием
      */
     public Booking createBooking(RoomBookingRequestDTO request) {
+        for (LocalDateTime end = request.getEndTime(); end.isBefore(request.getRRule().getUntilDate());)
+        {
+
+        }
         return null;
     }
 

@@ -32,4 +32,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                 @Param("endDateTime") LocalDateTime endDateTime,
                                                 @Param("endDateTime") Long userId);
 
+    @Query("DELETE FROM Booking b" +
+            "WHERE b.periodicBookingId = :periodicBookingId")
+    void deleteAllByPeriodicBookingId(@Param("periodicBookingId") Long periodicBookingId);
+
+    List<Booking> findAllByPeriodicBookingId(@Param("periodicBookingId") Long periodicBookingId);
 }
