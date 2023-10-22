@@ -26,9 +26,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                  @Param("endDateTime") LocalDateTime endDateTime,
                                                  @Param("roomId") Long roomId);
 
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.endTime >= :startDateTime " +
+                "AND b.startTime <= :endDateTime"+
+                "AND b.user.id == userId")
+    List<Booking> findBookingsInDateRangeByUser(@Param("startDateTime") LocalDateTime startDateTime,
+                                                @Param("endDateTime") LocalDateTime endDateTime,
+                                                @Param("endDateTime") Long userId);
 
-    @Query("SELECT b.room.roomName, COLLECT_LIST(b) FROM Booking b GROUP BY b.room.roomName HAVING b.endTime >= :startDateTime AND b.startTime <= :endDateTime ")
-    Map<String, List<Booking>> findBookingsInDateRangeAndGroupByRoomName (
-            @Param("startDateTime") LocalDateTime startDateTime,
-            @Param("endDateTime") LocalDateTime endDateTime);
 }

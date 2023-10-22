@@ -1,14 +1,16 @@
 package org.mai.roombooking.controllers;
 
-import org.mai.roombooking.entities.dto.BookingDTO;
+import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.services.BookingService;
 import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +35,6 @@ public class BookingController {
      * @param startTime Дата-время начала выгрузки
      * @param endTime   Дата-время конца выгрузки
      * @return ResponseEntity со списком бронирований, сгруппированных по комнате
-     * @throws BookingNotFoundException если не найдены бронирования в указанный период
      */
     @GetMapping
     public ResponseEntity<List<RoomBookingDTO>> getBookingsInTimeRange(
@@ -50,15 +51,13 @@ public class BookingController {
      * @param startTime Дата-время начала выгрузки
      * @param endTime   Дата-время конца выгрузки
      * @return ResponseEntity со списком бронирований для конкретной комнаты
-     * @throws RoomNotFoundException    если комната не найдена по идентификатору
-     * @throws BookingNotFoundException если не найдены бронирования в указанный период
      */
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<List<BookingDTO>> getBookingsByRoomInTimeRange(
+    public ResponseEntity<List<RoomBookingDTO>> getBookingsByRoomInTimeRange(
             @PathVariable Long roomId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        List<BookingDTO> bookings = bookingService.getBookingsByRoomInTimeRange(roomId, startTime, endTime);
+        List<RoomBookingDTO> bookings = bookingService.getBookingsByRoomInTimeRange(roomId, startTime, endTime);
         return ResponseEntity.ok(bookings);
     }
 
@@ -69,15 +68,18 @@ public class BookingController {
      * @param startTime Дата-время начала выгрузки
      * @param endTime   Дата-время конца выгрузки
      * @return ResponseEntity со списком бронирований для конкретного пользователя
-     * @throws UserNotFoundException    если пользователь не найден по идентификатору
-     * @throws BookingNotFoundException если не найдены бронирования в указанный период
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<BookingDTO>> getBookingsByUserInTimeRange(
+    public ResponseEntity<List<RoomBookingDTO>> getBookingsByUserInTimeRange(
             @PathVariable Long userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        List<BookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
+        List<RoomBookingDTO> bookings = new ArrayList<>();
+        try {
+            bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
+        } catch (UsernameNotFoundException ex) {
+            // TODO: вернуть код ошибки
+        }
         return ResponseEntity.ok(bookings);
     }
 
@@ -87,13 +89,13 @@ public class BookingController {
      * @param bookingId Идентификатор бронирования
      * @param request   DTO с информацией для изменения бронирования
      * @return ResponseEntity с обновленным бронированием
-     * @throws BookingNotFoundException если бронирование не найдено по идентификатору
+//     * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
     @PutMapping("/{bookingId}")
-    public ResponseEntity<BookingDTO> updateBooking(
+    public ResponseEntity<RoomBookingDTO> updateBooking(
             @PathVariable Long bookingId,
             @RequestBody BookingUpdateRequestDTO request) {
-        BookingDTO updatedBooking;
+        RoomBookingDTO updatedBooking;
 
         if (request.isPeriodic()) {
             // Обновить всю цепочку бронирования

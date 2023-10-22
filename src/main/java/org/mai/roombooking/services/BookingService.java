@@ -1,5 +1,13 @@
 package org.mai.roombooking.services;
 
+import org.mai.roombooking.dtos.RoomBookingDTO;
+import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.entities.User;
+import org.mai.roombooking.repositories.BookingRepository;
+import org.mai.roombooking.repositories.RoomRepository;
+import org.mai.roombooking.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,6 +20,12 @@ import java.util.stream.Collectors;
  */
 @Service
 public class BookingService {
+    @Autowired
+    BookingRepository bookingRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
 
     /**
      * Получает все бронирования комнат в заданном временном диапазоне.
@@ -19,10 +33,10 @@ public class BookingService {
      * @param startTime дата и время начала запроса
      * @param endTime   дата и время окончания запроса
      * @return список бронирований комнат в заданном временном диапазоне
-     * @throws BookingNotFoundException если не найдены бронирования в указанный период
      */
     public List<RoomBookingDTO> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
-        return null;
+        List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime,endTime);
+        return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
 
     /**
@@ -32,11 +46,10 @@ public class BookingService {
      * @param startTime дата и время начала запроса
      * @param endTime   дата и время окончания запроса
      * @return список бронирований для указанной комнаты в заданном временном диапазоне
-     * @throws RoomNotFoundException    если комната не найдена по идентификатору
-     * @throws BookingNotFoundException если не найдены бронирования в указанный период
      */
-    public List<BookingDTO> getBookingsByRoomInTimeRange(Long roomId, LocalDateTime startTime, LocalDateTime endTime) {
-        return null;
+    public List<RoomBookingDTO> getBookingsByRoomInTimeRange(Long roomId, LocalDateTime startTime, LocalDateTime endTime) {
+        List<Booking> bookings = bookingRepository.findBookingsInDateRangeForRoom(startTime, endTime, roomId);
+        return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
 
     /**
@@ -46,11 +59,20 @@ public class BookingService {
      * @param startTime дата и время начала запроса
      * @param endTime   дата и время окончания запроса
      * @return список бронирований для указанного пользователя в заданном временном диапазоне
-     * @throws UserNotFoundException    если пользователь не найден по идентификатору
-     * @throws BookingNotFoundException если не найдены бронирования в указанный период
+     * @throws UsernameNotFoundException если пользователь не найден по идентификатору
      */
-    public List<BookingDTO> getBookingsByUserInTimeRange(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
-        return null;
+
+    public List<RoomBookingDTO> getBookingsByUserInTimeRange(Long userId,
+                                                             LocalDateTime startTime,
+                                                             LocalDateTime endTime)
+                                                             throws UsernameNotFoundException{
+        List<Booking> bookings = bookingRepository.findBookingsInDateRangeByUser(startTime, endTime, userId);
+
+        if (bookings.isEmpty())
+            userRepository.findById(userId).orElseThrow(() ->
+                    new UsernameNotFoundException("User whis id" + userId +  "not found"));
+
+        return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
 
     /**
