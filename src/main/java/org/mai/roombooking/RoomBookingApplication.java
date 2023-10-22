@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan("org.mai.roombooking.entities")
 @EnableJpaRepositories("org.mai.roombooking.repositories")
 public class RoomBookingApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(RoomBookingApplication.class, args);
     }
