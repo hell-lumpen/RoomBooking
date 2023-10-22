@@ -3,6 +3,7 @@ package org.mai.roombooking.services;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.entities.RRule;
 import org.mai.roombooking.entities.Room;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.exceptions.BookingNotFoundException;
@@ -49,9 +50,17 @@ public class BookingService {
      * @param endTime   дата и время окончания запроса
      * @return список бронирований комнат в заданном временном диапазоне
      */
-    public List<RoomBookingDTO> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+    public Map<String, List<RoomBookingDTO>> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime,endTime);
-        return bookings.stream().map((RoomBookingDTO::new)).toList();
+
+        Map<String, List<RoomBookingDTO>> groupedBookings = bookings.stream().map((RoomBookingDTO::new)).collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
+        return groupedBookings.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .sorted(Comparator.comparing(RoomBookingDTO::getStartTime))
+                                .toList()
+                ));
     }
 
     /**
@@ -145,7 +154,8 @@ public class BookingService {
      * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
     public void deletePeriodicBooking(Long bookingId) {
-        bookingRepository.deleteAllByPeriodicBookingId(bookingId);
+        var booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
+        bookingRepository.deleteAllByPeriodicBookingId(booking.getPeriodicBookingId());
     }
 
     /**
@@ -167,10 +177,21 @@ public class BookingService {
      * @throws UserNotFoundException   если пользователь не найден по идентификатору
      */
     public Booking createBooking(RoomBookingRequestDTO request) {
-        for (LocalDateTime end = request.getEndTime(); end.isBefore(request.getRRule().getUntilDate());)
-        {
+        LocalDateTime end = request.getEndTime();
+        LocalDateTime start = request.getEndTime();
+        while (end.isBefore(request.getRRule().getUntilDate())) {
+            var booking = bookingRepository.save(getBookingFromDTO(request));
+            booking.setStartTime(start);
+            booking.setEndTime(end);
+            booking.setPeriodicBookingId(UUID.randomUUID());
+            bookingRepository.save(booking);
 
+            end = RECURRING_RULES.get(request.getRRule().getFrequency())
+                    .performOperation(end, request.getRRule().getInterval());
+            start = RECURRING_RULES.get(request.getRRule().getFrequency())
+                    .performOperation(start, request.getRRule().getInterval());
         }
+
         return null;
     }
 
@@ -197,5 +218,19 @@ public class BookingService {
                 .id(dto.getId())
                 .periodicBookingId(dto.getPeriodicBookingId())
                 .build();
+    }
+
+    private static final Map<RRule.Frequency, IncrementLocalDataTime> RECURRING_RULES = new EnumMap<>(RRule.Frequency.class);
+
+    static {
+        RECURRING_RULES.put(RRule.Frequency.DAILY, LocalDateTime::plusDays);
+        RECURRING_RULES.put(RRule.Frequency.WEEKLY, LocalDateTime::plusWeeks);
+        RECURRING_RULES.put(RRule.Frequency.MONTHLY, LocalDateTime::plusMonths);
+        RECURRING_RULES.put(RRule.Frequency.YEARLY, LocalDateTime::plusYears);
+    }
+
+    @FunctionalInterface
+    public interface IncrementLocalDataTime {
+        LocalDateTime performOperation(LocalDateTime inputDateTime, int value);
     }
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.mai.roombooking.entities.RRule;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RoomBookingRequestDTO {
     private Long id;
-    private Long periodicBookingId;
+    private UUID periodicBookingId;
     private Long roomId;
     private Long userId;
     private LocalDateTime startTime;

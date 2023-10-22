@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -36,7 +37,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("DELETE FROM Booking b" +
             "WHERE b.periodicBookingId = :periodicBookingId")
-    void deleteAllByPeriodicBookingId(@Param("periodicBookingId") Long periodicBookingId);
+    void deleteAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
 
-    List<Booking> findAllByPeriodicBookingId(@Param("periodicBookingId") Long periodicBookingId);
+    List<Booking> findAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
 }

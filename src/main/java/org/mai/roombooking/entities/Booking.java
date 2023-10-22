@@ -6,6 +6,7 @@ import lombok.*;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -21,7 +22,7 @@ public class Booking {
     private Long id;
 
     @Column(name = "periodic_booking_id")
-    private Long periodicBookingId;
+    private UUID periodicBookingId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id", nullable = false)

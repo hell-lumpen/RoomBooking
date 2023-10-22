@@ -11,6 +11,7 @@ import org.mai.roombooking.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RoomBookingDetailsDTO {
     private Long id;
-    private Long periodicBookingId;
+    private UUID periodicBookingId;
     private Room room;
     private User user;
     private LocalDateTime startTime;

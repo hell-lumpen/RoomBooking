@@ -17,6 +17,7 @@ import java.awt.print.Book;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST-контроллер для управления бронированиями.
@@ -41,10 +42,10 @@ public class BookingController {
      * @return ResponseEntity со списком бронирований, сгруппированных по комнате
      */
     @GetMapping
-    public ResponseEntity<List<RoomBookingDTO>> getBookingsInTimeRange(
+    public ResponseEntity<Map<String, List<RoomBookingDTO>>> getBookingsInTimeRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        List<RoomBookingDTO> bookings = bookingService.getBookingsInTimeRange(startTime, endTime);
+        Map<String, List<RoomBookingDTO>> bookings = bookingService.getBookingsInTimeRange(startTime, endTime);
         return ResponseEntity.ok(bookings);
     }
 
