@@ -9,6 +9,7 @@ import lombok.NonNull;
 import java.util.List;
 import java.util.Map;
 
+@Data
 public class Pair {
     String name;
 

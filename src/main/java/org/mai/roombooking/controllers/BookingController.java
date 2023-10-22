@@ -7,6 +7,7 @@ import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.services.BookingService;
+import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +25,12 @@ import java.util.Map;
 public class BookingController {
 
     private final BookingService bookingService;
-//    private final RoomService roomService;
+    private final RoomService roomService;
 
     @Autowired
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, RoomService roomService) {
         this.bookingService = bookingService;
+        this.roomService = roomService;
     }
 
     /**
@@ -136,26 +138,26 @@ public class BookingController {
         return ResponseEntity.ok(createdBooking);
     }
 
-//    /**
-//     * Получить список доступных комнат для бронирования в заданном временном диапазоне с учетом дополнительных параметров.
-//     *
-//     * @param startTime     Дата-время начала бронирования
-//     * @param endTime       Дата-время окончания бронирования
-//     * @param capacity      Вместимость комнаты (опционально)
-//     * @param hasProjector  Наличие проектора в комнате (опционально)
-//     * @param hasComputers  Наличие компьютеров в комнате (опционально)
-//     * @return ResponseEntity со списком доступных комнат
-//     */
-//    @GetMapping("/available-rooms")
-//    public ResponseEntity<List<RoomDTO>> getAvailableRooms(
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
-//            @RequestParam(required = false) Integer capacity,
-//            @RequestParam(required = false) Boolean hasProjector,
-//            @RequestParam(required = false) Boolean hasComputers) {
-//        List<RoomDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
-//        return ResponseEntity.ok(availableRooms);
-//    }
+    /**
+     * Получить список доступных комнат для бронирования в заданном временном диапазоне с учетом дополнительных параметров.
+     *
+     * @param startTime     Дата-время начала бронирования
+     * @param endTime       Дата-время окончания бронирования
+     * @param capacity      Вместимость комнаты (опционально)
+     * @param hasProjector  Наличие проектора в комнате (опционально)
+     * @param hasComputers  Наличие компьютеров в комнате (опционально)
+     * @return ResponseEntity со списком доступных комнат
+     */
+    @GetMapping("/available-rooms")
+    public ResponseEntity<List<RoomBookingDTO>> getAvailableRooms(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+            @RequestParam(required = false) Integer capacity,
+            @RequestParam(required = false) Boolean hasProjector,
+            @RequestParam(required = false) Boolean hasComputers) {
+        List<RoomBookingDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
+        return ResponseEntity.ok(availableRooms);
+    }
 //
 //    /**
 //     * Получить список всех аудиторий со статусами на текущий момент, отсортированных по релевантности запроса.

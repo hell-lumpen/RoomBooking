@@ -1,6 +1,7 @@
 package org.mai.roombooking.services;
 
 
+import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Room;
@@ -37,20 +38,19 @@ public class RoomService {
      * @param hasComputers  опциональный параметр компьютеров для фильтрации комнат
      * @return список доступных комнат, соответствующих указанным критериям
      */
-    public List<RoomDTO> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime, Integer capacity, Boolean hasProjector, Boolean hasComputers) {
-            List<Room> rooms = bookingRepository.findBookingsInDateRange(startTime, endTime)
-                    .stream()
-                    .map((Booking::getRoom))
-                    .distinct()
-                    .toList();
-
-            return roomRepository.getRoomsWithFilter(capacity, hasComputers, hasProjector)
-                    .stream()
-                    .filter(element -> !rooms.contains(element))
-                    .map((room -> new RoomDTO(room)))
-                    .toList();
-
-
+    public List<RoomBookingDTO> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime, Integer capacity, Boolean hasProjector, Boolean hasComputers) {
+//            List<Room> rooms = bookingRepository.findBookingsInDateRange(startTime, endTime)
+//                    .stream()
+//                    .map((Booking::getRoom))
+//                    .distinct()
+//                    .toList();
+//
+//            return roomRepository.getRoomsWithFilter(capacity, hasComputers, hasProjector)
+//                    .stream()
+//                    .filter(element -> !rooms.contains(element))
+//                    .map((room -> new RoomDTO(room)))
+//                    .toList();
+        return null;
     }
 
 //    /**
