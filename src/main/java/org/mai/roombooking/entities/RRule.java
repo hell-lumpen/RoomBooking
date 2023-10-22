@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class RRule {
     @Id
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Frequency frequency;
 
     @Id
