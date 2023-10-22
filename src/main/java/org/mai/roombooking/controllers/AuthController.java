@@ -38,20 +38,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.loginUser(loginRequest));
     }
 
-    @GetMapping("/hui")
-    public Map<String, List<Booking>> getBookingsByTimeRange(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSSSS") LocalDateTime endTime) {
-        Map<String, List<Booking>> booking = null;
-        try {
-            booking = bookingRepository.findBookingsInDateRangeAndGroupByRoomName(startTime, endTime);
-        }
-        catch (Exception psqlException) {
-            System.err.println(psqlException.getMessage());
-        }
-        return booking;
-    }
-
 //    @PostMapping("/logout")
 //    public ResponseEntity<String> logoutUser(HttpServletRequest request) {
 //        authService.logoutUser(request);

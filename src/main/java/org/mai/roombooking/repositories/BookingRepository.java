@@ -27,9 +27,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                  @Param("roomId") Long roomId);
 
     @Query("SELECT b FROM Booking b " +
-            "WHERE b.endTime >= :startDateTime " +
-                "AND b.startTime <= :endDateTime"+
-                "AND b.user.id == userId")
+            "WHERE b.endTime >= :startDateTime AND b.startTime <= :endDateTime AND b.user.userId = :userId")
     List<Booking> findBookingsInDateRangeByUser(@Param("startDateTime") LocalDateTime startDateTime,
                                                 @Param("endDateTime") LocalDateTime endDateTime,
                                                 @Param("endDateTime") Long userId);

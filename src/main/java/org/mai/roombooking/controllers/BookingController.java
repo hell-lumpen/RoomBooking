@@ -1,10 +1,11 @@
 package org.mai.roombooking.controllers;
 
-import org.mai.roombooking.dtos.BookingUpdateRequestDTO;
 import org.mai.roombooking.dtos.RoomBookingDTO;
+import org.mai.roombooking.dtos.RoomBookingRequestDTO;
+import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
+import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.services.BookingService;
-import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Book;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +26,11 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final RoomService roomService;
+//    private final RoomService roomService;
 
     @Autowired
-    public BookingController(BookingService bookingService, RoomService roomService) {
+    public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
-        this.roomService = roomService;
     }
 
     /**
@@ -77,12 +78,7 @@ public class BookingController {
             @PathVariable Long userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        List<RoomBookingDTO> bookings = new ArrayList<>();
-        try {
-            bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
-        } catch (UsernameNotFoundException ex) {
-            // TODO: вернуть код ошибки
-        }
+        List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
         return ResponseEntity.ok(bookings);
     }
 
@@ -94,25 +90,17 @@ public class BookingController {
      * @return ResponseEntity с обновленным бронированием
      */
     @PutMapping("/{bookingId}")
-    public ResponseEntity<HttpStatus> updateBooking(
+    public ResponseEntity<Booking> updateBooking(
             @PathVariable Long bookingId,
-            @RequestBody BookingUpdateRequestDTO request) {
-        RoomBookingDTO updatedBooking;
+            @RequestBody RoomBookingRequestDTO request) {
 
-        try {
-            if (request.isPeriodic()) {
-                // Обновить всю цепочку бронирования
-                updatedBooking = bookingService.updatePeriodicBooking(bookingId, request);
-            } else {
-                // Обновить одно бронирование
-                 bookingService.updateBooking(bookingId, request);
-            }
-        }catch (UsernameNotFoundException | RoomNotFoundException exception) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            //TODO: вернуть текст ошибки
+        if (request.isPeriodic()) {
+            // Обновить всю цепочку бронирования
+            return ResponseEntity.ok(bookingService.updatePeriodicBooking(bookingId, request));
+        } else {
+            // Обновить одно бронирование
+            return ResponseEntity.ok(bookingService.updateBooking(bookingId, request));
         }
-
-        return ResponseEntity.ok(updatedBooking);
     }
 
     /**
@@ -121,7 +109,6 @@ public class BookingController {
      * @param bookingId Идентификатор бронирования
      * @param isPeriodic Флаг, указывающий, нужно ли удалить всю цепочку бронирования
      * @return ResponseEntity с информацией об удалении
-     * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<String> deleteBooking(
@@ -145,49 +132,48 @@ public class BookingController {
      * @return ResponseEntity с созданным бронированием
      * @throws RoomNotFoundException   если комната не найдена по идентификатору
      * @throws UserNotFoundException   если пользователь не найден по идентификатору
-     * @throws BookingConflictException если есть конфликт с существующим бронированием
      */
     @PostMapping
-    public ResponseEntity<BookingDTO> createBooking(@RequestBody BookingCreateRequestDTO request) {
-        BookingDTO createdBooking = bookingService.createBooking(request);
+    public ResponseEntity<Booking> createBooking(@RequestBody RoomBookingRequestDTO request) {
+        Booking createdBooking = bookingService.createBooking(request);
         return ResponseEntity.ok(createdBooking);
     }
 
-    /**
-     * Получить список доступных комнат для бронирования в заданном временном диапазоне с учетом дополнительных параметров.
-     *
-     * @param startTime     Дата-время начала бронирования
-     * @param endTime       Дата-время окончания бронирования
-     * @param capacity      Вместимость комнаты (опционально)
-     * @param hasProjector  Наличие проектора в комнате (опционально)
-     * @param hasComputers  Наличие компьютеров в комнате (опционально)
-     * @return ResponseEntity со списком доступных комнат
-     */
-    @GetMapping("/available-rooms")
-    public ResponseEntity<List<RoomDTO>> getAvailableRooms(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
-            @RequestParam(required = false) Integer capacity,
-            @RequestParam(required = false) Boolean hasProjector,
-            @RequestParam(required = false) Boolean hasComputers) {
-        List<RoomDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
-        return ResponseEntity.ok(availableRooms);
-    }
-
-    /**
-     * Получить список всех аудиторий со статусами на текущий момент, отсортированных по релевантности запроса.
-     * @param capacity      Вместимость комнаты (опционально)
-     * @param hasProjector  Наличие проектора в комнате (опционально)
-     * @param hasComputers  Наличие компьютеров в комнате (опционально)
-     * @return ResponseEntity со списком аудиторий и их статусами
-     */
-    @GetMapping("/rooms/status")
-    public ResponseEntity<List<RoomStatusDTO>> getAllRoomsStatus(
-            @RequestParam(required = false) Integer capacity,
-            @RequestParam(required = false) Boolean hasProjector,
-            @RequestParam(required = false) Boolean hasComputers
-    ) {
-        List<RoomStatusDTO> roomsStatus = roomService.getAllRoomsStatus(capacity, hasProjector, hasComputers);
-        return ResponseEntity.ok(roomsStatus);
-    }
+//    /**
+//     * Получить список доступных комнат для бронирования в заданном временном диапазоне с учетом дополнительных параметров.
+//     *
+//     * @param startTime     Дата-время начала бронирования
+//     * @param endTime       Дата-время окончания бронирования
+//     * @param capacity      Вместимость комнаты (опционально)
+//     * @param hasProjector  Наличие проектора в комнате (опционально)
+//     * @param hasComputers  Наличие компьютеров в комнате (опционально)
+//     * @return ResponseEntity со списком доступных комнат
+//     */
+//    @GetMapping("/available-rooms")
+//    public ResponseEntity<List<RoomDTO>> getAvailableRooms(
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+//            @RequestParam(required = false) Integer capacity,
+//            @RequestParam(required = false) Boolean hasProjector,
+//            @RequestParam(required = false) Boolean hasComputers) {
+//        List<RoomDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
+//        return ResponseEntity.ok(availableRooms);
+//    }
+//
+//    /**
+//     * Получить список всех аудиторий со статусами на текущий момент, отсортированных по релевантности запроса.
+//     * @param capacity      Вместимость комнаты (опционально)
+//     * @param hasProjector  Наличие проектора в комнате (опционально)
+//     * @param hasComputers  Наличие компьютеров в комнате (опционально)
+//     * @return ResponseEntity со списком аудиторий и их статусами
+//     */
+//    @GetMapping("/status")
+//    public ResponseEntity<List<RoomStatusDTO>> getAllRoomsStatus(
+//            @RequestParam(required = false) Integer capacity,
+//            @RequestParam(required = false) Boolean hasProjector,
+//            @RequestParam(required = false) Boolean hasComputers
+//    ) {
+//        List<RoomStatusDTO> roomsStatus = roomService.getAllRoomsStatus(capacity, hasProjector, hasComputers);
+//        return ResponseEntity.ok(roomsStatus);
+//    }
 }

@@ -41,6 +41,9 @@ public class Booking {
     @Column(name = "booking_purpose")
     private String bookingPurpose;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private RRule rRule;
+
     @Column(name = "created_at")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", shape = JsonFormat.Shape.STRING)
     @Temporal(TemporalType.TIMESTAMP)
