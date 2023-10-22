@@ -17,6 +17,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "AND room.hasComputers = :hasComputers "+
             "AND room.hasProjector = :hasProjector")
     List<Room> getRoomsWithFilter(@Param("capacity") int capacity,
-                                                @Param("capacity") boolean hasComputers,
-                                                @Param("endDateTime") boolean hasProjector);
+                                                @Param("hasComputers") boolean hasComputers,
+                                                @Param("hasProjector") boolean hasProjector);
 }

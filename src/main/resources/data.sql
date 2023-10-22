@@ -11,7 +11,7 @@ VALUES
 
 INSERT INTO rrule (frequency, interval, until_date)
 VALUES
-    ('WEEKLY', 2, '2023-12-31 23:59:59.999'),
+    ('WEEKLY', 2, '2023-12-06 17:00:00.000'),
     ('MONTHLY', 3, '2023-12-31 23:59:59.999'),
     ('DAILY', 4, '2023-12-31 23:59:59.999');
 
