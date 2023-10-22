@@ -2,6 +2,7 @@ package org.mai.roombooking.repositories;
 
 import org.mai.roombooking.entities.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -35,8 +36,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                 @Param("endDateTime") LocalDateTime endDateTime,
                                                 @Param("endDateTime") Long userId);
 
-    @Query("DELETE FROM Booking b" +
-            "WHERE b.periodicBookingId = :periodicBookingId")
+    @Modifying
+    @Query("DELETE FROM Booking b WHERE b.periodicBookingId = :periodicBookingId")
     void deleteAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
 
     List<Booking> findAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
