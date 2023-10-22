@@ -1,10 +1,13 @@
 package org.mai.roombooking.controllers;
 
+import org.mai.roombooking.dtos.BookingUpdateRequestDTO;
 import org.mai.roombooking.dtos.RoomBookingDTO;
+import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.services.BookingService;
 import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -89,20 +92,24 @@ public class BookingController {
      * @param bookingId Идентификатор бронирования
      * @param request   DTO с информацией для изменения бронирования
      * @return ResponseEntity с обновленным бронированием
-//     * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
     @PutMapping("/{bookingId}")
-    public ResponseEntity<RoomBookingDTO> updateBooking(
+    public ResponseEntity<HttpStatus> updateBooking(
             @PathVariable Long bookingId,
             @RequestBody BookingUpdateRequestDTO request) {
         RoomBookingDTO updatedBooking;
 
-        if (request.isPeriodic()) {
-            // Обновить всю цепочку бронирования
-            updatedBooking = bookingService.updatePeriodicBooking(bookingId, request);
-        } else {
-            // Обновить одно бронирование
-            updatedBooking = bookingService.updateBooking(bookingId, request);
+        try {
+            if (request.isPeriodic()) {
+                // Обновить всю цепочку бронирования
+                updatedBooking = bookingService.updatePeriodicBooking(bookingId, request);
+            } else {
+                // Обновить одно бронирование
+                 bookingService.updateBooking(bookingId, request);
+            }
+        }catch (UsernameNotFoundException | RoomNotFoundException exception) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            //TODO: вернуть текст ошибки
         }
 
         return ResponseEntity.ok(updatedBooking);

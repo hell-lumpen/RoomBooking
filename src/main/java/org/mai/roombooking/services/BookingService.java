@@ -1,8 +1,11 @@
 package org.mai.roombooking.services;
 
+import org.mai.roombooking.dtos.BookingUpdateRequestDTO;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.entities.Room;
 import org.mai.roombooking.entities.User;
+import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.repositories.RoomRepository;
 import org.mai.roombooking.repositories.UserRepository;
@@ -25,6 +28,9 @@ public class BookingService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RoomRepository roomRepository;
 
 
     /**
@@ -83,7 +89,7 @@ public class BookingService {
      * @return обновленное бронирование
      * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
-    public BookingDTO updatePeriodicBooking(Long bookingId, BookingUpdateRequestDTO request) {
+    public RoomBookingDTO updatePeriodicBooking(Long bookingId, BookingUpdateRequestDTO request) {
         return null;
     }
 
@@ -93,10 +99,11 @@ public class BookingService {
      * @param bookingId идентификатор бронирования для обновления
      * @param request   запрос с информацией для обновления бронирования
      * @return обновленное бронирование
-     * @throws BookingNotFoundException если бронирование не найдено по идентификатору
+     * @throws UsernameNotFoundException пользователь с id, переданным клиентом, не найдена
+     * @throws RoomNotFoundException аудитория с id, переданным клиентом, не найдена
      */
-    public BookingDTO updateBooking(Long bookingId, BookingUpdateRequestDTO request) {
-        return null;
+    public void updateBooking(Long bookingId, BookingUpdateRequestDTO request) throws UsernameNotFoundException, RoomNotFoundException {
+        bookingRepository.save(getBookingFromDTO(request));
     }
 
     /**
@@ -130,5 +137,30 @@ public class BookingService {
      */
     public BookingDTO createBooking(BookingCreateRequestDTO request) {
         return null;
+    }
+
+    /**
+     *
+     * @param dto - Дто запроса от клиента
+     * @return объект для сохранения изменений в базу данных
+     * @throws UsernameNotFoundException пользователь с указанным клиентом id не обнаружен
+     * @throws RoomNotFoundException аудитория с указанным клиентом id не обнаружен
+     */
+    private Booking getBookingFromDTO(BookingUpdateRequestDTO dto) throws UsernameNotFoundException, RoomNotFoundException{
+        User user = userRepository.findById(dto.getId())
+                .orElseThrow(() -> new UsernameNotFoundException("User whis " + dto.getUserId()+ " not found"));
+
+        Room room = roomRepository.findById(dto.getRoomId())
+                .orElseThrow(() -> new RoomNotFoundException(dto.getRoomId()));
+
+        return Booking.builder()
+                .bookingPurpose(dto.getDescription())
+                .user(user)
+                .room(room)
+                .startTime(dto.getStartTime())
+                .endTime(dto.getEndTime())
+                .id(dto.getId())
+                .periodicBookingId(dto.getPeriodicBookingId())
+                .build();
     }
 }
