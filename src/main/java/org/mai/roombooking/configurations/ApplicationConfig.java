@@ -1,4 +1,4 @@
-package org.mai.roombooking.utilities;
+package org.mai.roombooking.configurations;
 
 import lombok.RequiredArgsConstructor;
 import org.mai.roombooking.repositories.UserRepository;

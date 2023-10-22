@@ -1,9 +1,7 @@
-package org.mai.roombooking.utilities;
+package org.mai.roombooking.configurations;
 
-import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.mai.roombooking.security.JwtAuthFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
