@@ -1,7 +1,8 @@
 package org.mai.roombooking.services;
 
-import org.mai.roombooking.dtos.BookingListDTO;
+import org.mai.roombooking.dtos.Pair;
 import org.mai.roombooking.dtos.RoomBookingDTO;
+import org.mai.roombooking.dtos.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.RRule;
@@ -51,7 +52,7 @@ public class BookingService {
      * @param endTime   дата и время окончания запроса
      * @return список бронирований комнат в заданном временном диапазоне
      */
-    public BookingListDTO getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+    public List<Pair> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime,endTime);
 
         Map<String, List<RoomBookingDTO>> groupedBookings = bookings.stream().map((RoomBookingDTO::new)).collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
@@ -62,7 +63,12 @@ public class BookingService {
                                 .sorted(Comparator.comparing(RoomBookingDTO::getStartTime))
                                 .toList()
                 ));
-        return new BookingListDTO(data.entrySet());
+
+        List<Pair> res = new ArrayList<>();
+        for (var entry : data.entrySet()) {
+            res.add(new Pair(entry));
+        }
+        return res;
     }
 
     /**
@@ -169,6 +175,11 @@ public class BookingService {
     public void deleteBooking(Long bookingId) {
         bookingRepository.deleteById(bookingId);
     }
+
+//    public RoomBookingDetailsDTO getBookingDetails(Long bokingId) {
+//
+//    }
+
 
     /**
      * Создает новое бронирование на основе предоставленного запроса.

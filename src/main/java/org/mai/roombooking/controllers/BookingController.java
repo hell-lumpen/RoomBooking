@@ -1,6 +1,6 @@
 package org.mai.roombooking.controllers;
 
-import org.mai.roombooking.dtos.BookingListDTO;
+import org.mai.roombooking.dtos.Pair;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
@@ -39,7 +39,7 @@ public class BookingController {
      * @return ResponseEntity со списком бронирований, сгруппированных по комнате
      */
     @GetMapping
-    public ResponseEntity<BookingListDTO> getBookingsInTimeRange(
+    public ResponseEntity<List<Pair>> getBookingsInTimeRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
         return ResponseEntity.ok(bookingService.getBookingsInTimeRange(startTime, endTime));
