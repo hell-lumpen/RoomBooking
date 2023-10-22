@@ -2,16 +2,15 @@ package org.mai.roombooking.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@Data
+@Builder
 @Table(name = "bookings")
 public class Booking {
 
