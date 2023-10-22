@@ -1,6 +1,8 @@
 package org.mai.roombooking.services;
 
 
+import org.mai.roombooking.repositories.BookingRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -10,6 +12,13 @@ import java.time.LocalDateTime;
  */
 @Service
 public class RoomService {
+
+    private final BookingRepository bookingRepository;
+
+    @Autowired
+    public RoomService(BookingRepository bookingRepository) {
+        this.bookingRepository = bookingRepository;
+    }
 
     /**
      * Получает список доступных комнат в заданном временном диапазоне с использованием опциональных параметров.

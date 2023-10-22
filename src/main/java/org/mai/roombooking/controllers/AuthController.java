@@ -1,7 +1,6 @@
 package org.mai.roombooking.controllers;
 
 import org.mai.roombooking.entities.Booking;
-import org.mai.roombooking.entities.dto.BookingDTO;
 import org.mai.roombooking.security.requestDTO.UserLoginRequest;
 import org.mai.roombooking.security.requestDTO.UserRegistrationRequest;
 import org.mai.roombooking.security.requestDTO.AuthResponse;
