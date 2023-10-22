@@ -1,5 +1,6 @@
 package org.mai.roombooking.services;
 
+import org.mai.roombooking.dtos.BookingListDTO;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
@@ -50,17 +51,18 @@ public class BookingService {
      * @param endTime   дата и время окончания запроса
      * @return список бронирований комнат в заданном временном диапазоне
      */
-    public Map<String, List<RoomBookingDTO>> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+    public BookingListDTO getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime,endTime);
 
         Map<String, List<RoomBookingDTO>> groupedBookings = bookings.stream().map((RoomBookingDTO::new)).collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
-        return groupedBookings.entrySet().stream()
+        var data = groupedBookings.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream()
                                 .sorted(Comparator.comparing(RoomBookingDTO::getStartTime))
                                 .toList()
                 ));
+        return new BookingListDTO(data.entrySet());
     }
 
     /**
