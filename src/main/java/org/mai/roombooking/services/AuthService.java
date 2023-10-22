@@ -2,9 +2,9 @@ package org.mai.roombooking.services;
 
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.entities.UserRole;
-import org.mai.roombooking.entities.dto.AuthResponse;
-import org.mai.roombooking.entities.dto.UserLoginRequest;
-import org.mai.roombooking.entities.dto.UserRegistrationRequest;
+import org.mai.roombooking.security.requestDTO.AuthResponse;
+import org.mai.roombooking.security.requestDTO.UserLoginRequest;
+import org.mai.roombooking.security.requestDTO.UserRegistrationRequest;
 import org.mai.roombooking.repositories.UserRepository;
 import org.mai.roombooking.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;

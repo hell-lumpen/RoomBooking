@@ -1,4 +1,4 @@
-package org.mai.roombooking.entities.dto;
+package org.mai.roombooking.security.requestDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

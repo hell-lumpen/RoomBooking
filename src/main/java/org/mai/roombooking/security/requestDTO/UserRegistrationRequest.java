@@ -1,4 +1,4 @@
-package org.mai.roombooking.entities.dto;
+package org.mai.roombooking.security.requestDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserLoginRequest {
-
+public class UserRegistrationRequest {
     private String username;
+    private String phoneNumber;
+    private String fullName;
     private String password;
 }

@@ -2,20 +2,17 @@ package org.mai.roombooking.controllers;
 
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.dto.BookingDTO;
-import org.mai.roombooking.entities.dto.UserLoginRequest;
-import org.mai.roombooking.entities.dto.UserRegistrationRequest;
-import org.mai.roombooking.entities.dto.AuthResponse;
+import org.mai.roombooking.security.requestDTO.UserLoginRequest;
+import org.mai.roombooking.security.requestDTO.UserRegistrationRequest;
+import org.mai.roombooking.security.requestDTO.AuthResponse;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.services.AuthService;
-import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Book;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
