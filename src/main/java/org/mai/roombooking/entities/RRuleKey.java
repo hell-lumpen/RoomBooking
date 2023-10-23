@@ -1,23 +1,19 @@
 package org.mai.roombooking.entities;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class RRuleKey implements Serializable {
 
     private RRule.Frequency frequency;
     private Integer interval;
     private LocalDateTime untilDate;
-
-    public RRuleKey() {
-    }
-
-    public RRuleKey(RRule.Frequency frequency, Integer interval, LocalDateTime untilDate) {
-        this.frequency = frequency;
-        this.interval = interval;
-        this.untilDate = untilDate;
-    }
 
     @Override
     public boolean equals(Object o) {

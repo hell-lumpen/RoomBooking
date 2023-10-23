@@ -1,13 +1,11 @@
 package org.mai.roombooking.repositories;
 
-import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository

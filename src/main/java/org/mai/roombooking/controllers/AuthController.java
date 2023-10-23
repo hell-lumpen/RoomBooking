@@ -1,31 +1,23 @@
 package org.mai.roombooking.controllers;
 
-import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.security.requestDTO.UserLoginRequest;
 import org.mai.roombooking.security.requestDTO.UserRegistrationRequest;
 import org.mai.roombooking.security.requestDTO.AuthResponse;
-import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
-    private final BookingRepository bookingRepository;
 
 
     @Autowired
-    public AuthController(AuthService authService, BookingRepository bookingRepository) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.bookingRepository = bookingRepository;
     }
 
     @PostMapping("/register")
@@ -43,4 +35,5 @@ public class AuthController {
 //        authService.logoutUser(request);
 //        return ResponseEntity.ok("User logged out successfully");
 //    }
+
 }

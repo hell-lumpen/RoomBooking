@@ -2,9 +2,6 @@ package org.mai.roombooking.services;
 
 
 import org.mai.roombooking.dtos.RoomBookingDTO;
-import org.mai.roombooking.dtos.RoomDTO;
-import org.mai.roombooking.entities.Booking;
-import org.mai.roombooking.entities.Room;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.repositories.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;

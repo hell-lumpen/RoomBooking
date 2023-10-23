@@ -4,6 +4,8 @@ import org.mai.roombooking.dtos.Pair;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.entities.User;
+import org.mai.roombooking.entities.UserRole;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.services.BookingService;
@@ -11,11 +13,13 @@ import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * REST-контроллер для управления бронированиями.
@@ -76,7 +80,13 @@ public class BookingController {
     public ResponseEntity<List<RoomBookingDTO>> getBookingsByUserInTimeRange(
             @PathVariable Long userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+            @AuthenticationPrincipal User user) {
+
+        if(!(Objects.equals(userId, user.getUserId())
+                || user.getRole().equals(UserRole.ADMINISTRATOR)))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
+
         List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
         return ResponseEntity.ok(bookings);
     }
@@ -91,7 +101,12 @@ public class BookingController {
     @PutMapping("/{bookingId}")
     public ResponseEntity<Booking> updateBooking(
             @PathVariable Long bookingId,
-            @RequestBody RoomBookingRequestDTO request) {
+            @RequestBody RoomBookingRequestDTO request,
+            @AuthenticationPrincipal User user) {
+
+        if(!Objects.equals(request.getUserId(), user.getUserId())
+                && !user.getRole().equals(UserRole.ADMINISTRATOR))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
 
         if (request.isPeriodic()) {
             // Обновить всю цепочку бронирования
@@ -112,7 +127,13 @@ public class BookingController {
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<String> deleteBooking(
             @PathVariable Long bookingId,
-            @RequestParam(defaultValue = "false") boolean isPeriodic) {
+            @RequestParam(defaultValue = "false") boolean isPeriodic,
+            @AuthenticationPrincipal User user) {
+
+        if(!Objects.equals(bookingService.getBookingById(bookingId).getUser().getUserId(), user.getUserId())
+                && !user.getRole().equals(UserRole.ADMINISTRATOR))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
+
         if (isPeriodic) {
             // Удалить всю цепочку бронирования
             bookingService.deletePeriodicBooking(bookingId);
@@ -133,7 +154,12 @@ public class BookingController {
      * @throws UserNotFoundException   если пользователь не найден по идентификатору
      */
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody RoomBookingRequestDTO request) {
+    public ResponseEntity<Booking> createBooking(@RequestBody RoomBookingRequestDTO request,
+                @AuthenticationPrincipal User user) {
+        if(!Objects.equals(request.getUserId(), user.getUserId())
+                && !user.getRole().equals(UserRole.ADMINISTRATOR))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
+
         Booking createdBooking = bookingService.createBooking(request);
         return ResponseEntity.ok(createdBooking);
     }
@@ -158,7 +184,7 @@ public class BookingController {
         List<RoomBookingDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
         return ResponseEntity.ok(availableRooms);
     }
-//
+
 //    /**
 //     * Получить список всех аудиторий со статусами на текущий момент, отсортированных по релевантности запроса.
 //     * @param capacity      Вместимость комнаты (опционально)
@@ -175,4 +201,5 @@ public class BookingController {
 //        List<RoomStatusDTO> roomsStatus = roomService.getAllRoomsStatus(capacity, hasProjector, hasComputers);
 //        return ResponseEntity.ok(roomsStatus);
 //    }
+
 }
