@@ -4,6 +4,7 @@ import org.mai.roombooking.dtos.Pair;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.*;
+import org.mai.roombooking.exceptions.BookingException;
 import org.mai.roombooking.exceptions.BookingNotFoundException;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
@@ -120,13 +121,12 @@ public class BookingService {
     /**
      * Обновляет периодическое бронирование на основе предоставленного запроса.
      *
-     * @param bookingId идентификатор бронирования для обновления
      * @param request   запрос с информацией для обновления бронирования
      * @return обновленное бронирование
      */
-    public Booking updatePeriodicBooking(Long bookingId, RoomBookingRequestDTO request) {
-        var booking = bookingRepository.findById(bookingId)
-                .orElseThrow(()->new BookingNotFoundException(bookingId));
+    public Booking updatePeriodicBooking(RoomBookingRequestDTO request, User user) {
+        var booking = bookingRepository.findById(request.getId())
+                .orElseThrow(()->new BookingNotFoundException(request.getId()));
 
         bookingRepository.findAllByPeriodicBookingId(booking.getPeriodicBookingId())
                 .forEach((bookingItem) -> {
@@ -140,14 +140,25 @@ public class BookingService {
     /**
      * Обновляет отдельное бронирование на основе предоставленного запроса.
      *
-     * @param bookingId идентификатор бронирования для обновления
      * @param request   запрос с информацией для обновления бронирования
      * @throws UsernameNotFoundException пользователь с id, переданным клиентом, не найдена
      * @throws RoomNotFoundException аудитория с id, переданным клиентом, не найдена
      */
-    public Booking updateBooking(Long bookingId, RoomBookingRequestDTO request)
+    public Booking updateBooking(RoomBookingRequestDTO request, User user)
             throws UsernameNotFoundException, RoomNotFoundException {
-        return bookingRepository.save(getBookingFromDTO(request));
+        var booking = getBookingFromDTO(request);
+        if (booking.getUser() == null)
+            booking.setUser(user);
+
+        long count = bookingRepository.findBookingsInDateRange(request.getStartTime(), request.getEndTime())
+                .stream()
+                .filter((bookingItem -> bookingItem.getRoom().getRoomId().equals(request.getRoomId())))
+                .count();
+
+        if (count != 0)
+            throw new BookingException();
+
+        return bookingRepository.save(booking);
     }
 
     /**
@@ -180,11 +191,18 @@ public class BookingService {
      * @throws RoomNotFoundException   если комната не найдена по идентификатору
      * @throws UserNotFoundException   если пользователь не найден по идентификатору
      */
-    public Booking createBooking(RoomBookingRequestDTO request) {
+    public Booking createBooking(RoomBookingRequestDTO request, User user) {
         LocalDateTime end = request.getEndTime();
         LocalDateTime start = request.getEndTime();
         while (end.isBefore(request.getRRule().getUntilDate())) {
             var booking = bookingRepository.save(getBookingFromDTO(request));
+            if (request.getUserId() == null)
+                booking.setUser(user);
+            else
+                booking.setUser(userRepository.findById(request.getId()).orElseThrow(()->new UserNotFoundException(request.getUserId())));
+
+
+            booking.setUser((request.getUserId() == null) ? user : userRepository.findById(request.getId()).orElseThrow(()->new UserNotFoundException(request.getUserId())));
             booking.setStartTime(start);
             booking.setEndTime(end);
             booking.setPeriodicBookingId(UUID.randomUUID());
@@ -234,7 +252,7 @@ public class BookingService {
     }
 
     @FunctionalInterface
-    public interface IncrementLocalDataTime {
+    private interface IncrementLocalDataTime {
         LocalDateTime performOperation(LocalDateTime inputDateTime, int value);
     }
 }
