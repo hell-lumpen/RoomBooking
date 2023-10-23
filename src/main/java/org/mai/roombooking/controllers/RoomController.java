@@ -15,7 +15,7 @@ public class RoomController {
     @Autowired
     RoomRepository roomRepository;
 
-    @GetMapping
+    @GetMapping("/all")
     public List<RoomDTO> getAllRooms() {
         return roomRepository.findAll().stream().map(RoomDTO::new).toList();
     }
