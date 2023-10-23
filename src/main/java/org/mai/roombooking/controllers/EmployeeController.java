@@ -15,8 +15,12 @@ import java.util.List;
 @RequestMapping("/api/employee")
 public class EmployeeController {
 
-    @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    EmployeeController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /**
      * Функция получения персонала кафедры

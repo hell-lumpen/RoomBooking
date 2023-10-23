@@ -3,7 +3,6 @@ package org.mai.roombooking.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
-import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

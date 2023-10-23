@@ -2,30 +2,20 @@ package org.mai.roombooking.services;
 
 import org.mai.roombooking.dtos.Pair;
 import org.mai.roombooking.dtos.RoomBookingDTO;
-import org.mai.roombooking.dtos.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
-import org.mai.roombooking.entities.Booking;
-import org.mai.roombooking.entities.RRule;
-import org.mai.roombooking.entities.Room;
-import org.mai.roombooking.entities.User;
+import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.BookingNotFoundException;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.repositories.RoomRepository;
 import org.mai.roombooking.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +32,10 @@ public class BookingService {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
+    }
+
+    public Booking getBookingById(Long bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(()->new BookingNotFoundException(bookingId));
     }
 
 
@@ -101,24 +95,24 @@ public class BookingService {
                                                              throws UsernameNotFoundException{
         List<Booking> bookings = bookingRepository.findBookingsInDateRangeByUser(startTime, endTime, userId);
 
-        SecurityContext context = SecurityContextHolder.getContext();
-
-        Authentication authentication = context.getAuthentication();
-
-        List<String> roles = authentication.getAuthorities().stream()
-                .map(Object::toString)
-                .toList();
-
-        Long currentUserId = ((User) authentication.getPrincipal()).getUserId();
-
-        if (!roles.contains("ADMINISTRATOR") && !userId.equals(currentUserId)) {
-            throw new AccessDeniedException("Access denied: Not enough permissions");
-        }
-        else {
+//        SecurityContext context = SecurityContextHolder.getContext();
+//
+//        Authentication authentication = context.getAuthentication();
+//
+//        List<String> roles = authentication.getAuthorities().stream()
+//                .map(Object::toString)
+//                .toList();
+//
+//        Long currentUserId = ((User) authentication.getPrincipal()).getUserId();
+//
+//        if (!roles.contains(UserRole.ADMINISTRATOR.name()) && !userId.equals(currentUserId)) {
+//            throw new AccessDeniedException("Access denied: Not enough permissions");
+//        }
+//        else {
             if (bookings.isEmpty())
                 userRepository.findById(userId).orElseThrow(() ->
                         new UsernameNotFoundException("User with id" + userId + "not found"));
-        }
+//        }
 
         return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
@@ -151,7 +145,8 @@ public class BookingService {
      * @throws UsernameNotFoundException пользователь с id, переданным клиентом, не найдена
      * @throws RoomNotFoundException аудитория с id, переданным клиентом, не найдена
      */
-    public Booking updateBooking(Long bookingId, RoomBookingRequestDTO request) throws UsernameNotFoundException, RoomNotFoundException {
+    public Booking updateBooking(Long bookingId, RoomBookingRequestDTO request)
+            throws UsernameNotFoundException, RoomNotFoundException {
         return bookingRepository.save(getBookingFromDTO(request));
     }
 
@@ -175,10 +170,6 @@ public class BookingService {
     public void deleteBooking(Long bookingId) {
         bookingRepository.deleteById(bookingId);
     }
-
-//    public RoomBookingDetailsDTO getBookingDetails(Long bokingId) {
-//
-//    }
 
 
     /**
