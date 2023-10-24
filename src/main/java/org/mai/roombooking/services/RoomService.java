@@ -2,6 +2,9 @@ package org.mai.roombooking.services;
 
 
 import org.mai.roombooking.dtos.RoomBookingDTO;
+import org.mai.roombooking.dtos.RoomDTO;
+import org.mai.roombooking.entities.Room;
+import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.repositories.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,21 +36,23 @@ public class RoomService {
      * @param capacity      опциональный параметр вместимости для фильтрации комнат
      * @param hasProjector  опциональный параметр проектора для фильтрации комнат
      * @param hasComputers  опциональный параметр компьютеров для фильтрации комнат
-     * @return список доступных комнат, соответствующих указанным критериям
+     * @return список доступных комнат, соответствующих указанным критериям, если он пуст доступных комнат нет
      */
-    public List<RoomBookingDTO> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime, Integer capacity, Boolean hasProjector, Boolean hasComputers) {
-//            List<Room> rooms = bookingRepository.findBookingsInDateRange(startTime, endTime)
-//                    .stream()
-//                    .map((Booking::getRoom))
-//                    .distinct()
-//                    .toList();
-//
-//            return roomRepository.getRoomsWithFilter(capacity, hasComputers, hasProjector)
-//                    .stream()
-//                    .filter(element -> !rooms.contains(element))
-//                    .map((room -> new RoomDTO(room)))
-//                    .toList();
-        return null;
+    public List<RoomDTO> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime, Integer capacity, Boolean hasProjector, Boolean hasComputers) {
+
+        List<Room> rooms = bookingRepository.findBookingsInDateRange(startTime, endTime)
+                    .stream()
+                    .map((Booking::getRoom))
+                    .distinct()
+                    .toList();
+
+        return roomRepository.findAll().stream()
+                .filter((room -> capacity==null || room.getCapacity() > capacity))
+                .filter(room -> hasComputers == null || hasComputers == room.getHasComputers())
+                .filter(room -> hasProjector == null || hasProjector == room.getHasProjector())
+                .filter(element -> !rooms.contains(element))
+                .map((RoomDTO::new))
+                .toList();
     }
 
 //    /**
