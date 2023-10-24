@@ -5,7 +5,6 @@ import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.User;
-import org.mai.roombooking.entities.UserRole;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.services.BookingService;
@@ -84,7 +83,7 @@ public class BookingController {
             @AuthenticationPrincipal User user) {
 
         if(!(Objects.equals(userId, user.getUserId())
-                || user.getRole().equals(UserRole.ADMINISTRATOR)))
+                || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
         List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
@@ -105,7 +104,7 @@ public class BookingController {
             @AuthenticationPrincipal User user) {
 
         if(!Objects.equals(request.getUserId(), user.getUserId())
-                && !user.getRole().equals(UserRole.ADMINISTRATOR))
+                && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
         if (request.isPeriodic()) {
@@ -131,7 +130,7 @@ public class BookingController {
             @AuthenticationPrincipal User user) {
 
         if(!Objects.equals(bookingService.getBookingById(bookingId).getUser().getUserId(), user.getUserId())
-                && !user.getRole().equals(UserRole.ADMINISTRATOR))
+                && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
         if (isPeriodic) {
@@ -157,7 +156,7 @@ public class BookingController {
     public ResponseEntity<Booking> createBooking(@RequestBody RoomBookingRequestDTO request,
                 @AuthenticationPrincipal User user) {
         if(!Objects.equals(request.getUserId(), user.getUserId())
-                && !user.getRole().equals(UserRole.ADMINISTRATOR))
+                && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
         Booking createdBooking = bookingService.createBooking(request);

@@ -1,7 +1,6 @@
 package org.mai.roombooking.services;
 
 import org.mai.roombooking.entities.User;
-import org.mai.roombooking.entities.UserRole;
 import org.mai.roombooking.security.requestDTO.AuthResponse;
 import org.mai.roombooking.security.requestDTO.UserLoginRequest;
 import org.mai.roombooking.security.requestDTO.UserRegistrationRequest;
@@ -38,13 +37,16 @@ public class AuthService {
                 .fullName(registrationRequest.getFullName())
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .phoneNumber(registrationRequest.getPhoneNumber())
-                .role(UserRole.ADMINISTRATOR)
+                .role(User.UserRole.ADMINISTRATOR)
                 .isAccountLocked(false)
                 .build();
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return AuthResponse.builder()
                 .token(jwtToken)
+                .username(user.getUsername())
+                .fullname(user.getFullName())
+                .role(user.getRole())
                 .build();
     }
 
@@ -60,6 +62,9 @@ public class AuthService {
         var jwtToken = jwtService.generateToken(user);
         return AuthResponse.builder()
                 .token(jwtToken)
+                .username(user.getUsername())
+                .fullname(user.getFullName())
+                .role(user.getRole())
                 .build();
     }
 }

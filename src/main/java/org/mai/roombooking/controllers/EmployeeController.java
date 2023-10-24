@@ -2,7 +2,6 @@ package org.mai.roombooking.controllers;
 
 import org.mai.roombooking.dtos.EmployeeDTO;
 import org.mai.roombooking.entities.User;
-import org.mai.roombooking.entities.UserRole;
 import org.mai.roombooking.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +28,7 @@ public class EmployeeController {
     @GetMapping("/getAll")
     public List<EmployeeDTO> getAll() {
         return userRepository.findAll().stream()
-                .filter((user) -> user.getRole().equals(UserRole.TEACHER) || user.getRole().equals(UserRole.ADMINISTRATOR))
+                .filter((user) -> user.getRole().equals(User.UserRole.TEACHER) || user.getRole().equals(User.UserRole.ADMINISTRATOR))
                 .filter((User::isAccountNonLocked))
                 .map((EmployeeDTO::new))
                 .toList();

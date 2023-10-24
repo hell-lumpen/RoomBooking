@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.mai.roombooking.entities.User;
 
 @Data
 @Builder
@@ -11,4 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthResponse {
     String token;
+    String username;
+    String fullname;
+    User.UserRole role;
 }
