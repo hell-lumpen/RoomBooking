@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NonNull;
 import org.mai.roombooking.entities.Room;
 
-
 @Data
 public class RoomDTO {
     Long id;
