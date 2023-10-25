@@ -13,6 +13,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class AuthService {
     private final UserRepository userRepository;
@@ -41,12 +44,12 @@ public class AuthService {
                 .isAccountLocked(false)
                 .build();
         userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("fullname", user.getFullName());
+        extraClaims.put("role", user.getRole());
+        var jwtToken = jwtService.generateToken(extraClaims, user);
         return AuthResponse.builder()
                 .token(jwtToken)
-                .username(user.getUsername())
-                .fullname(user.getFullName())
-                .role(user.getRole())
                 .build();
     }
 
@@ -59,12 +62,14 @@ public class AuthService {
         );
         var user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        var jwtToken = jwtService.generateToken(user);
+
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("fullname", user.getFullName());
+        extraClaims.put("role", user.getRole());
+        var jwtToken = jwtService.generateToken(extraClaims, user);
+
         return AuthResponse.builder()
                 .token(jwtToken)
-                .username(user.getUsername())
-                .fullname(user.getFullName())
-                .role(user.getRole())
                 .build();
     }
 }

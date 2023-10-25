@@ -12,7 +12,4 @@ import org.mai.roombooking.entities.User;
 @AllArgsConstructor
 public class AuthResponse {
     String token;
-    String username;
-    String fullname;
-    User.UserRole role;
 }
