@@ -225,7 +225,7 @@ public class BookingService {
      * @throws RoomNotFoundException аудитория с указанным клиентом id не обнаружен
      */
     private Booking getBookingFromDTO(RoomBookingRequestDTO dto) throws UsernameNotFoundException, RoomNotFoundException{
-        User user = userRepository.findById(dto.getId())
+        User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException(dto.getUserId()));
 
         Room room = roomRepository.findById(dto.getRoomId())
@@ -237,7 +237,6 @@ public class BookingService {
                 .room(room)
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
-                .id(dto.getId())
                 .periodicBookingId(dto.getPeriodicBookingId())
                 .build();
     }
