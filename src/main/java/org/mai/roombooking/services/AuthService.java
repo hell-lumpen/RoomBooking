@@ -54,19 +54,24 @@ public class AuthService {
     }
 
     public AuthResponse loginUser(UserLoginRequest loginRequest) {
+        System.out.println("---1");
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
                         loginRequest.getPassword()
                 )
         );
+        System.out.println("---1?2");
         var user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        System.out.println("---2");
 
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("fullname", user.getFullName());
         extraClaims.put("role", user.getRole());
+        System.out.println("---3");
         var jwtToken = jwtService.generateToken(extraClaims, user);
+        System.out.println("---4");
 
         return AuthResponse.builder()
                 .token(jwtToken)

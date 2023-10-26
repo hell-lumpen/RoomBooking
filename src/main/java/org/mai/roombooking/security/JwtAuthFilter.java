@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.mai.roombooking.exceptions.AccountIsLockedException;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.security.auth.login.AccountLockedException;
 import java.io.IOException;
 
 @Component
@@ -34,12 +36,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String username;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
-            System.out.println(authHeader);
             return;
         }
 
         jwt = authHeader.substring(7);
-        System.out.println("|" + jwt + "|");
         username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -56,6 +56,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+            if (!userDetails.isAccountNonLocked()) {
+                throw new AccountIsLockedException();
             }
         }
         filterChain.doFilter(request, response);

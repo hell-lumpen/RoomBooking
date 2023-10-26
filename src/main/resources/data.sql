@@ -17,13 +17,14 @@ VALUES
     ('MONTHLY', 3, '2023-12-31 23:59:59.999'),
     ('DAILY', 4, '2023-12-31 23:59:59.999');
 
-INSERT INTO users (is_account_locked, user_id, fullname, password, phone_number, role, username)
+INSERT INTO users (is_account_locked, fullname, password, phone_number, role, username)
 VALUES
-    (false, 1, 'Ненахов Евгений Валентинович', '$2a$10$29c7FqNe945nvsQzTpKuxO.ZaSmCVbGU9vFgQhDpPDjO3Ip5ggVUe', 'username', 'ADMINISTRATOR', 'username'),
-    (false, 2, 'Крылов Сергей Сергеевич', '$2a$10$Vub3M8Uqy/6hnQkyzIKz9uzO3AUp6dJVrBPuL2blfJaBYx3hHc.ES', 'username1', 'ADMINISTRATOR', 'username1'),
-    (false, 3, 'Булакина Мария Борисовна', '$2a$10$zxX4AZPN3I32t9isvpsYJOs1sGXEIdi3qzjCT0I3SXNUPUb8TjjX.', 'username2', 'ADMINISTRATOR', 'username2'),
-    (false, 4, 'Ирбитский Илья Сергеевич', '$2a$10$seChzroHn6eCNk/H7n.3Qu5amP5WsYVz05I6fZs97Kph9rqTS6vcm', 'username3', 'ADMINISTRATOR', 'username3'),
-    (false, 5, 'Погосян Михаил Асланович', '$2a$10$DFWuQWujrRXD9fj/PyK3qO3Kmzp97ByXb./qQMCG2JAwmRLtQNK2C', 'username4', 'ADMINISTRATOR', 'username4');
+    (false, 'Ненахов Евгений Валентинович', '$2a$10$29c7FqNe945nvsQzTpKuxO.ZaSmCVbGU9vFgQhDpPDjO3Ip5ggVUe', 'username', 'ADMINISTRATOR', 'username'),
+    (false, 'Крылов Сергей Сергеевич', '$2a$10$Vub3M8Uqy/6hnQkyzIKz9uzO3AUp6dJVrBPuL2blfJaBYx3hHc.ES', 'username1', 'ADMINISTRATOR', 'username1'),
+    (false, 'Булакина Мария Борисовна', '$2a$10$zxX4AZPN3I32t9isvpsYJOs1sGXEIdi3qzjCT0I3SXNUPUb8TjjX.', 'username2', 'ADMINISTRATOR', 'username2'),
+    (false, 'Ирбитский Илья Сергеевич', '$2a$10$seChzroHn6eCNk/H7n.3Qu5amP5WsYVz05I6fZs97Kph9rqTS6vcm', 'username3', 'ADMINISTRATOR', 'username3'),
+    (false, 'Погосян Михаил Асланович', '$2a$10$DFWuQWujrRXD9fj/PyK3qO3Kmzp97ByXb./qQMCG2JAwmRLtQNK2C', 'username4', 'ADMINISTRATOR', 'username4'),
+    (false, 'Грубенко Максим Дмитриевич', '$2a$10$BDMzrKT30nY0HFasmDcDZ.YSdlpaTjMXdMMZxYonXuuWdQ4VSdvV2', 1, 'ADMINISTRATOR', 'user');
 
 
 INSERT INTO bookings (periodic_booking_id, r_rule_frequency, r_rule_interval, r_rule_until_date, room_id, user_id, start_time, end_time, booking_purpose)
