@@ -13,8 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-
-    @Query("SELECT b FROM Booking b " +
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.user " +
             "WHERE b.endTime >= :startDateTime AND b.startTime <= :endDateTime")
     List<Booking> findBookingsInDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
