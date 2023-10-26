@@ -1,5 +1,6 @@
 package org.mai.roombooking.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.mai.roombooking.dtos.Pair;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
@@ -24,12 +25,14 @@ import java.util.Objects;
 /**
  * REST-контроллер для управления бронированиями.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
     private final RoomService roomService;
+//    private final Service roomService;
 
     @Autowired
     public BookingController(BookingService bookingService, RoomService roomService) {
@@ -48,6 +51,7 @@ public class BookingController {
     public ResponseEntity<List<Pair>> getBookingsInTimeRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+        log.info("Get booking in range");
         return ResponseEntity.ok(bookingService.getBookingsInTimeRange(startTime, endTime));
     }
 

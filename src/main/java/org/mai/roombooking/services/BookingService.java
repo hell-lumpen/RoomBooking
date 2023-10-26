@@ -237,6 +237,7 @@ public class BookingService {
                 .room(room)
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
+                .id(dto.getId())
                 .periodicBookingId(dto.getPeriodicBookingId())
                 .build();
     }
