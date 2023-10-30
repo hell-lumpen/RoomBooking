@@ -1,5 +1,6 @@
 package org.mai.roombooking.services;
 
+import lombok.NonNull;
 import org.mai.roombooking.dtos.Pair;
 import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomBookingRequestDTO;
@@ -14,6 +15,7 @@ import org.mai.roombooking.repositories.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -95,25 +97,9 @@ public class BookingService {
                                                              LocalDateTime endTime)
                                                              throws UsernameNotFoundException{
         List<Booking> bookings = bookingRepository.findBookingsInDateRangeByUser(startTime, endTime, userId);
-
-//        SecurityContext context = SecurityContextHolder.getContext();
-//
-//        Authentication authentication = context.getAuthentication();
-//
-//        List<String> roles = authentication.getAuthorities().stream()
-//                .map(Object::toString)
-//                .toList();
-//
-//        Long currentUserId = ((User) authentication.getPrincipal()).getUserId();
-//
-//        if (!roles.contains(UserRole.ADMINISTRATOR.name()) && !userId.equals(currentUserId)) {
-//            throw new AccessDeniedException("Access denied: Not enough permissions");
-//        }
-//        else {
             if (bookings.isEmpty())
                 userRepository.findById(userId).orElseThrow(() ->
                         new UsernameNotFoundException("User with id" + userId + "not found"));
-//        }
 
         return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
@@ -124,17 +110,10 @@ public class BookingService {
      * @param request   запрос с информацией для обновления бронирования
      * @return обновленное бронирование
      */
-    public Booking updatePeriodicBooking(RoomBookingRequestDTO request, User user) {
-        var booking = bookingRepository.findById(request.getId())
-                .orElseThrow(()->new BookingNotFoundException(request.getId()));
-
-        bookingRepository.findAllByPeriodicBookingId(booking.getPeriodicBookingId())
-                .forEach((bookingItem) -> {
-                    Booking bookingTmp = getBookingFromDTO(request);
-                    bookingTmp.setId(bookingItem.getId());
-                    bookingRepository.save(bookingTmp);
-                });
-        return booking;
+    @Transactional
+    public Booking updatePeriodicBooking(@NonNull RoomBookingRequestDTO request) {
+        this.deletePeriodicBooking(request.getId());
+        return this.createPrerodicBooking(request);
     }
 
     /**
@@ -144,16 +123,11 @@ public class BookingService {
      * @throws UsernameNotFoundException пользователь с id, переданным клиентом, не найдена
      * @throws RoomNotFoundException аудитория с id, переданным клиентом, не найдена
      */
-    public Booking updateBooking(RoomBookingRequestDTO request, User user)
+    public Booking updateBooking(RoomBookingRequestDTO request)
             throws UsernameNotFoundException, RoomNotFoundException {
+
         var booking = getBookingFromDTO(request);
-
-        long count = bookingRepository.findBookingsInDateRange(request.getStartTime(), request.getEndTime())
-                .stream()
-                .filter((bookingItem -> bookingItem.getRoom().getRoomId().equals(request.getRoomId())))
-                .count();
-
-        if (count != 0)
+        if (!validateBooking(request.getStartTime(), request.getEndTime(), request.getRoomId()))
             throw new BookingException();
 
         return bookingRepository.save(booking);
@@ -166,7 +140,8 @@ public class BookingService {
      * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
     public void deletePeriodicBooking(Long bookingId) {
-        var booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
+        var booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
         bookingRepository.deleteAllByPeriodicBookingId(booking.getPeriodicBookingId());
     }
 
@@ -186,33 +161,30 @@ public class BookingService {
      *
      * @param request запрос с информацией для создания бронирования
      * @return созданное бронирование
-     * @throws RoomNotFoundException   если комната не найдена по идентификатору
-     * @throws UserNotFoundException   если пользователь не найден по идентификатору
      */
-    public Booking createPrerodicBooking(RoomBookingRequestDTO request, User user) {
+    @Transactional
+    public Booking createPrerodicBooking(@NonNull RoomBookingRequestDTO request) {
         LocalDateTime end = request.getEndTime();
         LocalDateTime start = request.getEndTime();
+
+        var booking = getBookingFromDTO(request);
+        booking.setPeriodicBookingId(UUID.randomUUID());
+
         while (end.isBefore(request.getRRule().getUntilDate())) {
-            var booking = bookingRepository.save(getBookingFromDTO(request));
-            if (request.getUserId() == null)
-                booking.setUser(user);
+            if (validateBooking(start,end, request.getRoomId()))
+                bookingRepository.save(booking);
             else
-                booking.setUser(userRepository.findById(request.getId()).orElseThrow(()->new UserNotFoundException(request.getUserId())));
-
-
-            booking.setUser((request.getUserId() == null) ? user : userRepository.findById(request.getId()).orElseThrow(()->new UserNotFoundException(request.getUserId())));
-            booking.setStartTime(start);
-            booking.setEndTime(end);
-            booking.setPeriodicBookingId(UUID.randomUUID());
-            bookingRepository.save(booking);
+                throw new BookingException();
 
             end = RECURRING_RULES.get(request.getRRule().getFrequency())
                     .performOperation(end, request.getRRule().getInterval());
             start = RECURRING_RULES.get(request.getRRule().getFrequency())
                     .performOperation(start, request.getRRule().getInterval());
-        }
 
-        return null;
+            booking.setStartTime(start);
+            booking.setEndTime(end);
+        }
+        return booking;
     }
 
     /**
@@ -252,5 +224,16 @@ public class BookingService {
     @FunctionalInterface
     private interface IncrementLocalDataTime {
         LocalDateTime performOperation(LocalDateTime inputDateTime, int value);
+    }
+
+    private boolean validateBooking(LocalDateTime start, LocalDateTime end, Long roomId) {
+        if (start.isAfter(end) || start.getDayOfYear() != end.getDayOfYear())
+            return false;
+
+        long count = bookingRepository.findBookingsInDateRange(start, end)
+                .stream()
+                .filter((bookingItem -> bookingItem.getRoom().getRoomId().equals(roomId)))
+                .count();
+        return count == 0;
     }
 }

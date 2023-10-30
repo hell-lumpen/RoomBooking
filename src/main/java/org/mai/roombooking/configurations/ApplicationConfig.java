@@ -1,5 +1,8 @@
 package org.mai.roombooking.configurations;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
 import org.mai.roombooking.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +22,11 @@ public class ApplicationConfig {
 
     private final UserRepository userRepository;
 
+    @Bean
+    public Validator validator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        return factory.getValidator();
+    }
     @Bean
     public UserDetailsService userDetailsService () {
         return username -> userRepository.findByUsername(username)

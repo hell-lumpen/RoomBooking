@@ -117,16 +117,15 @@ public class BookingController {
 
         if (request.isPeriodic()) {
             // Обновить всю цепочку бронирования
-            return ResponseEntity.ok(bookingService.updatePeriodicBooking(request, user));
+            return ResponseEntity.ok(bookingService.updatePeriodicBooking(request));
         } else {
             // Обновить одно бронирование
-            return ResponseEntity.ok(bookingService.updateBooking(request, user));
+            return ResponseEntity.ok(bookingService.updateBooking(request));
         }
     }
 
     /**
      * Удалить бронирование.
-     *
      * @param bookingId Идентификатор бронирования
      * @param isPeriodic Флаг, указывающий, нужно ли удалить всю цепочку бронирования
      * @return ResponseEntity с информацией об удалении
@@ -172,9 +171,9 @@ public class BookingController {
 
         Booking createdBooking;
         if (request.isPeriodic()) {
-            createdBooking = bookingService.createPrerodicBooking(request, user);
+            createdBooking = bookingService.createPrerodicBooking(request);
         } else {
-            createdBooking = bookingService.updateBooking(request, user);
+            createdBooking = bookingService.updateBooking(request);
         }
         messagingTemplate.convertAndSend("/topic/1", "add new");
         return ResponseEntity.ok(createdBooking);

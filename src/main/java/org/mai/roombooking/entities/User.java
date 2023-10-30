@@ -1,10 +1,7 @@
 package org.mai.roombooking.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,19 +25,23 @@ public class User implements UserDetails {
     private String username;
 
     @Column(name = "phone_number", unique = true, nullable = false)
+    @Setter
     private String phoneNumber;
 
     @Column(name = "fullname", nullable = false)
+    @Setter
     private String fullName;
 
     @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "is_account_locked", nullable = false)
+    @Setter
     private Boolean isAccountLocked;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Setter
     private UserRole role;
 
     @Override
