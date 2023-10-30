@@ -189,7 +189,7 @@ public class BookingService {
      * @throws RoomNotFoundException   если комната не найдена по идентификатору
      * @throws UserNotFoundException   если пользователь не найден по идентификатору
      */
-    public Booking createBooking(RoomBookingRequestDTO request, User user) {
+    public Booking createPrerodicBooking(RoomBookingRequestDTO request, User user) {
         LocalDateTime end = request.getEndTime();
         LocalDateTime start = request.getEndTime();
         while (end.isBefore(request.getRRule().getUntilDate())) {

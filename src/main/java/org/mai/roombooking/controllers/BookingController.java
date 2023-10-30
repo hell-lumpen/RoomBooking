@@ -166,7 +166,7 @@ public class BookingController {
 
         Booking createdBooking;
         if (request.isPeriodic()) {
-            createdBooking = bookingService.createBooking(request, user);
+            createdBooking = bookingService.createPrerodicBooking(request, user);
         } else {
             createdBooking = bookingService.updateBooking(request, user);
         }
