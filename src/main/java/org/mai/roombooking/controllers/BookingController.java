@@ -157,10 +157,12 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Booking> createBooking(@RequestBody RoomBookingRequestDTO request,
                                                  @AuthenticationPrincipal User user) {
-        if(request.getUserId() != null && !(Objects.equals(request.getUserId(), user.getUserId())
+        if (request.getUserId() == null)
+            request.setUserId(user.getUserId());
+
+        if(!(Objects.equals(request.getUserId(), user.getUserId())
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
-
 
         Booking createdBooking;
         if (request.isPeriodic()) {

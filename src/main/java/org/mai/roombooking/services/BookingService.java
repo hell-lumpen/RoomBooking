@@ -147,8 +147,6 @@ public class BookingService {
     public Booking updateBooking(RoomBookingRequestDTO request, User user)
             throws UsernameNotFoundException, RoomNotFoundException {
         var booking = getBookingFromDTO(request);
-        if (booking.getUser() == null)
-            booking.setUser(user);
 
         long count = bookingRepository.findBookingsInDateRange(request.getStartTime(), request.getEndTime())
                 .stream()
