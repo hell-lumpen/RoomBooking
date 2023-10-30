@@ -14,6 +14,7 @@ import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,11 @@ public class BookingController {
     private final BookingService bookingService;
     private final RoomService roomService;
 //    private final Service roomService;
+
+
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     public BookingController(BookingService bookingService, RoomService roomService) {
@@ -161,13 +167,13 @@ public class BookingController {
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
-
         Booking createdBooking;
         if (request.isPeriodic()) {
             createdBooking = bookingService.createBooking(request, user);
         } else {
             createdBooking = bookingService.updateBooking(request, user);
         }
+        messagingTemplate.convertAndSend("/topic/1", "add new");
         return ResponseEntity.ok(createdBooking);
     }
 
