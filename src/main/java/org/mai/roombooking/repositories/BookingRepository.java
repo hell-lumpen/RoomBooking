@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.user " +
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.owner " +
             "WHERE b.endTime >= :startDateTime AND b.startTime <= :endDateTime")
     List<Booking> findBookingsInDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
@@ -29,14 +29,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b " +
             "WHERE b.endTime >= :startDateTime " +
             "   AND b.startTime <= :endDateTime " +
-            "   AND b.user.userId = :userId")
+            "   AND b.owner.userId = :userId")
     List<Booking> findBookingsInDateRangeByUser(@Param("startDateTime") LocalDateTime startDateTime,
                                                 @Param("endDateTime") LocalDateTime endDateTime,
                                                 @Param("endDateTime") Long userId);
 
     @Modifying
-    @Query("DELETE FROM Booking b WHERE b.periodicBookingId = :periodicBookingId")
+    @Query("DELETE FROM Booking b WHERE b.bookingGroupId = :periodicBookingId")
     void deleteAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
 
-    List<Booking> findAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
+    List<Booking> findAllByBookingGroupId(@Param("periodicBookingId") UUID periodicBookingId);
 }
