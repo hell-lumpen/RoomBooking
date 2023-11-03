@@ -20,4 +20,7 @@ public class Tag {
 
     @Column(name = "short_name",nullable = false, unique = true)
     String shortName;
+
+    @Column(name = "color", nullable = false)
+    String color;
 }
