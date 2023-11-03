@@ -15,9 +15,9 @@ public class Tag {
     @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "full_name", nullable = false, unique = true)
     String fullName;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "short_name",nullable = false, unique = true)
     String shortName;
 }
