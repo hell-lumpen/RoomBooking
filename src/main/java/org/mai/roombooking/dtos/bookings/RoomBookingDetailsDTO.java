@@ -26,6 +26,7 @@ public class RoomBookingDetailsDTO {
     private LocalDateTime createdAt;
     private List<UserDTO> staff;
     private List<Group> groups;
+    private Tag tag;
 
     public RoomBookingDetailsDTO(Booking booking) {
         id = booking.getId();
@@ -37,6 +38,7 @@ public class RoomBookingDetailsDTO {
         description = booking.getDescription();
         staff = booking.getStaff().stream().map(UserDTO::new).toList();
         groups = booking.getGroups();
+        tag = booking.getTag();
         createdAt = booking.getCreatedAt();
     }
 }

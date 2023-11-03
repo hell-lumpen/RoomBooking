@@ -5,11 +5,9 @@ import org.mai.roombooking.dtos.bookings.Pair;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.*;
-import org.mai.roombooking.exceptions.BookingException;
-import org.mai.roombooking.exceptions.BookingNotFoundException;
-import org.mai.roombooking.exceptions.RoomNotFoundException;
-import org.mai.roombooking.exceptions.UserNotFoundException;
+import org.mai.roombooking.exceptions.*;
 import org.mai.roombooking.repositories.BookingRepository;
+import org.mai.roombooking.repositories.GroupRepository;
 import org.mai.roombooking.repositories.RoomRepository;
 import org.mai.roombooking.repositories.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,11 +27,14 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
+    private final GroupRepository groupRepository;
 
-    BookingService(BookingRepository bookingRepository, UserRepository userRepository, RoomRepository roomRepository) {
+    BookingService(BookingRepository bookingRepository, UserRepository userRepository,
+                   RoomRepository roomRepository, GroupRepository groupRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
+        this.groupRepository = groupRepository;
     }
 
     // GETERS
@@ -214,6 +215,17 @@ public class BookingService {
                 .endTime(dto.getEndTime())
                 .id(dto.getId())
                 .bookingGroupId(dto.getGroupBookingId())
+                .staff(dto.getStaffId()
+                        .stream()
+                        .map(id -> userRepository.findById(id)
+                                .orElseThrow(()->new UserNotFoundException(id)))
+                        .toList())
+                .groups(dto.getGroupsId()
+                        .stream()
+                        .map(id -> groupRepository.findById(id)
+                                .orElseThrow(()->new GroupNotFoundException(id)))
+                        .toList())
+                .tag(dto.getTag())
                 .build();
     }
 

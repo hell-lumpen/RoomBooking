@@ -4,6 +4,7 @@ import lombok.*;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Group;
+import org.mai.roombooking.entities.Tag;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,7 @@ public class RoomBookingDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String description;
+    private Tag tag;
 
     public RoomBookingDTO(@NonNull Booking booking) {
         description = booking.getDescription();
@@ -30,5 +32,6 @@ public class RoomBookingDTO {
         startTime = booking.getStartTime();
         endTime = booking.getEndTime();
         owner = booking.getOwner().getFullName();
+        tag = booking.getTag();
     }
 }

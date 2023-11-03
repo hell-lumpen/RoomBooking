@@ -49,6 +49,10 @@ public class Booking {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "tag")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Tag tag;
+
     @Column(name = "created_at")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", shape = JsonFormat.Shape.STRING)
     @Temporal(TemporalType.TIMESTAMP)

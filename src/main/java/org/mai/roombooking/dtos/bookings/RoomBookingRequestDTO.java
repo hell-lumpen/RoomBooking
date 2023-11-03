@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.Group;
+import org.mai.roombooking.entities.Tag;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,23 +25,19 @@ public class RoomBookingRequestDTO {
 
     @NotNull
     private Long roomId;
-
     @NotNull
     private Long userId;
-
     @NotNull
     private LocalDateTime startTime;
-
     @NotNull
     private LocalDateTime endTime;
-
     @NotNull
     @NotBlank
     private String description;
-
     @NotNull
-    private List<UserDTO> staff;
-
+    private List<Long> staffId;
     @NotNull
-    private List<Group> groups;
+    private List<Long> groupsId;
+    @NotNull
+    private Tag tag;
 }
