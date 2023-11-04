@@ -35,7 +35,7 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "is_account_locked", nullable = false)
+    @Column(name = "is_account_locked", nullable = false, columnDefinition = "boolean default false")
     @Setter
     private Boolean isAccountLocked;
 
