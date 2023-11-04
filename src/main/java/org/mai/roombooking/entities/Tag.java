@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import org.mai.roombooking.dtos.TagDTO;
 
 @Entity(name = "tag")
 @Data
@@ -23,4 +25,11 @@ public class Tag {
 
     @Column(name = "color", nullable = false)
     String color;
+
+    public Tag(@NonNull TagDTO dto) {
+        id = dto.getId();
+        fullName = dto.getFullName();
+        shortName = dto.getShortName();
+        color = dto.getColor();
+    }
 }
