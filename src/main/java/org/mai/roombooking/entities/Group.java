@@ -1,10 +1,8 @@
 package org.mai.roombooking.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.mai.roombooking.dtos.GroupDTO;
 
 @Entity
 @AllArgsConstructor
@@ -20,4 +18,9 @@ public class Group {
 
     @Column(nullable = false)
     String name;
+
+    public Group(@NonNull GroupDTO dto) {
+        id = dto.getId();
+        name = dto.getName();
+    }
 }
