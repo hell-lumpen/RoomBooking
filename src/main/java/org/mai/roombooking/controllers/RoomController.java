@@ -1,8 +1,6 @@
 package org.mai.roombooking.controllers;
 
 import org.mai.roombooking.dtos.RoomDTO;
-import org.mai.roombooking.entities.Room;
-import org.mai.roombooking.repositories.RoomRepository;
 import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;

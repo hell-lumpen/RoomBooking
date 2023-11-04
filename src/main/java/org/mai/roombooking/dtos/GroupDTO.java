@@ -1,6 +1,5 @@
 package org.mai.roombooking.dtos;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.mai.roombooking.entities.Group;
