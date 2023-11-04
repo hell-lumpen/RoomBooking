@@ -1,6 +1,8 @@
 package org.mai.roombooking.dtos.bookings;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.mai.roombooking.dtos.GroupDTO;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Group;
@@ -21,6 +23,8 @@ public class RoomBookingDTO {
     private String owner;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private List<UserDTO> staff;
+    private List<GroupDTO> groups;
     private String description;
     private Tag tag;
 
@@ -33,5 +37,7 @@ public class RoomBookingDTO {
         endTime = booking.getEndTime();
         owner = booking.getOwner().getFullName();
         tag = booking.getTag();
+        staff = booking.getStaff().stream().map(UserDTO::new).toList();
+        groups = booking.getGroups().stream().map(GroupDTO::new).toList();
     }
 }

@@ -1,9 +1,6 @@
 package org.mai.roombooking.dtos.bookings;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.*;
 
@@ -28,7 +25,7 @@ public class RoomBookingDetailsDTO {
     private List<Group> groups;
     private Tag tag;
 
-    public RoomBookingDetailsDTO(Booking booking) {
+    public RoomBookingDetailsDTO(@NonNull Booking booking) {
         id = booking.getId();
         bookingGroupId = booking.getBookingGroupId();
         room = booking.getRoom();
