@@ -1,5 +1,6 @@
 package org.mai.roombooking.dtos;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -15,8 +16,20 @@ public class RoomDTO {
     @NotBlank
     String name;
 
+    @NotNull
+    private Integer capacity;
+
+    @NotNull
+    private Boolean hasComputers;
+
+    @NotNull
+    private Boolean hasProjector;
+
     public RoomDTO(@NonNull Room room) {
         this.id = room.getRoomId();
         this.name = room.getRoomName();
+        this.capacity = room.getCapacity();
+        this.hasComputers = room.getHasComputers();
+        this.hasProjector = room.getHasProjector();
     }
 }
