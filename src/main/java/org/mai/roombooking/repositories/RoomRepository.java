@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
@@ -17,4 +18,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> getRoomsWithFilter(@Param("capacity") int capacity,
                                                 @Param("hasComputers") boolean hasComputers,
                                                 @Param("hasProjector") boolean hasProjector);
+
+    @Query("SELECT room FROM Room room WHERE room.isCathedral = true")
+    List<Room> getCathedralRooms();
+
+    Optional<Room> findRoomByRoomName(String roomName);
 }

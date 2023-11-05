@@ -2,6 +2,7 @@ package org.mai.roombooking.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Builder
 @Table(name = "Rooms")
 public class Room {
 
@@ -23,9 +25,12 @@ public class Room {
     @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
-    @Column(name = "has_computers", nullable = false)
+    @Column(name = "has_computers", nullable = false, columnDefinition = "boolean default false")
     private Boolean hasComputers;
 
-    @Column(name = "has_projector", nullable = false)
+    @Column(name = "has_projector", nullable = false, columnDefinition = "boolean default false")
     private Boolean hasProjector;
+
+    @Column(name = "is_cathedral", nullable = false, columnDefinition = "boolean default false")
+    private Boolean isCathedral;
 }

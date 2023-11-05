@@ -1,9 +1,9 @@
 package org.mai.roombooking.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.mai.roombooking.dtos.Pair;
-import org.mai.roombooking.dtos.RoomBookingDTO;
-import org.mai.roombooking.dtos.RoomBookingRequestDTO;
+import org.mai.roombooking.dtos.bookings.Pair;
+import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
+import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.User;
@@ -33,17 +33,13 @@ public class BookingController {
 
     private final BookingService bookingService;
     private final RoomService roomService;
-//    private final Service roomService;
-
-
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
-    public BookingController(BookingService bookingService, RoomService roomService) {
+    public BookingController(BookingService bookingService, RoomService roomService, SimpMessagingTemplate messagingTemplate) {
         this.bookingService = bookingService;
         this.roomService = roomService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     /**
@@ -115,38 +111,24 @@ public class BookingController {
         if(!user.getRole().equals(User.UserRole.ADMINISTRATOR) && request.getUserId() == null)
             throw new UserNotFoundException((long) -1);
 
-        if (request.isPeriodic()) {
-            // Обновить всю цепочку бронирования
-            return ResponseEntity.ok(bookingService.updatePeriodicBooking(request));
-        } else {
-            // Обновить одно бронирование
-            return ResponseEntity.ok(bookingService.updateBooking(request));
-        }
+        return ResponseEntity.ok(bookingService.updateBooking(request));
     }
 
     /**
      * Удалить бронирование.
      * @param bookingId Идентификатор бронирования
-     * @param isPeriodic Флаг, указывающий, нужно ли удалить всю цепочку бронирования
      * @return ResponseEntity с информацией об удалении
      */
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<String> deleteBooking(
             @PathVariable Long bookingId,
-            @RequestParam(defaultValue = "false") boolean isPeriodic,
             @AuthenticationPrincipal User user) {
 
-        if(!Objects.equals(bookingService.getBookingById(bookingId).getUser().getUserId(), user.getUserId())
+        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getUserId(), user.getUserId())
                 && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
-        if (isPeriodic) {
-            // Удалить всю цепочку бронирования
-            bookingService.deletePeriodicBooking(bookingId);
-        } else {
-            // Удалить одно бронирование
-            bookingService.deleteBooking(bookingId);
-        }
+        bookingService.deleteBooking(bookingId);
 
         return ResponseEntity.ok("Booking deleted successfully");
     }
@@ -169,12 +151,8 @@ public class BookingController {
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
-        Booking createdBooking;
-        if (request.isPeriodic()) {
-            createdBooking = bookingService.createPrerodicBooking(request);
-        } else {
-            createdBooking = bookingService.updateBooking(request);
-        }
+        Booking createdBooking = bookingService.updateBooking(request);
+
         messagingTemplate.convertAndSend("/topic/1", "add new");
         return ResponseEntity.ok(createdBooking);
     }

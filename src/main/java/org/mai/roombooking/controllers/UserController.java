@@ -29,6 +29,10 @@ public class UserController {
         return userService.findAll();
     }
 
+    /**
+     * Метод для получения списка не заблокированных пользователей
+     * @return Список не заблокированных пользователей
+     */
     @GetMapping("/get/active")
     public List<UserDTO> getActive() {
         return userService.findAll()
@@ -52,7 +56,7 @@ public class UserController {
      * @param request dto пользователя содержащее поля открытые для редактирования
      * @return обновленные данные пользователя
      */
-    @PutMapping("")
+    @PutMapping("/update")
     public UserDTO updateUser(@NonNull @RequestBody UserDTO request) {
         return userService.updateUser(request);
     }

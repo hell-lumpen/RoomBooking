@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -20,16 +21,22 @@ public class Booking {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "periodic_booking_id")
-    private UUID periodicBookingId;
+    @Column(name = "booking_group_id")
+    private UUID bookingGroupId;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    List<User> staff;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    List<Group> groups;
 
     @Column(name = "start_time", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -39,11 +46,12 @@ public class Booking {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime endTime;
 
-    @Column(name = "booking_purpose")
-    private String bookingPurpose;
+    @Column(name = "description")
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private RRule rRule;
+    @JoinColumn(name = "tag_id", nullable = false)
+    private Tag tag;
 
     @Column(name = "created_at")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", shape = JsonFormat.Shape.STRING)

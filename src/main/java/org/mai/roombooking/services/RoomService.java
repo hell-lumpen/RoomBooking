@@ -1,13 +1,14 @@
 package org.mai.roombooking.services;
 
 
-import org.mai.roombooking.dtos.RoomBookingDTO;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.Room;
 import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.repositories.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,7 +39,8 @@ public class RoomService {
      * @param hasComputers  опциональный параметр компьютеров для фильтрации комнат
      * @return список доступных комнат, соответствующих указанным критериям, если он пуст доступных комнат нет
      */
-    public List<RoomDTO> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime, Integer capacity, Boolean hasProjector, Boolean hasComputers) {
+    public List<RoomDTO> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime,
+                                           Integer capacity, Boolean hasProjector, Boolean hasComputers) {
 
         List<Room> rooms = bookingRepository.findBookingsInDateRange(startTime, endTime)
                     .stream()
@@ -55,15 +57,34 @@ public class RoomService {
                 .toList();
     }
 
-//    /**
-//     * Получает список всех комнат со статусами, отсортированных по релевантности на основе опциональных параметров.
-//     *
-//     * @param capacity      опциональный параметр вместимости для фильтрации комнат
-//     * @param hasProjector  опциональный параметр проектора для фильтрации комнат
-//     * @param hasComputers  опциональный параметр компьютеров для фильтрации комнат
-//     * @return список комнат со статусами
-//     */
-//    public List<RoomStatusDTO> getAllRoomsStatus(Integer capacity, Boolean hasProjector, Boolean hasComputers) {
-//        return null;
-//    }
+    public List<RoomDTO> getAllRooms() {
+        return roomRepository.findAll().stream().map(RoomDTO::new).toList();
+    }
+
+    public RoomDTO update(RoomDTO dto) {
+        roomRepository.save(getRoomFromDTO(dto));
+        return null;
+    }
+
+    public List<RoomDTO> getCathedralRooms() {
+        return roomRepository.getCathedralRooms().stream().map(RoomDTO::new).toList();
+    }
+
+    public void delete(@NonNull Long roomId) {
+        roomRepository.deleteById(roomId);
+    }
+
+    public Room getRoomByName(@NonNull String name) {
+        return roomRepository.findRoomByRoomName(name).orElseThrow(()-> new RoomNotFoundException(0L));
+    }
+
+    private Room getRoomFromDTO(@NonNull RoomDTO dto) {
+        return Room.builder()
+                .roomName(dto.getName())
+                .roomId(dto.getId())
+                .capacity(dto.getCapacity())
+                .hasComputers(dto.getHasComputers())
+                .hasProjector(dto.getHasProjector())
+                .build();
+    }
 }
