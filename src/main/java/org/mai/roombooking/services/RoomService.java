@@ -4,6 +4,7 @@ package org.mai.roombooking.services;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.Room;
 import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.repositories.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,10 @@ public class RoomService {
 
     public void delete(@NonNull Long roomId) {
         roomRepository.deleteById(roomId);
+    }
+
+    public Room getRoomByName(@NonNull String name) {
+        return roomRepository.findRoomByRoomName(name).orElseThrow(()-> new RoomNotFoundException(0L));
     }
 
     private Room getRoomFromDTO(@NonNull RoomDTO dto) {

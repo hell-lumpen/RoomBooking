@@ -56,4 +56,8 @@ public class UserService {
         return new UserDTO(userRepository.findById(id)
                 .orElseThrow(()-> new UserNotFoundException(id)));
     }
+
+    public User getUserByFullName(String fullName) {
+        return userRepository.findUserByFullName(fullName).orElseThrow(() -> new UserNotFoundException(0L));
+    }
 }

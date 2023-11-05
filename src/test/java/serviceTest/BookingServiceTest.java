@@ -35,8 +35,8 @@ public class BookingServiceTest {
                 .userId(userRepository.findAll().get(0).getUserId())
                 .startTime(LocalDateTime.of(2023, Month.OCTOBER, 23,11,40))
                 .endTime(LocalDateTime.of(2023, Month.OCTOBER, 23,12,40))
-                .staff(new ArrayList<>())
-                .groups(new ArrayList<>())
+                .staffId(new ArrayList<>())
+                .groupsId(new ArrayList<>())
                 .description("Some description")
                 .build();
 
@@ -58,8 +58,8 @@ public class BookingServiceTest {
                 .userId(userRepository.findAll().get(0).getUserId())
                 .startTime(LocalDateTime.of(2023, Month.OCTOBER, 24,10,0))
                 .endTime(LocalDateTime.of(2023, Month.OCTOBER, 24,11,0))
-                .staff(new ArrayList<>())
-                .groups(new ArrayList<>())
+                .staffId(new ArrayList<>())
+                .groupsId(new ArrayList<>())
                 .description("Some description")
                 .build();
 
@@ -75,8 +75,8 @@ public class BookingServiceTest {
                 .userId(userRepository.findAll().get(0).getUserId())
                 .startTime(LocalDateTime.of(2023, Month.OCTOBER, 24,11,0))
                 .endTime(LocalDateTime.of(2023, Month.OCTOBER, 24,12,0))
-                .staff(new ArrayList<>())
-                .groups(new ArrayList<>())
+                .staffId(new ArrayList<>())
+                .groupsId(new ArrayList<>())
                 .description("Some description")
                 .build();
 
@@ -92,8 +92,8 @@ public class BookingServiceTest {
                 .userId(userRepository.findAll().get(0).getUserId())
                 .startTime(LocalDateTime.of(2023, Month.OCTOBER, 24,9,0))
                 .endTime(LocalDateTime.of(2023, Month.OCTOBER, 24,12,0))
-                .staff(new ArrayList<>())
-                .groups(new ArrayList<>())
+                .staffId(new ArrayList<>())
+                .groupsId(new ArrayList<>())
                 .description("Some description")
                 .build();
 
@@ -109,8 +109,8 @@ public class BookingServiceTest {
                 .userId(userRepository.findAll().get(0).getUserId())
                 .startTime(LocalDateTime.of(2023, Month.OCTOBER, 24,10,30))
                 .endTime(LocalDateTime.of(2023, Month.OCTOBER, 24,11,0))
-                .staff(new ArrayList<>())
-                .groups(new ArrayList<>())
+                .staffId(new ArrayList<>())
+                .groupsId(new ArrayList<>())
                 .description("Some description")
                 .build();
 
@@ -125,8 +125,8 @@ public class BookingServiceTest {
                 .userId(userRepository.findAll().get(0).getUserId())
                 .startTime(LocalDateTime.of(2023, Month.OCTOBER, 24,10,0))
                 .endTime(LocalDateTime.of(2023, Month.OCTOBER, 24,9,0))
-                .staff(new ArrayList<>())
-                .groups(new ArrayList<>())
+                .staffId(new ArrayList<>())
+                .groupsId(new ArrayList<>())
                 .description("Some description")
                 .build();
 

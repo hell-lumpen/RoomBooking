@@ -3,6 +3,7 @@ package org.mai.roombooking.dtos;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.mai.roombooking.entities.Group;
+import org.mai.roombooking.entities.Tag;
 
 @Builder
 @Data
@@ -19,4 +20,5 @@ public class GroupDTO {
         id = group.getId();
         name = group.getName();
     }
+
 }

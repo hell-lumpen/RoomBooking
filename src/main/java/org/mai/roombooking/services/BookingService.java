@@ -169,14 +169,18 @@ public class BookingService {
      * @throws UsernameNotFoundException пользователь с id, переданным клиентом, не найдена
      * @throws RoomNotFoundException     аудитория с id, переданным клиентом, не найдена
      */
-    public Booking updateBooking(RoomBookingRequestDTO request)
+    public Booking updateBooking(@NonNull RoomBookingRequestDTO request)
+            throws UsernameNotFoundException, RoomNotFoundException {
+        return updateBooking(getBookingFromDTO(request));
+    }
+
+    public Booking updateBooking(@NonNull Booking request)
             throws UsernameNotFoundException, RoomNotFoundException {
 
-        var booking = getBookingFromDTO(request);
-        if (!validateBooking(request.getStartTime(), request.getEndTime(), request.getRoomId()))
+        if (!validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId()))
             throw new BookingException();
 
-        return bookingRepository.save(booking);
+        return bookingRepository.save(request);
     }
 
 
@@ -227,15 +231,6 @@ public class BookingService {
                         .toList())
                 .tag(dto.getTag())
                 .build();
-    }
-
-    private static final Map<RRule.Frequency, IncrementLocalDataTime> RECURRING_RULES = new EnumMap<>(RRule.Frequency.class);
-
-    static {
-        RECURRING_RULES.put(RRule.Frequency.DAILY, LocalDateTime::plusDays);
-        RECURRING_RULES.put(RRule.Frequency.WEEKLY, LocalDateTime::plusWeeks);
-        RECURRING_RULES.put(RRule.Frequency.MONTHLY, LocalDateTime::plusMonths);
-        RECURRING_RULES.put(RRule.Frequency.YEARLY, LocalDateTime::plusYears);
     }
 
     @FunctionalInterface
