@@ -19,7 +19,7 @@ public class RoomController {
         this.roomService = roomService;
     }
 
-    @GetMapping("/get/all")
+    @GetMapping("/all")
     public List<RoomDTO> getAllRooms() {
         return roomService.getAllRooms();
     }

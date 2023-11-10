@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Long> {
-    @Query("SELECT t FROM Tag t WHERE t.shortName = :shortName")
+    @Query("SELECT t FROM tag t WHERE t.shortName = :shortName")
     Optional<Tag> findByShortName(String shortName);
 }

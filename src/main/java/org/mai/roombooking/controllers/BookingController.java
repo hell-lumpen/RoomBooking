@@ -7,6 +7,8 @@ import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.User;
+import org.mai.roombooking.exceptions.BookingConflictException;
+import org.mai.roombooking.exceptions.BookingNotFoundException;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.services.BookingService;
@@ -106,7 +108,7 @@ public class BookingController {
     @PutMapping("")
     public ResponseEntity<Booking> updateBooking(
             @RequestBody RoomBookingRequestDTO request,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) throws BookingConflictException {
 
         if(!user.getRole().equals(User.UserRole.ADMINISTRATOR) && request.getUserId() == null)
             throw new UserNotFoundException((long) -1);
@@ -122,7 +124,7 @@ public class BookingController {
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<String> deleteBooking(
             @PathVariable Long bookingId,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) throws BookingNotFoundException {
 
         if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getUserId(), user.getUserId())
                 && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
@@ -143,7 +145,7 @@ public class BookingController {
      */
     @PostMapping
     public ResponseEntity<Booking> createBooking(@RequestBody RoomBookingRequestDTO request,
-                                                 @AuthenticationPrincipal User user) {
+                                                 @AuthenticationPrincipal User user) throws BookingConflictException {
         if (request.getUserId() == null)
             request.setUserId(user.getUserId());
 

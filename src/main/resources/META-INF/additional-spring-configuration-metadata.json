@@ -4,5 +4,10 @@
       "name": "secure.jwt-service.secret-key",
       "type": "java.lang.String",
       "description": "Secret key for sign JW-token."
+    },
+    {
+      "name": "secure.jwt-service.token-timelife",
+      "type": "java.lang.Long",
+      "description": "JW-token lifetime in milliseconds."
     }
 ] }

@@ -49,7 +49,7 @@ public class Booking {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
 

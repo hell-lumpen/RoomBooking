@@ -16,7 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
                 "localhost",
                 "192.168.1.8",
                 "10.10.67.118",
-                "10.10.71.185");
+                "10.10.71.185",
+                "10.9.8.193");
 
         ips = ips.stream().map(element -> "http://" + element + ":3000").toList();
 

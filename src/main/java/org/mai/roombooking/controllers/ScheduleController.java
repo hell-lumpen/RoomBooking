@@ -3,6 +3,7 @@ package org.mai.roombooking.controllers;
 import lombok.NonNull;
 import org.mai.roombooking.dtos.LessonDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
+import org.mai.roombooking.exceptions.BookingConflictException;
 import org.mai.roombooking.exceptions.DTOValidationException;
 import org.mai.roombooking.services.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/lesson")
-    public RoomBookingDTO addLesson(@NonNull @RequestBody LessonDTO dto) {
+    public RoomBookingDTO addLesson(@NonNull @RequestBody LessonDTO dto) throws BookingConflictException {
         if (dto.getRoom().equals("--каф"))
             throw new DTOValidationException("--каф комната невалидна");
 

@@ -1,5 +1,6 @@
 package org.mai.roombooking.services;
 
+import lombok.AllArgsConstructor;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.security.requestDTO.AuthResponse;
 import org.mai.roombooking.security.requestDTO.UserLoginRequest;
@@ -17,22 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-
-    @Autowired
-    public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtService jwtService,
-                       AuthenticationManager authenticationManager) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-    }
 
     public AuthResponse registerUser(UserRegistrationRequest registrationRequest) {
         User user = User.builder()

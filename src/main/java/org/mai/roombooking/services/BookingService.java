@@ -38,7 +38,7 @@ public class BookingService {
     }
 
     // GETERS
-    public Booking getBookingById(Long bookingId) {
+    public Booking getBookingById(Long bookingId) throws BookingNotFoundException {
         return bookingRepository.findById(bookingId).orElseThrow(()->new BookingNotFoundException(bookingId));
     }
 
@@ -170,15 +170,15 @@ public class BookingService {
      * @throws RoomNotFoundException     аудитория с id, переданным клиентом, не найдена
      */
     public Booking updateBooking(@NonNull RoomBookingRequestDTO request)
-            throws UsernameNotFoundException, RoomNotFoundException {
+            throws UsernameNotFoundException, RoomNotFoundException, BookingConflictException {
         return updateBooking(getBookingFromDTO(request));
     }
 
     public Booking updateBooking(@NonNull Booking request)
-            throws UsernameNotFoundException, RoomNotFoundException {
+            throws UsernameNotFoundException, RoomNotFoundException, BookingConflictException {
 
         if (!validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId()))
-            throw new BookingException();
+            throw new BookingConflictException();
 
         return bookingRepository.save(request);
     }
