@@ -17,12 +17,12 @@ public class BookingServiceExceptionHandler {
 
         if (exception instanceof BookingConflictException) {
             detail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(409), exception.getMessage());
-            detail.setProperty("exception_description", "Конфликт бронирования! Выбранный временной интервал уже был забронирован ранее.");
+            detail.setProperty("exception_description", "Упс! Конфликт бронирования. Временной интервал уже занят.");
         }
 
         else if (exception instanceof BookingNotFoundException) {
             detail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), exception.getMessage());
-            detail.setProperty("exception_description", "Бронирование не найдено! Выбранное бронирование не найдено. Возможно оно уже удалено или никогда не существовало.");
+            detail.setProperty("exception_description", "Ой! Бронирование не найдено. Возможно, его уже нет или никогда не было.");
         }
 
         return detail;
