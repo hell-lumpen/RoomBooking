@@ -21,7 +21,7 @@ public class BookingServiceExceptionHandler {
         }
 
         else if (exception instanceof BookingNotFoundException) {
-            detail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), exception.getMessage());
+            detail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(404), exception.getClass().getName());
             detail.setProperty("exception_description", "Ой! Бронирование не найдено. Возможно, его уже нет или никогда не было.");
         }
 

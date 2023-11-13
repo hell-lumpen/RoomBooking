@@ -14,6 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         List<String> ips = Arrays.asList(
                 "localhost",
+                "10.10.74.166",
                 "192.168.1.8",
                 "10.10.67.118",
                 "10.10.71.185",
