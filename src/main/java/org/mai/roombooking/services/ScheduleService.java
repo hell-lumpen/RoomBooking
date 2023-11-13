@@ -1,9 +1,11 @@
 package org.mai.roombooking.services;
 
+import lombok.AllArgsConstructor;
 import org.mai.roombooking.dtos.GroupDTO;
 import org.mai.roombooking.dtos.LessonDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
 import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.exceptions.BookingConflictException;
 import org.mai.roombooking.exceptions.GroupNotFoundException;
 import org.mai.roombooking.exceptions.TagNotFoundException;
 import org.mai.roombooking.repositories.GroupRepository;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@AllArgsConstructor
 @Service
 public class ScheduleService {
     private final BookingService bookingService;
@@ -25,16 +28,17 @@ public class ScheduleService {
     private final GroupRepository groupRepository;
 
 
-    @Autowired
-    public ScheduleService(BookingService bookingService, RoomService roomService,
-                           UserService userService, TagRepository tagRepository,
-                           GroupRepository groupRepository) {
-        this.bookingService = bookingService;
-        this.roomService = roomService;
-        this.userService = userService;
-        this.tagRepository = tagRepository;
-        this.groupRepository = groupRepository;
-    }
+//    public ScheduleService(BookingService bookingService,
+//                           RoomService roomService,
+//                           UserService userService,
+//                           TagRepository tagRepository,
+//                           GroupRepository groupRepository) {
+//        this.bookingService = bookingService;
+//        this.roomService = roomService;
+//        this.userService = userService;
+//        this.tagRepository = tagRepository;
+//        this.groupRepository = groupRepository;
+//    }
 
 
     public void bookingSchedule(@NonNull List<LessonDTO> dtos) {
@@ -45,7 +49,7 @@ public class ScheduleService {
         //TODO: реализация
     }
 
-    public RoomBookingDTO bookingLesson(LessonDTO dto) {
+    public RoomBookingDTO bookingLesson(LessonDTO dto) throws BookingConflictException {
         return new RoomBookingDTO(bookingService.updateBooking(getBookingFromLessonDTO(dto)));
     }
 

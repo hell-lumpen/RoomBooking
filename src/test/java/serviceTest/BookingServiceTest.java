@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
-import org.mai.roombooking.exceptions.BookingException;
+import org.mai.roombooking.exceptions.BookingConflictException;
 import org.mai.roombooking.repositories.UserRepository;
 import org.mai.roombooking.services.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class BookingServiceTest {
 
     @Test
     @Transactional
-    public void testSuccessfulBookingSave() {
+    public void testSuccessfulBookingSave() throws BookingConflictException {
         var dto = RoomBookingRequestDTO
                 .builder()
                 .roomId(5L)
@@ -63,7 +63,7 @@ public class BookingServiceTest {
                 .description("Some description")
                 .build();
 
-        Assertions.assertThrows(BookingException.class, () -> bookingService.updateBooking(dto));
+        Assertions.assertThrows(BookingConflictException.class, () -> bookingService.updateBooking(dto));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class BookingServiceTest {
                 .description("Some description")
                 .build();
 
-        Assertions.assertThrows(BookingException.class, () -> bookingService.updateBooking(dto));
+        Assertions.assertThrows(BookingConflictException.class, () -> bookingService.updateBooking(dto));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class BookingServiceTest {
                 .description("Some description")
                 .build();
 
-        Assertions.assertThrows(BookingException.class, () -> bookingService.updateBooking(dto));
+        Assertions.assertThrows(BookingConflictException.class, () -> bookingService.updateBooking(dto));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class BookingServiceTest {
                 .description("Some description")
                 .build();
 
-        Assertions.assertThrows(BookingException.class, () -> bookingService.updateBooking(dto));
+        Assertions.assertThrows(BookingConflictException.class, () -> bookingService.updateBooking(dto));
     }
     @Test
     @Transactional
@@ -130,7 +130,7 @@ public class BookingServiceTest {
                 .description("Some description")
                 .build();
 
-        Assertions.assertThrows(BookingException.class, () -> bookingService.updateBooking(dto));
+        Assertions.assertThrows(BookingConflictException.class, () -> bookingService.updateBooking(dto));
     }
 
 }

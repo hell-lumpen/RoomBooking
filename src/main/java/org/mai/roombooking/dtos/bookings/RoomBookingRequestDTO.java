@@ -34,10 +34,7 @@ public class RoomBookingRequestDTO {
     @NotNull
     @NotBlank
     private String description;
-    @NotNull
     private List<Long> staffId;
-    @NotNull
     private List<Long> groupsId;
-    @NotNull
     private Tag tag;
 }
