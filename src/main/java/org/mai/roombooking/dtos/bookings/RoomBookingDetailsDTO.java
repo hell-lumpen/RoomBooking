@@ -16,11 +16,11 @@ public class RoomBookingDetailsDTO {
     private Long id;
     private UUID bookingGroupId ;
     private Room room;
-    private UserDTO user ;
+    private UserDTO owner;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private String title;
     private String description;
-    private LocalDateTime createdAt;
     private List<UserDTO> staff;
     private List<Group> groups;
     private Tag tag;
@@ -28,14 +28,14 @@ public class RoomBookingDetailsDTO {
     public RoomBookingDetailsDTO(@NonNull Booking booking) {
         id = booking.getId();
         bookingGroupId = booking.getBookingGroupId();
+        title = booking.getTitle();
         room = booking.getRoom();
-        user = new UserDTO(booking.getOwner());
+        owner = new UserDTO(booking.getOwner());
         startTime = booking.getStartTime();
         endTime = booking.getEndTime();
         description = booking.getDescription();
         staff = booking.getStaff().stream().map(UserDTO::new).toList();
         groups = booking.getGroups();
         tag = booking.getTag();
-        createdAt = booking.getCreatedAt();
     }
 }

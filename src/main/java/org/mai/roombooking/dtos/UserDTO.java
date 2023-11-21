@@ -12,6 +12,9 @@ import org.mai.roombooking.entities.User;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
+    @NotNull(message = "Id should not be empty")
+    private Long id;
+
     @NotEmpty(message = "Full name should not be empty")
     @NotBlank(message = "The phone number should not be empty")
     private String fullName;
@@ -20,9 +23,6 @@ public class UserDTO {
     @NotBlank(message = "The phone number should not be empty")
     @NotNull(message = "The phone number should not be empty")
     private String phoneNumber;
-
-    @NotNull(message = "Id should not be empty")
-    private Long id;
 
     @NotNull(message = "Role should not be empty")
     private User.UserRole role;

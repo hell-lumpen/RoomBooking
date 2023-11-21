@@ -3,6 +3,7 @@ package org.mai.roombooking.services;
 import lombok.NonNull;
 import org.mai.roombooking.dtos.bookings.Pair;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
+import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
@@ -38,10 +39,14 @@ public class BookingService {
     }
 
     // GETERS
-    public Booking getBookingById(Long bookingId) throws BookingNotFoundException {
-        return bookingRepository.findById(bookingId).orElseThrow(()->new BookingNotFoundException(bookingId));
+    public RoomBookingDetailsDTO getBookingById(Long bookingId) throws BookingNotFoundException {
+        return new RoomBookingDetailsDTO(bookingRepository.findById(bookingId)
+                .orElseThrow(()->new BookingNotFoundException(bookingId)));
     }
 
+    public List<RoomBookingDTO> getAll() {
+        return bookingRepository.findAll().stream().map(RoomBookingDTO::new).toList();
+    }
 
     /**
      * Получает все бронирования комнат в заданном временном диапазоне.
@@ -104,62 +109,6 @@ public class BookingService {
         return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
 
-//    /**
-//     * Обновляет периодическое бронирование на основе предоставленного запроса.
-//     *
-//     * @param request   запрос с информацией для обновления бронирования
-//     * @return обновленное бронирование
-//     */
-//    @Transactional
-//    public Booking updatePeriodicBooking(@NonNull RoomBookingRequestDTO request) {
-//        this.deletePeriodicBooking(request.getId());
-//        return this.createPrerodicBooking(request);
-//    }
-//
-//    /**
-//     * Удаляет периодическое бронирование на основе предоставленного идентификатора.
-//     *
-//     * @param bookingId идентификатор бронирования для удаления
-//     * @throws BookingNotFoundException если бронирование не найдено по идентификатору
-//     */
-//    public void deletePeriodicBooking(Long bookingId) {
-//        var booking = bookingRepository.findById(bookingId)
-//                .orElseThrow(() -> new BookingNotFoundException(bookingId));
-//        bookingRepository.deleteAllByPeriodicBookingId(booking.getBookingGroupId());
-//    }
-//
-//
-//    /**
-//     * Создает новое бронирование на основе предоставленного запроса.
-//     *
-//     * @param request запрос с информацией для создания бронирования
-//     * @return созданное бронирование
-//     */
-//    @Transactional
-//    public Booking createPrerodicBooking(@NonNull RoomBookingRequestDTO request) {
-//        LocalDateTime end = request.getEndTime();
-//        LocalDateTime start = request.getEndTime();
-//
-//        var booking = getBookingFromDTO(request);
-//        booking.setBookingGroupId(UUID.randomUUID());
-//
-//        while (end.isBefore(request.getRRule().getUntilDate())) {
-//            if (validateBooking(start,end, request.getRoomId()))
-//                bookingRepository.save(booking);
-//            else
-//                throw new BookingException();
-//
-//            end = RECURRING_RULES.get(request.getRRule().getFrequency())
-//                    .performOperation(end, request.getRRule().getInterval());
-//            start = RECURRING_RULES.get(request.getRRule().getFrequency())
-//                    .performOperation(start, request.getRRule().getInterval());
-//
-//            booking.setStartTime(start);
-//            booking.setEndTime(end);
-//        }
-//        return booking;
-//    }
-
     // Обновление данных
 
     /**
@@ -177,7 +126,8 @@ public class BookingService {
     public Booking updateBooking(@NonNull Booking request)
             throws UsernameNotFoundException, RoomNotFoundException, BookingConflictException {
 
-        if (!validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId()))
+        if (request.getId() != null && bookingRepository.findById(request.getId()).isEmpty() &&
+                !validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId()))
             throw new BookingConflictException();
 
         return bookingRepository.save(request);
@@ -188,9 +138,8 @@ public class BookingService {
      * Удаляет отдельное бронирование на основе предоставленного идентификатора.
      *
      * @param bookingId идентификатор бронирования для удаления
-     * @throws BookingNotFoundException если бронирование не найдено по идентификатору
      */
-    public void deleteBooking(Long bookingId) {
+    public void deleteBooking(@NonNull Long bookingId) {
         bookingRepository.deleteById(bookingId);
     }
 
@@ -205,13 +154,14 @@ public class BookingService {
      */
     private Booking getBookingFromDTO(@NonNull RoomBookingRequestDTO dto)
             throws UsernameNotFoundException, RoomNotFoundException{
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new UserNotFoundException(dto.getUserId()));
+        User user = userRepository.findById(dto.getOwnerId())
+                .orElseThrow(() -> new UserNotFoundException(dto.getOwnerId()));
 
         Room room = roomRepository.findById(dto.getRoomId())
                 .orElseThrow(() -> new RoomNotFoundException(dto.getRoomId()));
 
         return Booking.builder()
+                .title(dto.getTitle())
                 .description(dto.getDescription())
                 .owner(user)
                 .room(room)

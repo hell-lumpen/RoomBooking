@@ -1,8 +1,10 @@
 package org.mai.roombooking.controllers;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.mai.roombooking.dtos.bookings.Pair;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
+import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.Booking;
@@ -34,15 +36,37 @@ import java.util.Objects;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final RoomService roomService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public BookingController(BookingService bookingService, RoomService roomService, SimpMessagingTemplate messagingTemplate) {
+    public BookingController(BookingService bookingService, SimpMessagingTemplate messagingTemplate) {
         this.bookingService = bookingService;
-        this.roomService = roomService;
         this.messagingTemplate = messagingTemplate;
     }
+
+
+    /**
+     * Метод получения детализированной информации по конкретному бронированию
+     * @param id идентификатор бронирования
+     * @return детализированная информация по бронированию
+     * @throws BookingNotFoundException попытка получения несуществующего бронирования
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<RoomBookingDetailsDTO> getBookingDetails(@PathVariable @NonNull Long id)
+            throws BookingNotFoundException {
+        return ResponseEntity.ok(bookingService.getBookingById(id));
+    }
+
+
+    /**
+     * Метод получения всех бронирований, хранящихся в базе данных
+     * @return список бронирований
+     */
+    @GetMapping("/all")
+    public ResponseEntity<List<RoomBookingDTO>> getAll() {
+        return ResponseEntity.ok(bookingService.getAll());
+    }
+
 
     /**
      * Получить все бронирования в заданном временном диапазоне, сгруппированные по комнате.
@@ -55,7 +79,7 @@ public class BookingController {
     public ResponseEntity<List<Pair>> getBookingsInTimeRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        log.info("Get booking in range");
+
         return ResponseEntity.ok(bookingService.getBookingsInTimeRange(startTime, endTime));
     }
 
@@ -86,10 +110,10 @@ public class BookingController {
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<RoomBookingDTO>> getBookingsByUserInTimeRange(
-            @PathVariable Long userId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
-            @AuthenticationPrincipal User user) {
+            @PathVariable @NonNull Long userId,
+            @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+            @AuthenticationPrincipal @NonNull User user) {
 
         if(!(Objects.equals(userId, user.getUserId())
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
@@ -100,33 +124,36 @@ public class BookingController {
     }
 
     /**
-     * Изменить бронирование.
-     *
-     * @param request   DTO с информацией для изменения бронирования
+     * Метод изменения или создания нового бронирования аудитории
+     * @param request DTO с информацией для изменения бронирования
      * @return ResponseEntity с обновленным бронированием
      */
-    @PutMapping("")
-    public ResponseEntity<Booking> updateBooking(
-            @RequestBody RoomBookingRequestDTO request,
-            @AuthenticationPrincipal User user) throws BookingConflictException {
+    @PutMapping()
+    public ResponseEntity<RoomBookingDetailsDTO> updateBooking(
+            @RequestBody @NonNull RoomBookingRequestDTO request,
+            @AuthenticationPrincipal @NonNull User user) throws BookingConflictException {
 
-        if(!user.getRole().equals(User.UserRole.ADMINISTRATOR) && request.getUserId() == null)
-            throw new UserNotFoundException((long) -1);
+        if(request.getOwnerId() == null ||
+            !(Objects.equals(request.getOwnerId(), user.getUserId())
+                    || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
 
-        return ResponseEntity.ok(bookingService.updateBooking(request));
+        return ResponseEntity.ok(new RoomBookingDetailsDTO(bookingService.updateBooking(request)));
     }
 
     /**
-     * Удалить бронирование.
-     * @param bookingId Идентификатор бронирования
-     * @return ResponseEntity с информацией об удалении
+     * @param bookingId Идентификатор бронирования не null
+     * @return 200 при успешном удалении, другой код в случе ошибки
+     * @throws BookingNotFoundException попытка удаления несуществующего бронирования
+     * @throws AccessDeniedException недостаточно прав для удаления текущего бронирования
      */
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<String> deleteBooking(
-            @PathVariable Long bookingId,
-            @AuthenticationPrincipal User user) throws BookingNotFoundException {
+            @PathVariable @NonNull Long bookingId,
+            @AuthenticationPrincipal @NonNull User user)
+            throws BookingNotFoundException, AccessDeniedException {
 
-        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getUserId(), user.getUserId())
+        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getId(), user.getUserId())
                 && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
@@ -138,18 +165,21 @@ public class BookingController {
     /**
      * Создать бронирование.
      *
-     * @param request DTO с информацией для создания бронирования
+     * @param request DTO с информацией о создании бронирования
      * @return ResponseEntity с созданным бронированием
-     * @throws RoomNotFoundException   если комната не найдена по идентификатору
-     * @throws UserNotFoundException   если пользователь не найден по идентификатору
+     * @throws RoomNotFoundException если комната не найдена по идентификатору
+     * @throws UserNotFoundException если пользователь не найден по идентификатору
      */
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody RoomBookingRequestDTO request,
-                                                 @AuthenticationPrincipal User user) throws BookingConflictException {
-        if (request.getUserId() == null)
-            request.setUserId(user.getUserId());
+    public ResponseEntity<Booking> createBooking(
+            @RequestBody @NonNull RoomBookingRequestDTO request,
+            @AuthenticationPrincipal @NonNull User user)
+            throws BookingConflictException, RoomNotFoundException, UserNotFoundException {
 
-        if(!(Objects.equals(request.getUserId(), user.getUserId())
+        if (request.getOwnerId() == null)
+            request.setOwnerId(user.getUserId());
+
+        if(!(Objects.equals(request.getOwnerId(), user.getUserId())
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
@@ -159,43 +189,26 @@ public class BookingController {
         return ResponseEntity.ok(createdBooking);
     }
 
-    /**
-     * Получить список доступных комнат для бронирования в заданном временном диапазоне с учетом дополнительных параметров.
-     *
-     * @param startTime     Дата-время начала бронирования
-     * @param endTime       Дата-время окончания бронирования
-     * @param capacity      Вместимость комнаты (опционально)
-     * @param hasProjector  Наличие проектора в комнате (опционально)
-     * @param hasComputers  Наличие компьютеров в комнате (опционально)
-     * @return ResponseEntity со списком доступных комнат
-     */
-    @GetMapping("/available-rooms")
-    public ResponseEntity<List<RoomDTO>> getAvailableRooms(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
-            @RequestParam(required = false) Integer capacity,
-            @RequestParam(required = false) Boolean hasProjector,
-            @RequestParam(required = false) Boolean hasComputers) {
-
-        List<RoomDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
-        return ResponseEntity.ok(availableRooms);
-    }
-
+//    //TODO: Перенести в Room service
 //    /**
-//     * Получить список всех аудиторий со статусами на текущий момент, отсортированных по релевантности запроса.
+//     * Получить список доступных комнат для бронирования в заданном временном диапазоне с учетом дополнительных параметров.
+//     *
+//     * @param startTime     Дата-время начала бронирования
+//     * @param endTime       Дата-время окончания бронирования
 //     * @param capacity      Вместимость комнаты (опционально)
 //     * @param hasProjector  Наличие проектора в комнате (опционально)
 //     * @param hasComputers  Наличие компьютеров в комнате (опционально)
-//     * @return ResponseEntity со списком аудиторий и их статусами
+//     * @return ResponseEntity со списком доступных комнат
 //     */
-//    @GetMapping("/status")
-//    public ResponseEntity<List<RoomStatusDTO>> getAllRoomsStatus(
+//    @GetMapping("/available-rooms")
+//    public ResponseEntity<List<RoomDTO>> getAvailableRooms(
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
 //            @RequestParam(required = false) Integer capacity,
 //            @RequestParam(required = false) Boolean hasProjector,
-//            @RequestParam(required = false) Boolean hasComputers
-//    ) {
-//        List<RoomStatusDTO> roomsStatus = roomService.getAllRoomsStatus(capacity, hasProjector, hasComputers);
-//        return ResponseEntity.ok(roomsStatus);
+//            @RequestParam(required = false) Boolean hasComputers) {
+//
+//        List<RoomDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
+//        return ResponseEntity.ok(availableRooms);
 //    }
-
 }

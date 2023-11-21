@@ -8,6 +8,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+/**
+ * /api/room (UPDATE CREATE)
+ * /api/room/{id} (GET DELETE)
+ * реализованно /api/room/all (GET)
+ * /api/room/available?startTime&endTime&capacity&hasProjector&hasComputers (GET)
+ * фильтрации
+ */
 @RestController
 @RequestMapping("/api/room")
 public class RoomController {

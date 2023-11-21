@@ -15,7 +15,6 @@ import java.util.UUID;
 @Builder
 @Table(name = "bookings")
 public class Booking {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -32,10 +31,10 @@ public class Booking {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     List<User> staff;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     List<Group> groups;
 
     @Column(name = "start_time", nullable = false)
@@ -46,15 +45,13 @@ public class Booking {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime endTime;
 
+    @Column(name="title", nullable = false)
+    private String title;
+
     @Column(name = "description")
     private String description;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
-
-    @Column(name = "created_at")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", shape = JsonFormat.Shape.STRING)
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime createdAt;
 }

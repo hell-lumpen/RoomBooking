@@ -2,9 +2,10 @@ package org.mai.roombooking.dtoTest;
 
 import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.exceptions.DTOValidationException;
@@ -12,17 +13,21 @@ import org.mai.roombooking.utils.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.lang.NonNull;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.stream.Stream;
 
 
 @SpringBootTest
+@RunWith(SpringRunner.class)
+//@RunWith(SpringJUnit4ClassRunner.class)
 public class ValidationUserDTOTest {
     @Autowired
     ValidationUtils validationUtils;
 
     @Test
-    public void ValidateUserDto() throws ValidationException{
+    public void ValidateUserDto() throws Exception {
         var user = UserDTO
                 .builder()
                 .id(1L)
