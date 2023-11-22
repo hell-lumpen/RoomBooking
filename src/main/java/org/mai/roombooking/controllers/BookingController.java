@@ -163,15 +163,15 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Booking> getBooking(
+    public ResponseEntity<RoomBookingDetailsDTO> getBooking(
             @PathVariable Long bookingId,
             @AuthenticationPrincipal User user) throws BookingNotFoundException, InterruptedException {
 
-        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getUserId(), user.getUserId())
+        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getId(), user.getUserId())
                 && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
-        Booking booking = bookingService.getBookingById(bookingId);
+        RoomBookingDetailsDTO booking = bookingService.getBookingById(bookingId);
         Thread.sleep(2000);
         return ResponseEntity.ok(booking);
     }
