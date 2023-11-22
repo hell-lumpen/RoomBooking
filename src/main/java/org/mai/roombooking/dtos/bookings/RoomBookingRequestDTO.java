@@ -6,12 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.mai.roombooking.dtos.UserDTO;
-import org.mai.roombooking.entities.Group;
 import org.mai.roombooking.entities.Tag;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RoomBookingRequestDTO {
     private Long id;
-    private UUID groupBookingId;
+    private UUID bookingGroupId;
 
     @NotNull
     private Long roomId;

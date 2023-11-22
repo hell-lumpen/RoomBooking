@@ -168,7 +168,7 @@ public class BookingService {
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .id(dto.getId())
-                .bookingGroupId(dto.getGroupBookingId())
+                .bookingGroupId(dto.getBookingGroupId())
                 .staff(dto.getStaffId()
                         .stream()
                         .map(id -> userRepository.findById(id)

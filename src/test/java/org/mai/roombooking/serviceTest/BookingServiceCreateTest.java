@@ -197,9 +197,9 @@ public class BookingServiceCreateTest {
     }
 
     public boolean compareRequestDtoAndBookingDetailsDto(@NonNull RoomBookingRequestDTO dto1,@NonNull RoomBookingDetailsDTO dto2) {
-        return (dto1.getGroupBookingId() == null && dto2.getBookingGroupId() == null) ||
-                    (dto1.getGroupBookingId() != null && dto2.getBookingGroupId() != null &&
-                            dto1.getGroupBookingId().equals(dto2.getBookingGroupId())) &&
+        return (dto1.getBookingGroupId() == null && dto2.getBookingGroupId() == null) ||
+                    (dto1.getBookingGroupId() != null && dto2.getBookingGroupId() != null &&
+                            dto1.getBookingGroupId().equals(dto2.getBookingGroupId())) &&
                 dto1.getTitle().equals(dto2.getTitle()) &&
                 dto1.getRoomId().equals(dto2.getRoom().getRoomId()) &&
                 dto1.getOwnerId().equals(dto2.getOwner().getId()) &&
