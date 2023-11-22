@@ -162,6 +162,20 @@ public class BookingController {
         return ResponseEntity.ok("Booking deleted successfully");
     }
 
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<Booking> getBooking(
+            @PathVariable Long bookingId,
+            @AuthenticationPrincipal User user) throws BookingNotFoundException, InterruptedException {
+
+        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getUserId(), user.getUserId())
+                && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
+
+        Booking booking = bookingService.getBookingById(bookingId);
+        Thread.sleep(2000);
+        return ResponseEntity.ok(booking);
+    }
+
     /**
      * Создать бронирование.
      *

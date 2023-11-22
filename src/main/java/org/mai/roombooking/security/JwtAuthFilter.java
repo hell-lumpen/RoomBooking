@@ -36,6 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
+//            throw new TokenNotFoundException("token not found in headers");
         }
 
         jwt = authHeader.substring(7);

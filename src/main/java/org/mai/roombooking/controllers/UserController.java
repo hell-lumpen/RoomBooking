@@ -20,6 +20,12 @@ public class UserController {
         this.userService = userService;
     }
 
+
+    @GetMapping("/test")
+    public String getTest() {
+        return "string";
+    }
+
     /**
      * Функция получения персонала кафедры
      * @return список активных преподавателей и администраторов
