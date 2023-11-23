@@ -25,7 +25,7 @@ public class CalendarService {
         builder.append("BEGIN:VCALENDAR\n");
         builder.append("VERSION:2.0\n");
         builder.append("PRODID:-//Smart Campus//Calendar//EN\n");
-        builder.append("CALSCALE:GREGORIAN");
+        builder.append("CALSCALE:GREGORIAN\n");
         builder.append("METHOD:PUBLISH\n");
         builder.append("X-WR-CALNAME:Календарь Smart Campus\n");
         builder.append("X-WR-TIMEZONE:Europe/Moscow\n");

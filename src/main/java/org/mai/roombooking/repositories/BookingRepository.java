@@ -32,7 +32,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "   AND b.owner.userId = :userId")
     List<Booking> findBookingsInDateRangeByUser(@Param("startDateTime") LocalDateTime startDateTime,
                                                 @Param("endDateTime") LocalDateTime endDateTime,
-                                                @Param("endDateTime") Long userId);
+                                                @Param("userId") Long userId);
 
     @Modifying
     @Query("DELETE FROM Booking b WHERE b.bookingGroupId = :periodicBookingId")
