@@ -61,7 +61,7 @@ public class BookingController {
     /**
      * Метод получения всех бронирований, хранящихся в базе данных
      * @return список бронирований
-     */
+     */ 
     @GetMapping("/all")
     public ResponseEntity<List<RoomBookingDTO>> getAll() {
         return ResponseEntity.ok(bookingService.getAll());
