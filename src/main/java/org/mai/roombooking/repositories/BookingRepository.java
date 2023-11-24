@@ -1,6 +1,8 @@
 package org.mai.roombooking.repositories;
 
 import org.mai.roombooking.entities.Booking;
+import org.mai.roombooking.entities.Group;
+import org.mai.roombooking.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -39,4 +41,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     void deleteAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
 
     List<Booking> findAllByBookingGroupId(@Param("periodicBookingId") UUID periodicBookingId);
+    List<Booking> findByGroupsContaining(Group group);
+    List<Booking> findByStaffContaining(User staff);
 }

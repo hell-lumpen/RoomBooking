@@ -59,3 +59,17 @@ VALUES
     ('15a08dac-b262-45d7-b0ef-90fcfcff37b5', 1, 1, 6, '2023-12-06 15:00:00.000', '2023-12-06 17:00:00.000', 'Какое-то совещание', 'Совещание 1 и еще много много текста про само мероприятие'),
     ('15d0e401-b7ae-46df-bdce-1bb72f214ebd', 2, 1, 6, '2023-12-06 15:00:00.000', '2023-12-06 17:00:00.000', 'Какое-то совещание', 'Совещание 2 и еще много много текста про само мероприятие')
 ON CONFLICT DO NOTHING;
+
+INSERT INTO bookings_groups(booking_id, groups_id)
+VALUES
+    (1,1), (1,2), (1,3),
+    (2,4), (2,2)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO bookings_staff(booking_id, staff_user_id)
+VALUES
+    (1,1),
+    (2,4), (2,2), (2,5),
+    (10,4), (10,2), (10,5), (10,1)
+ON CONFLICT DO NOTHING;
+
