@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -72,6 +73,22 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(userId, user.userId) && Objects.equals(username, user.username)
+                && Objects.equals(phoneNumber, user.phoneNumber) && Objects.equals(fullName, user.fullName)
+                && Objects.equals(password, user.password) && Objects.equals(isAccountLocked, user.isAccountLocked)
+                && role == user.role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, username, phoneNumber, fullName, password, isAccountLocked, role);
     }
 
     public enum UserRole

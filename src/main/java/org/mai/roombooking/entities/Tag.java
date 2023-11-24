@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.mai.roombooking.dtos.TagDTO;
 
+import java.util.Objects;
+
 @Entity(name = "tag")
 @Data
 @AllArgsConstructor
@@ -31,5 +33,19 @@ public class Tag {
         fullName = dto.getFullName();
         shortName = dto.getShortName();
         color = dto.getColor();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tag tag = (Tag) o;
+        return Objects.equals(id, tag.id) && Objects.equals(fullName, tag.fullName) &&
+                Objects.equals(shortName, tag.shortName) && Objects.equals(color, tag.color);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, fullName, shortName, color);
     }
 }

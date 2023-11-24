@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.mai.roombooking.dtos.GroupDTO;
 
+import java.util.Objects;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -11,6 +13,7 @@ import org.mai.roombooking.dtos.GroupDTO;
 @Builder
 @Table(name = "groups")
 public class Group {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -23,4 +26,18 @@ public class Group {
         id = dto.getId();
         name = dto.getName();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Group group = (Group) o;
+        return Objects.equals(id, group.id) && Objects.equals(name, group.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+
 }

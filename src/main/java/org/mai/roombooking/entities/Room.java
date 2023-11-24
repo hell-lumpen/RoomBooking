@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,4 +35,19 @@ public class Room {
 
     @Column(name = "is_cathedral", nullable = false, columnDefinition = "boolean default false")
     private Boolean isCathedral;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Room room = (Room) o;
+        return Objects.equals(roomId, room.roomId) && Objects.equals(roomName, room.roomName) &&
+                Objects.equals(capacity, room.capacity) && Objects.equals(hasComputers, room.hasComputers)
+                && Objects.equals(hasProjector, room.hasProjector) && Objects.equals(isCathedral, room.isCathedral);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(roomId, roomName, capacity, hasComputers, hasProjector, isCathedral);
+    }
 }

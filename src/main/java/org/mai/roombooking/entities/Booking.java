@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -54,4 +55,22 @@ public class Booking {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tag;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Booking booking = (Booking) o;
+        return Objects.equals(id, booking.id) && Objects.equals(bookingGroupId, booking.bookingGroupId) &&
+                Objects.equals(room, booking.room) && Objects.equals(owner, booking.owner) &&
+                Objects.equals(staff, booking.staff) && Objects.equals(groups, booking.groups) &&
+                Objects.equals(startTime, booking.startTime) && Objects.equals(endTime, booking.endTime)
+                && Objects.equals(title, booking.title) && Objects.equals(description, booking.description)
+                && Objects.equals(tag, booking.tag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, bookingGroupId, room, owner, staff, groups, startTime, endTime, title, description, tag);
+    }
 }
