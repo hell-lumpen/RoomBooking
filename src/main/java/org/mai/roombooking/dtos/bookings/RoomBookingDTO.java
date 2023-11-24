@@ -24,6 +24,7 @@ public class RoomBookingDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String title;
+    private String description;
     private Tag tag;
 
     public RoomBookingDTO(@NonNull Booking booking) {
@@ -35,5 +36,6 @@ public class RoomBookingDTO {
         endTime = booking.getEndTime();
         owner = booking.getOwner().getFullName();
         tag = booking.getTag();
+        description = booking.getDescription();
     }
 }

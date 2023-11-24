@@ -35,6 +35,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     // Base Spring
+    implementation group: 'org.springframework', name: 'spring-web', version: '6.1.1'
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

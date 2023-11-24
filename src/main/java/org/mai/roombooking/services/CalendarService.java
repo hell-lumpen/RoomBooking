@@ -1,10 +1,15 @@
 package org.mai.roombooking.services;
 
 import lombok.NonNull;
+import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Group;
 import org.mai.roombooking.entities.User;
+import org.mai.roombooking.exceptions.GroupNotFoundException;
+import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.repositories.BookingRepository;
+import org.mai.roombooking.repositories.GroupRepository;
+import org.mai.roombooking.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +19,38 @@ import java.util.List;
 @Service
 public class CalendarService {
     private final BookingRepository bookingRepository;
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public CalendarService(BookingRepository bookingRepository) {
+    public CalendarService(BookingRepository bookingRepository, GroupRepository groupRepository, UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
+        this.groupRepository = groupRepository;
+
+        this.userRepository = userRepository;
     }
 
     public String getAllBookings() {
+        return convertToICalendar(bookingRepository.findAll());
+    }
+
+    public String getByGroup(Long groupId) {
+        var group = groupRepository.findById(groupId).orElseThrow(()-> new GroupNotFoundException(groupId));
+        return convertToICalendar(bookingRepository.findByGroupsContaining(group));
+    }
+
+    public String getByStaff(Long staffId) {
+        var staff = userRepository.findById(staffId).orElseThrow(()-> new UserNotFoundException(staffId));
+        return convertToICalendar(bookingRepository.findByStaffContaining(staff));
+    }
+
+    public String getByGroup(String groupName) {
+        var group = groupRepository.findByName(groupName).orElseThrow();
+        return convertToICalendar(bookingRepository.findByGroupsContaining(group));
+    }
+    private static @NonNull String convertToICalendar(@NonNull List<Booking> bookings) {
         StringBuilder builder = new StringBuilder();
+
         builder.append("BEGIN:VCALENDAR\n");
         builder.append("VERSION:2.0\n");
         builder.append("PRODID:-//Smart Campus//Calendar//EN\n");
@@ -30,7 +59,7 @@ public class CalendarService {
         builder.append("X-WR-CALNAME:Календарь Smart Campus\n");
         builder.append("X-WR-TIMEZONE:Europe/Moscow\n");
 
-        for(var booking : bookingRepository.findAll())
+        for(var booking : bookings)
             builder.append(convertToICalendar(booking));
 
         builder.append("END:VCALENDAR");
@@ -38,7 +67,7 @@ public class CalendarService {
         return builder.toString();
     }
 
-    public static @NonNull String convertToICalendar(@NonNull Booking booking) {
+    private static @NonNull String convertToICalendar(@NonNull Booking booking) {
         StringBuilder icsBuilder = new StringBuilder();
 
         icsBuilder.append("BEGIN:VEVENT\n");

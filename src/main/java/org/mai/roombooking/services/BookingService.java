@@ -39,11 +39,52 @@ public class BookingService {
     }
 
     // GETERS
+
+    /**
+     * Получение списка бронирований по идентификатору учебной группы
+     * @param groupId идентификатор учебной группы
+     * @return список бронирований, в которых участвует выбранная группа
+     */
+    public List<RoomBookingDTO> getBookingsByGroupId(Long groupId) {
+        var group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+        return bookingRepository.findByGroupsContaining(group).stream().map(RoomBookingDTO::new).toList();
+    }
+
+    /**
+     * Получение списка бронирований по названию учебной группы
+     * @param groupName название учебной группы
+     * @return список бронирований, в которых участвует выбранная группа
+     */
+    public List<RoomBookingDTO> getBookingsByGroupName(String groupName) {
+        var group = groupRepository.findByName(groupName).orElseThrow();
+        return bookingRepository.findByGroupsContaining(group).stream().map(RoomBookingDTO::new).toList();
+    }
+
+    /**
+     * Получение списка бронирований по идентификатору участника (сотрудника)
+     * @param staffId идентификатор сотрудника
+     * @return список бронирований, в которых участвует выбранный сотрудник
+     */
+    public List<RoomBookingDTO> getBookingsByStaff(Long staffId) {
+        var staff = userRepository.findById(staffId).orElseThrow(() -> new UserNotFoundException(staffId));
+        return bookingRepository.findByStaffContaining(staff).stream().map(RoomBookingDTO::new).toList();
+    }
+
+    /**
+     * Получение детализированной информации по запрашиваемому мероприятию
+     * @param bookingId идентификатор бронирования
+     * @return детализированная информация по бронированию
+     * @throws BookingNotFoundException бронирование, с заданным идентификатором, не найдено
+     */
     public RoomBookingDetailsDTO getBookingById(Long bookingId) throws BookingNotFoundException {
         return new RoomBookingDetailsDTO(bookingRepository.findById(bookingId)
                 .orElseThrow(()->new BookingNotFoundException(bookingId)));
     }
 
+    /**
+     * Получение списка всех бронирований
+     * @return список всех бронирований
+     */
     public List<RoomBookingDTO> getAll() {
         return bookingRepository.findAll().stream().map(RoomBookingDTO::new).toList();
     }
@@ -142,8 +183,6 @@ public class BookingService {
     public void deleteBooking(@NonNull Long bookingId) {
         bookingRepository.deleteById(bookingId);
     }
-
-
 
 
     /**
