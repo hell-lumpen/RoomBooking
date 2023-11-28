@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Сервисный класс для управления комнатами.
@@ -61,9 +62,9 @@ public class RoomService {
         return roomRepository.findAll().stream().map(RoomDTO::new).toList();
     }
 
-    public RoomDTO update(RoomDTO dto) {
-        roomRepository.save(getRoomFromDTO(dto));
-        return null;
+    public Room update(RoomDTO dto) {
+        return roomRepository.save(getRoomFromDTO(dto));
+
     }
 
     public List<RoomDTO> getCathedralRooms() {
@@ -74,8 +75,8 @@ public class RoomService {
         roomRepository.deleteById(roomId);
     }
 
-    public Room getRoomByName(@NonNull String name) {
-        return roomRepository.findRoomByRoomName(name).orElseThrow(()-> new RoomNotFoundException(0L));
+    public Optional<Room> getRoomByName(@NonNull String name) {
+        return roomRepository.findRoomByRoomName(name);
     }
 
     private Room getRoomFromDTO(@NonNull RoomDTO dto) {
@@ -85,6 +86,7 @@ public class RoomService {
                 .capacity(dto.getCapacity())
                 .hasComputers(dto.getHasComputers())
                 .hasProjector(dto.getHasProjector())
+                .isCathedral(dto.getIsCathedral())
                 .build();
     }
 }

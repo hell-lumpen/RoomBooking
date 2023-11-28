@@ -19,7 +19,7 @@ public class Group {
     @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     String name;
 
     public Group(@NonNull GroupDTO dto) {

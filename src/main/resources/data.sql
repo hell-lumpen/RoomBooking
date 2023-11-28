@@ -11,16 +11,25 @@ VALUES (10, true, true, 'Пространство самоподготовки I
     (16, false, false, 'IT-17')
 ON CONFLICT DO NOTHING;
 
-
-INSERT INTO users (is_account_locked, fullname, password, phone_number, role, username)
-VALUES
-    (false, 'Ненахов Евгений Валентинович', '$2a$10$29c7FqNe945nvsQzTpKuxO.ZaSmCVbGU9vFgQhDpPDjO3Ip5ggVUe', 'username', 'ADMINISTRATOR', 'username'),
-    (false, 'Крылов Сергей Сергеевич', '$2a$10$Vub3M8Uqy/6hnQkyzIKz9uzO3AUp6dJVrBPuL2blfJaBYx3hHc.ES', 'username1', 'ADMINISTRATOR', 'username1'),
-    (false, 'Булакина Мария Борисовна', '$2a$10$zxX4AZPN3I32t9isvpsYJOs1sGXEIdi3qzjCT0I3SXNUPUb8TjjX.', 'username2', 'ADMINISTRATOR', 'username2'),
-    (false, 'Ирбитский Илья Сергеевич', '$2a$10$seChzroHn6eCNk/H7n.3Qu5amP5WsYVz05I6fZs97Kph9rqTS6vcm', 'username3', 'ADMINISTRATOR', 'username3'),
-    (false, 'Погосян Михаил Асланович', '$2a$10$DFWuQWujrRXD9fj/PyK3qO3Kmzp97ByXb./qQMCG2JAwmRLtQNK2C', 'username4', 'ADMINISTRATOR', 'username4'),
-    (false, 'Грубенко Максим Дмитриевич', '$2a$10$BDMzrKT30nY0HFasmDcDZ.YSdlpaTjMXdMMZxYonXuuWdQ4VSdvV2', '1', 'ADMINISTRATOR', 'user')
+INSERT INTO user_info (is_account_locked, password, phone_number, role, username) VALUES
+    (false, '$2a$10$29c7FqNe945nvsQzTpKuxO.ZaSmCVbGU9vFgQhDpPDjO3Ip5ggVUe', 'username', 'ADMINISTRATOR', 'username'),
+    (false, '$2a$10$Vub3M8Uqy/6hnQkyzIKz9uzO3AUp6dJVrBPuL2blfJaBYx3hHc.ES', 'username1', 'ADMINISTRATOR', 'username1'),
+    (false, '$2a$10$zxX4AZPN3I32t9isvpsYJOs1sGXEIdi3qzjCT0I3SXNUPUb8TjjX.', 'username2', 'ADMINISTRATOR', 'username2'),
+    (false, '$2a$10$seChzroHn6eCNk/H7n.3Qu5amP5WsYVz05I6fZs97Kph9rqTS6vcm', 'username3', 'ADMINISTRATOR', 'username3'),
+    (false, '$2a$10$DFWuQWujrRXD9fj/PyK3qO3Kmzp97ByXb./qQMCG2JAwmRLtQNK2C', 'username4', 'ADMINISTRATOR', 'username4'),
+    (false, '$2a$10$BDMzrKT30nY0HFasmDcDZ.YSdlpaTjMXdMMZxYonXuuWdQ4VSdvV2', '1', 'ADMINISTRATOR', 'user')
 ON CONFLICT DO NOTHING;
+
+
+INSERT INTO users(fullname, info) VALUES
+    ('Ненахов Евгений Валентинович', 1),
+    ('Крылов Сергей Сергеевич',      2),
+    ('Булакина Мария Борисовна',     3),
+    ('Ирбитский Илья Сергеевич',     4),
+    ('Погосян Михаил Асланович',     5),
+    ('Грубенко Максим Дмитриевич',   6)
+ON CONFLICT DO NOTHING;
+
 
 
 INSERT Into tag(full_name, short_name, color)
@@ -37,10 +46,10 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO groups(name)
 VALUES
-    ('M8O-410Б-20'),
-    ('M8O-409Б-20'),
-    ('M8O-406Б-20'),
-    ('M8O-411Б-20')
+    ('Группа 1'),
+    ('Группа 2'),
+    ('Группа 3'),
+    ('Группа 4')
 ON CONFLICT DO NOTHING;
 
 

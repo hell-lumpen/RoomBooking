@@ -13,7 +13,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter
 @Builder
-@Table(name = "Rooms")
+@Table(name = "Rooms", indexes = {
+        @Index(name = "cathedral_index", columnList = "is_cathedral")})
 public class Room {
 
     @Id
@@ -24,7 +25,7 @@ public class Room {
     @Column(name = "room_name", nullable = false, unique = true)
     private String roomName;
 
-    @Column(name = "capacity", nullable = false)
+    @Column(name = "capacity")
     private Integer capacity;
 
     @Column(name = "has_computers", nullable = false, columnDefinition = "boolean default false")

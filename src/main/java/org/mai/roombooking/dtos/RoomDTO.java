@@ -8,7 +8,7 @@ import org.mai.roombooking.entities.Room;
 
 @Data
 public class RoomDTO {
-    @NotNull
+
     Long id;
 
     @NotNull
@@ -24,11 +24,21 @@ public class RoomDTO {
     @NotNull
     private Boolean hasProjector;
 
+    @NotNull Boolean isCathedral;
+
     public RoomDTO(@NonNull Room room) {
         this.id = room.getRoomId();
         this.name = room.getRoomName();
         this.capacity = room.getCapacity();
         this.hasComputers = room.getHasComputers();
         this.hasProjector = room.getHasProjector();
+        this.isCathedral = room.getIsCathedral();
+    }
+    public RoomDTO(String name) {
+        this.name = name;
+        this.capacity = 0;
+        this.hasComputers = false;
+        this.hasProjector = false;
+        this.isCathedral = false;
     }
 }

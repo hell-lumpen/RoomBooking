@@ -23,6 +23,10 @@ repositories {
 
 dependencies {
 
+    // Parser
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.16.2'
+
+
     // Validations
     implementation group: 'org.hibernate.validator', name: 'hibernate-validator', version: '8.0.1.Final'
     implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.0.2'
@@ -35,8 +39,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     // Base Spring
-//    implementation group: 'org.springframework', name: 'spring-web', version: '6.1.1'
-
     implementation 'org.springframework.boot:spring-boot-starter-web'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

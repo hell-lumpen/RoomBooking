@@ -55,21 +55,22 @@ public class ScheduleService {
 
 
     private Booking getBookingFromLessonDTO(@NonNull LessonDTO dto) {
-        return Booking.builder()
-                .bookingGroupId(UUID.fromString(dto.getGroupBookingId()))
-                .tag(tagRepository.findByShortName(dto.getTag())
-                        .orElseThrow(() -> new TagNotFoundException(dto.getTag())))
-                .groups(dto.getGroups().stream()
-                        .map((group) -> groupRepository.findByName(group)
-                                .orElseThrow(() -> new GroupNotFoundException(0L)))
-                        .toList())
-                .staff(new ArrayList<>())
-                .owner(userService.getUserByFullName(dto.getEmployee()))
-                .description(dto.getDescription())
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
-                .room(roomService.getRoomByName(dto.getRoom()))
-                .build();
+        return null;
+//        return Booking.builder()
+//                .bookingGroupId(UUID.fromString(dto.getGroupBookingId()))
+//                .tag(tagRepository.findByShortName(dto.getTag())
+//                        .orElseThrow(() -> new TagNotFoundException(dto.getTag())))
+//                .groups(dto.getGroups().stream()
+//                        .map((group) -> groupRepository.findByName(group)
+//                                .orElseThrow(() -> new GroupNotFoundException(0L)))
+//                        .toList())
+//                .staff(new ArrayList<>())
+//                .owner(userService.getUserByFullName(dto.getEmployee()))
+//                .description(dto.getDescription())
+//                .startTime(dto.getStartTime())
+//                .endTime(dto.getEndTime())
+//                .room(roomService.getRoomByName(dto.getRoom()))
+//                .build();
     }
 
 }

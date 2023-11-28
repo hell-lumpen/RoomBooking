@@ -14,45 +14,37 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
-@Table(name = "Users")
+@Table(name = "users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
-
-    @Column(name = "phone_number", unique = true, nullable = false)
-    @Setter
-    private String phoneNumber;
-
     @Column(name = "fullname", nullable = false)
     @Setter
     private String fullName;
 
-    @Column(name = "password", nullable = false)
-    private String password;
 
-    @Column(name = "is_account_locked", nullable = false, columnDefinition = "boolean default false")
-    @Setter
-    private Boolean isAccountLocked;
-
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    @Setter
-    private UserRole role;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "info")
+    private UserInfo info;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.name()));
+        return List.of(new SimpleGrantedAuthority(this.info.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return this.password;
+        return this.info.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.info.getUsername();
     }
 
     @Override
@@ -62,7 +54,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !this.isAccountLocked;
+        return !this.info.getIsAccountLocked();
     }
 
     @Override
@@ -75,29 +67,26 @@ public class User implements UserDetails {
         return true;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(userId, user.userId) && Objects.equals(username, user.username)
-                && Objects.equals(phoneNumber, user.phoneNumber) && Objects.equals(fullName, user.fullName)
-                && Objects.equals(password, user.password) && Objects.equals(isAccountLocked, user.isAccountLocked)
-                && role == user.role;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, username, phoneNumber, fullName, password, isAccountLocked, role);
-    }
-
-    public enum UserRole
-    {
+    public enum UserRole {
         TECHNICIAN,
         ENGINEER,
         ADMINISTRATOR,
         DIRECTOR,
         TEACHER
     }
+
+    public String getPhoneNumber() {
+        return (info != null) ? info.getPhoneNumber() : null;
+    }
+
+    public Boolean getIsAccountLocked(){
+        return (info != null) ? info.getIsAccountLocked() : true;
+    }
+
+    public UserRole getRole() { return (info != null) ? info.getRole() : null; }
+
+    public void setPhoneNumber(String phoneNumber) { info.setPhoneNumber(phoneNumber); }
+    public void setIsAccountLocked(boolean isAccountLocked) { info.setIsAccountLocked(isAccountLocked); }
+    public void setRole(UserRole role) { info.setRole(role); }
 }
 

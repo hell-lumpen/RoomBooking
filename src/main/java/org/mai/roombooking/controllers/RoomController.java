@@ -39,7 +39,7 @@ public class RoomController {
 
     @PostMapping("/update")
     public RoomDTO updateRoom(@NonNull @RequestBody RoomDTO dto) {
-        return roomService.update(dto);
+        return new RoomDTO(roomService.update(dto));
     }
 
     @DeleteMapping("/delete/{id}")

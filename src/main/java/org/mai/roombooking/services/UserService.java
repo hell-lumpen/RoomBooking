@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -57,7 +58,11 @@ public class UserService {
                 .orElseThrow(()-> new UserNotFoundException(id)));
     }
 
-    public User getUserByFullName(String fullName) {
-        return userRepository.findUserByFullName(fullName).orElseThrow(() -> new UserNotFoundException(0L));
+    public Optional<User> getUserByFullName(String fullName) {
+        return userRepository.findUserByFullName(fullName);
+    }
+
+    public User createEmployee(String fullname) {
+        return userRepository.save(User.builder().fullName(fullname).build());
     }
 }

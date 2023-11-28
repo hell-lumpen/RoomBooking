@@ -74,7 +74,7 @@ public class CalendarService {
 
         icsBuilder.append("UID:").append(booking.getId()).append("\n");
         icsBuilder.append("SUMMARY:").append(booking.getTitle()).append("\n");
-        icsBuilder.append("DESCRIPTION:").append(booking.getDescription());
+        icsBuilder.append("DESCRIPTION:").append(booking.getDescription()).append(". ");
 
         if ((booking.getStaff() != null && !booking.getStaff().isEmpty()) ||
                 (booking.getGroups() != null && !booking.getGroups().isEmpty())) {
