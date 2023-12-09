@@ -4,6 +4,7 @@ import lombok.NonNull;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,8 +82,8 @@ public class UserController {
      * @param userId идентификатор пользователя
      */
     @GetMapping("/{userId}")
-    public void getUserById(@NonNull @PathVariable Long userId) {
-        userService.findById(userId);
+    public ResponseEntity<UserDTO> getUserById(@NonNull @PathVariable Long userId) {
+        return ResponseEntity.ok(userService.findById(userId));
     }
 
 }

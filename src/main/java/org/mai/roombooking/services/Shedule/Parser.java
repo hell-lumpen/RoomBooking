@@ -20,26 +20,42 @@ import java.util.concurrent.*;
 
 public class Parser {
         private final ConcurrentLinkedQueue<ParserService.ParsingError> errors;
-        private final Random random;
         Parser(ConcurrentLinkedQueue<ParserService.ParsingError> errors) {
             this.errors = errors;
-            random = new Random();
         }
 
 
-        public List<ParserService.ScheduleLesson> run(@NonNull Group group, int week) {
+        public List<ParserService.ScheduleLesson> parse(@NonNull Group group, int week) {
             String url = "https://mai.ru/education/studies/schedule/index.php?group=" + group.getName() + "&week=" + week;
             Map<ParserService.GroupingByGroupKey, ParserService.ScheduleLesson> result = new HashMap<>();
-            try {
-                int randomNumber = random.nextInt(900000) + 9000000;
+            Document document = null;
 
-                Connection connection = Jsoup.connect(url).timeout(120 * 1000); // таймаут 2 мин
-//                connection.cookie("schedule-st-group", group.getName());
-//                connection.cookie("BITRIX_SM_GUEST_ID", Integer.toString(randomNumber));
-//                connection.cookie("BITRIX_SM_GUEST_ID", "%D0%9C8%D0%9E-101%D0%91-23");
-//                connection.cookie("schedule-st-group", "9453633");
-//                connection.cookie("schedule-group-cache", "2.0");
-                Document document = connection.get();
+            int count = 0;
+            int maxTries = 3;
+            boolean continueHttpCall = true;
+            while (continueHttpCall) {
+                try {
+                    Thread.sleep(1000);
+                    Connection connection = Jsoup.connect(url)
+                            .timeout(120 * 1000)
+                            .cookie("BITRIX_SM_GUEST_ID", "12179208")
+                            .cookie("schedule-st-group", "%D0%9C4%D0%9E-604%D0%A1%D0%BA-18")
+                            .cookie("BITRIX_SM_LAST_VISIT", "28.11.2023%2019%3A58%3A34")
+                            .cookie("schedule-group-cache", "2.0");
+
+                    document = connection.get();
+                    continueHttpCall = false;
+                } catch (IOException e) {
+                    if (++count == maxTries) {
+                        continueHttpCall = false;
+                        System.err.println("Error in: Group " + group.getName() + ", week " + week);
+                        System.err.println(e.getMessage());
+                        errors.add(new ParserService.ParsingError(group, week));
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
                 Elements elements = document.getElementsByClass("step-content");
 
@@ -57,6 +73,7 @@ public class Parser {
                     for (Element lesson : element.select("div.mb-4")) {
                         var tmp = element.select("p").get(0).text();
                         String name = tmp.substring(0,tmp.length() - 3).trim();
+                        //TODO: сплитуй все что движется !!!!
                         String tag = tmp.substring(tmp.length() - 3).trim();
 
                         String room;
@@ -95,13 +112,6 @@ public class Parser {
                     }
                 }
                 return new ArrayList<>(result.values());
-            }
-            catch (IOException e) {
-                System.err.println("Error in: Group " + group.getName() + ", week " +  week);
-                System.err.println(e.getMessage());
-                errors.add(new ParserService.ParsingError(group, week));
-            }
-            return new LinkedList<>();
         }
 
     static Map<String, Month> month = new HashMap<>() {{

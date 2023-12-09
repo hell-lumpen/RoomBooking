@@ -3,11 +3,12 @@ package org.mai.roombooking.serviceTest;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mai.roombooking.dtos.GroupDTO;
+import org.mai.roombooking.dtos.TagDTO;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
-import org.mai.roombooking.entities.Group;
 import org.mai.roombooking.exceptions.BookingConflictException;
 import org.mai.roombooking.exceptions.BookingNotFoundException;
 import org.mai.roombooking.repositories.TagRepository;
@@ -201,7 +202,7 @@ public class BookingServiceCreateTest {
                     (dto1.getBookingGroupId() != null && dto2.getBookingGroupId() != null &&
                             dto1.getBookingGroupId().equals(dto2.getBookingGroupId())) &&
                 dto1.getTitle().equals(dto2.getTitle()) &&
-                dto1.getRoomId().equals(dto2.getRoom().getRoomId()) &&
+                dto1.getRoomId().equals(dto2.getRoom().getId()) &&
                 dto1.getOwnerId().equals(dto2.getOwner().getId()) &&
                 dto1.getStartTime().equals(dto2.getStartTime()) &&
                 dto1.getEndTime().equals(dto2.getEndTime()) &&
@@ -211,8 +212,8 @@ public class BookingServiceCreateTest {
                         dto2.getStaff().stream().map(UserDTO::getId).toList().equals(dto1.getStaffId())) &&
                 (dto1.getGroupsId() == null && dto2.getGroups() == null) ||
                     (dto1.getGroupsId() != null && dto2.getGroups() != null &&
-                        dto2.getGroups().stream().map(Group::getId).toList().equals(dto1.getGroupsId())) &&
-                dto1.getTag().equals(dto2.getTag());
+                        dto2.getGroups().stream().map(GroupDTO::getId).toList().equals(dto1.getGroupsId())) &&
+                new TagDTO(dto1.getTag()).equals(dto2.getTag());
     }
 
 }

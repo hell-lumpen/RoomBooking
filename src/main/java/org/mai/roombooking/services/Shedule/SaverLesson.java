@@ -23,7 +23,8 @@ public class SaverLesson {
     private final RoomService roomService;
 
     @Autowired
-    public SaverLesson(TagRepository tagRepository, UserService userService, BookingService bookingService, RoomService roomService) {
+    public SaverLesson(TagRepository tagRepository, UserService userService, BookingService bookingService,
+                       RoomService roomService) {
         this.tagRepository = tagRepository;
         this.userService = userService;
         this.bookingService = bookingService;
@@ -58,6 +59,7 @@ public class SaverLesson {
         Booking booking = Booking.builder()
                 .description("")
                 .title(lesson.getName())
+                .bookingGroupId(lesson.getGroupId())
                 .startTime(lesson.getStart())
                 .endTime(lesson.getEnd())
                 .tag(tag.get())

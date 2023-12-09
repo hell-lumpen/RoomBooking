@@ -1,6 +1,9 @@
 package org.mai.roombooking.dtos.bookings;
 
 import lombok.*;
+import org.mai.roombooking.dtos.GroupDTO;
+import org.mai.roombooking.dtos.RoomDTO;
+import org.mai.roombooking.dtos.TagDTO;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.*;
 
@@ -15,27 +18,27 @@ import java.util.UUID;
 public class RoomBookingDetailsDTO {
     private Long id;
     private UUID bookingGroupId ;
-    private Room room;
+    private RoomDTO room;
     private UserDTO owner;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String title;
     private String description;
     private List<UserDTO> staff;
-    private List<Group> groups;
-    private Tag tag;
+    private List<GroupDTO> groups;
+    private TagDTO tag;
 
     public RoomBookingDetailsDTO(@NonNull Booking booking) {
         id = booking.getId();
         bookingGroupId = booking.getBookingGroupId();
         title = booking.getTitle();
-        room = booking.getRoom();
+        room = new RoomDTO(booking.getRoom());
         owner = new UserDTO(booking.getOwner());
         startTime = booking.getStartTime();
         endTime = booking.getEndTime();
         description = booking.getDescription();
         staff = booking.getStaff().stream().map(UserDTO::new).toList();
-        groups = booking.getGroups();
-        tag = booking.getTag();
+        groups = booking.getGroups().stream().map(GroupDTO::new).toList();
+        tag = new TagDTO(booking.getTag());
     }
 }

@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 import org.jsoup.Connection;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -24,33 +23,77 @@ public class ParserService {
     private final SaverLesson saver;
     private final GroupRepository groupRepository;
 
+    public void startParsing() {
+        ExecutorService parseGroupExecutor = Executors.newFixedThreadPool(1);
+        ExecutorService saveGroupExecutor = Executors.newFixedThreadPool(1);
+        ExecutorService parseExecutor = Executors.newFixedThreadPool(10);
+        ExecutorService groupingExecutor = Executors.newFixedThreadPool(2);
+        ExecutorService saveExecutor = Executors.newFixedThreadPool(2);
+
+        List<CompletableFuture<Void>> allFutures = new ArrayList<>();
+
+        for (int department = 1; department <= 14; department++) {
+            for (int course = 1; course <= 6; course++) {
+                int finalDepartment = department;
+                int finalCourse = course;
+                CompletableFuture<List<String>> parsedGroups = CompletableFuture.supplyAsync(() ->
+                        this.parseGroups(finalDepartment, finalCourse), parseGroupExecutor);
+
+                CompletableFuture<List<Group>> savedGroups =
+                        parsedGroups.thenApplyAsync(this::saveGroups, saveGroupExecutor);
+
+                CompletableFuture<List<ParserService.ScheduleLesson>> parsedLessons =
+                        savedGroups.thenApplyAsync(this::parseWebSite, parseExecutor);
+
+                CompletableFuture<List<ParserService.ScheduleLesson>> groupedLessons =
+                        parsedLessons.thenApplyAsync(this::groupLessons, groupingExecutor);
+
+                CompletableFuture<Void> saveScheduleFuture =
+                        groupedLessons.thenAcceptAsync(this::saveSchedule, saveExecutor);
+
+                allFutures.add(saveScheduleFuture);
+            }
+        }
+
+
+        CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(allFutures.toArray(new CompletableFuture[0]));
+        try {
+            // Ожидание завершения всех CompletableFuture.
+            allOfFuture.join();
+
+            parseGroupExecutor.shutdown();
+            saveGroupExecutor.shutdown();
+            groupingExecutor.shutdown();
+            parseExecutor.shutdown();
+            saveExecutor.shutdown();
+
+            if (parseExecutor.awaitTermination(36, TimeUnit.HOURS) &&
+                    saveExecutor.awaitTermination(36, TimeUnit.HOURS) &&
+                    parseGroupExecutor.awaitTermination(36, TimeUnit.HOURS) &&
+                    saveGroupExecutor.awaitTermination(36, TimeUnit.HOURS) &&
+                    groupingExecutor.awaitTermination(36, TimeUnit.HOURS)) {
+                System.out.println("Все запросы обработаны успешно.");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public ParserService(GroupRepository groupRepository, SaverLesson saver) {
         this.saver = saver;
         this.groupRepository = groupRepository;
-
-//        this.processors = Runtime.getRuntime().availableProcessors();
     }
 
-    public List<String> parseGroups(int department, int course) {
+    private @NonNull List<String> parseGroups(int department, int course) {
         String url = "https://mai.ru/education/studies/schedule/groups.php?department=Институт+№" +
                 department + "&course=" + course;
         try {
+            Thread.sleep(1000);
             Connection connection = Jsoup.connect(url)
-                    .ignoreContentType(true)
-                    .userAgent("YandexNews")
-
-//                    .referrer("http://www.google.com")
-//                    .timeout(12000)
-                    .followRedirects(true)
-                    .cookie("BITRIX_SM_GUEST_ID", "%D0%9C8%D0%9E-101%D0%91-23")
-                    .cookie("__ym_tab_guid", "114a3ed1-60be-4f9b-6b8f-8b2ae9bd4a1f");
-//                    .cookie("BITRIX_SM_LAST_ADV", "5")
-//                    .cookie("PHPSESSID", "PsUgwFOO7dRCtndPbqr5U4foZybeu7IH")
-//                    .cookie("schedule-group-cache", "2.0");
+                    .cookie("BITRIX_SM_GUEST_ID", "%D0%9C8%D0%9E-101%D0%91-23");
 
             Document document = connection.get();
-
             Elements elements = document.getElementsByClass("btn btn-soft-secondary btn-xs mb-1 fw-medium btn-group");
 
             List<String> result = new LinkedList<>();
@@ -60,64 +103,50 @@ public class ParserService {
 
             return result;
 
-        } catch (HttpStatusException e) {
-            System.err.println("Error parsing groups in course " + course + " and department " + department);
-            System.err.println(e.getMessage());
-            return new LinkedList<>();
         } catch (IOException ex) {
             System.err.println("Error parsing groups in course " + course + " and department " + department);
             System.err.println(ex.getMessage());
             return new LinkedList<>();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public List<Group> saveGroups(@NonNull List<String> groupNames) {
+    private @NonNull List<Group> saveGroups(@NonNull List<String> groupNames) {
         List<Group> result = new LinkedList<>();
         for (var name : groupNames)
             result.add(groupRepository.save(Group.builder().name(name).build()));
 
-        System.out.printf("end saving groups by %s department and %s course%n", result.get(0).getName().charAt(1), result.get(0).getName().charAt(4));
         return result;
     }
 
 
-   public @NonNull List<ScheduleLesson> parseWebSite(@NonNull List<Group> groups) {
-        System.out.printf("start parsing Lessons by %s department and %s course%n", groups.get(0).getName().charAt(1), groups.get(0).getName().charAt(4));
-
+   private @NonNull List<ScheduleLesson> parseWebSite(@NonNull List<Group> groups) {
         List<ScheduleLesson> result = new LinkedList<>();
         ConcurrentLinkedQueue<ParsingError> errors = new ConcurrentLinkedQueue<>();
 
         var parser = new Parser(errors);
-        for (Group group : groups)
-            for (int week = 0; week < 20; week++) {
-                result.addAll(parser.run(group, week));
-            }
+        for (Group group : groups) {
+            for (int week = 0; week < 20; week++)
+                result.addAll(parser.parse(group, week));
+
+        }
+
 
        while (!errors.isEmpty()) {
            ParsingError currError = errors.poll();
-           result.addAll(parser.run(currError.getGroup(), currError.getWeek()));
+           result.addAll(parser.parse(currError.getGroup(), currError.getWeek()));
        }
-
-       System.out.printf("end parsing Lessons by %s department and %s course%n", groups.get(0).getName().charAt(1), groups.get(0).getName().charAt(4));
-
-
        return result;
    }
 
-   public void saveSchedule(@NonNull List<ScheduleLesson> lessons) {
-       System.out.printf("start saving Lessons by %s department and %s course%n", lessons.get(0).getGroup().get(0).getName().charAt(1), lessons.get(0).getGroup().get(0).getName().charAt(4));
-       for (ScheduleLesson lesson : lessons)
-           saver.run(lesson);
-
-       System.out.printf("end saving Lessons by %s department and %s course%n", lessons.get(0).getGroup().get(0).getName().charAt(1), lessons.get(0).getGroup().get(0).getName().charAt(4));
-   }
-
-    public @NonNull List<ScheduleLesson> groupLessons(@NonNull List<ScheduleLesson> lessons) {
+    private @NonNull List<ScheduleLesson> groupLessons(@NonNull List<ScheduleLesson> lessons) {
+        System.out.println("Start grouping");
         Map<GroupingByLessonNameKey, UUID> lessonsGroup = new HashMap<>();
 
         for (int i = 0; i < lessons.size(); i++) {
             var lesson = lessons.get(i);
-            var key = new GroupingByLessonNameKey(lesson.group, lesson.name, lesson.tag);
+            var key = new GroupingByLessonNameKey(lesson.group, lesson.name, lesson.tag, lesson.room);
             if (lessonsGroup.containsKey(key)) {
                 lesson.groupId = lessonsGroup.get(key);
                 lessons.set(i, lesson);
@@ -128,9 +157,14 @@ public class ParserService {
                 lessonsGroup.put(key, newUUID);
             }
         }
+        System.out.println("End grouping");
         return lessons;
     }
 
+   private void saveSchedule(@NonNull List<ScheduleLesson> lessons) {
+       for (ScheduleLesson lesson : lessons)
+           saver.run(lesson);
+   }
 
     @Getter
     @AllArgsConstructor
@@ -168,19 +202,20 @@ public class ParserService {
         private List<Group> group;
         private String name;
         private String tag;
+        private String room;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GroupingByLessonNameKey that = (GroupingByLessonNameKey) o;
+            return Objects.equals(group, that.group) && Objects.equals(name, that.name) &&
+                    Objects.equals(tag, that.tag) &&  Objects.equals(room, that.room);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(group, name, tag, room);
+        }
     }
-
-
 }
-
-
-// bh=EkEiR29vZ2xlIENocm9tZSI7dj0iMTE5IiwgIkNocm9taXVtIjt2PSIxMTkiLCAiTm90P0FfQnJhbmQiO3Y9IjI0IhoFIng4NiIiECIxMTkuMC42MDQ1LjE2MCIqAj8wMgIiIjoJIldpbmRvd3MiQggiMTQuMC4wIkoEIjY0IlJcIkdvb2dsZSBDaHJvbWUiO3Y9IjExOS4wLjYwNDUuMTYwIiwiQ2hyb21pdW0iO3Y9IjExOS4wLjYwNDUuMTYwIiwiTm90P0FfQnJhbmQiO3Y9IjI0LjAuMC4wIiI=;
-// Expires=Wed, 27-Nov-2024 14:10:56 GMT;
-// Path=/
-
-// bh=Ej8iR29vZ2xlIENocm9tZSI7dj0iMTE5IiwiQ2hyb21pdW0iO3Y9IjExOSIsIk5vdD9BX0JyYW5kIjt2PSIyNCIaBSJ4ODYiIhAiMTE5LjAuNjA0NS4xNjAiKgI/MDICIiI6CSJXaW5kb3dzIkIIIjE0LjAuMCJKBCI2NCJSXCJHb29nbGUgQ2hyb21lIjt2PSIxMTkuMC42MDQ1LjE2MCIsIkNocm9taXVtIjt2PSIxMTkuMC42MDQ1LjE2MCIsIk5vdD9BX0JyYW5kIjt2PSIyNC4wLjAuMCIi;
-// Expires=Wed, 27-Nov-2024 14:12:47 GMT;
-// Domain=.yandex.ru;
-// Path=/;
-// SameSite=None;
-// Secure

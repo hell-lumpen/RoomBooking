@@ -1,6 +1,7 @@
 package org.mai.roombooking.services;
 
 import lombok.NonNull;
+import org.mai.roombooking.dtos.PairDTO;
 import org.mai.roombooking.dtos.bookings.Pair;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
@@ -99,7 +100,7 @@ public class BookingService {
     public List<Pair> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime,endTime);
 
-        Map<String, List<RoomBookingDTO>> groupedBookings = bookings.stream().map((RoomBookingDTO::new)).collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
+        Map<PairDTO, List<RoomBookingDTO>> groupedBookings = bookings.stream().map((RoomBookingDTO::new)).collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
         var data = groupedBookings.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,

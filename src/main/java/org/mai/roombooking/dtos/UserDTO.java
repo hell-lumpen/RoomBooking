@@ -19,7 +19,7 @@ public class UserDTO {
     @NotBlank(message = "The phone number should not be empty")
     private String fullName;
 
-    @Pattern(regexp = "8\\d{10}")
+    @Pattern(regexp = "\\+7\\d{10}")
     @NotBlank(message = "The phone number should not be empty")
     @NotNull(message = "The phone number should not be empty")
     private String phoneNumber;

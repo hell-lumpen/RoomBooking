@@ -50,7 +50,7 @@ public class RoomService {
                     .toList();
 
         return roomRepository.findAll().stream()
-                .filter((room -> capacity==null || room.getCapacity() > capacity))
+                .filter(room -> capacity == null     || room.getCapacity() > capacity)
                 .filter(room -> hasComputers == null || hasComputers == room.getHasComputers())
                 .filter(room -> hasProjector == null || hasProjector == room.getHasProjector())
                 .filter(element -> !rooms.contains(element))
