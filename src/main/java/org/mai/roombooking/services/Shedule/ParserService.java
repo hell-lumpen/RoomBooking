@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Service
+@Slf4j
 public class ParserService {
     private final SaverLesson saver;
     private final GroupRepository groupRepository;
@@ -32,7 +34,7 @@ public class ParserService {
 
         List<CompletableFuture<Void>> allFutures = new ArrayList<>();
 
-        for (int department = 1; department <= 14; department++) {
+        for (int department = 8; department <= 8; department++) {
             for (int course = 1; course <= 6; course++) {
                 int finalDepartment = department;
                 int finalCourse = course;
@@ -110,12 +112,15 @@ public class ParserService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     private @NonNull List<Group> saveGroups(@NonNull List<String> groupNames) {
         List<Group> result = new LinkedList<>();
         for (var name : groupNames)
             result.add(groupRepository.save(Group.builder().name(name).build()));
+
+        log.info("Groups saved: " + groupNames);
 
         return result;
     }
@@ -129,7 +134,7 @@ public class ParserService {
         for (Group group : groups) {
             for (int week = 0; week < 20; week++)
                 result.addAll(parser.parse(group, week));
-
+            log.info("Group parsed: name = " + group.getName());
         }
 
 
@@ -137,6 +142,8 @@ public class ParserService {
            ParsingError currError = errors.poll();
            result.addAll(parser.parse(currError.getGroup(), currError.getWeek()));
        }
+
+       log.info("Parsed website");
        return result;
    }
 

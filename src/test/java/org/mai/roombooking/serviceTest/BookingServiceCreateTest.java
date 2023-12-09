@@ -146,7 +146,7 @@ public class BookingServiceCreateTest {
     public void testExternalErrorBookingSave() {
         var dto = RoomBookingRequestDTO
                 .builder()
-                .roomId(5L)
+                .roomId(3L)
                 .title("Hello")
                 .ownerId(userRepository.findAll().get(0).getUserId())
                 .startTime(LocalDateTime.of(2023, Month.OCTOBER, 24,9,0))

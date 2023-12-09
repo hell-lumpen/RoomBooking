@@ -43,4 +43,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findAllByBookingGroupId(@Param("periodicBookingId") UUID periodicBookingId);
     List<Booking> findByGroupsContaining(Group group);
     List<Booking> findByStaffContaining(User staff);
+
+    @Query("SELECT b FROM Booking b WHERE b.owner.userId = :ownerId")
+    List<Booking> findByOwner(Long ownerId);
 }

@@ -27,7 +27,7 @@ public class BookingFilteringTest {
 
     @Test
     void getByGroup() {
-        var group = groupRepository.findByName("M8O-410Б-20").orElseThrow();
+        var group = groupRepository.findByName("Группа 1").orElseThrow();
         var bookingList = bookingRepository.findByGroupsContaining(group);
 
         Assertions.assertEquals(1, bookingList.size());

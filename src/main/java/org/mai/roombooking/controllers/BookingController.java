@@ -75,7 +75,7 @@ public class BookingController {
      * @param endTime   Дата-время конца выгрузки
      * @return ResponseEntity со списком бронирований, сгруппированных по комнате
      */
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<List<Pair>> getBookingsInTimeRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
@@ -121,6 +121,22 @@ public class BookingController {
 
         List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
         return ResponseEntity.ok(bookings);
+    }
+
+    /**
+     * Получение предстоящих событий авторизованного пользователя
+     * @param limit количество запрашиваемых событий
+     * @param user авторизованный пользователя
+     * @return список бронирований
+     */
+    @GetMapping("/first{limit}/")
+    public List<RoomBookingDTO> getLimitBookingsByUser(
+            @PathVariable @NonNull Integer limit,
+            @AuthenticationPrincipal @NonNull User user) {
+        return bookingService.getLastBookingsByOwner(user.getUserId(), limit)
+                .stream()
+                .map(RoomBookingDTO::new)
+                .toList();
     }
 
     /**

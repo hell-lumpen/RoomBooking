@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query("SELECT u FROM User u, UserInfo uu where uu.username = :username")
+    @Query("SELECT u FROM User u, UserInfo uu where u.info.id = uu.id and uu.username = :username")
     List<User> findByUsername(String username);
     List<User> findByFullNameLikeIgnoreCase(String partialName);
 

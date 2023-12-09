@@ -20,13 +20,33 @@ public class Group {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    String name;
+    private String name;
+
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    private int size;
+
 
     public Group(@NonNull GroupDTO dto) {
         id = dto.getId();
         name = dto.getName();
+        size = 25;
     }
 
+    /**
+     * Метод получения факультета группы
+     * @return факультет
+     */
+    public int getFaculty() {
+        return (int) name.charAt(1);
+    }
+
+    /**
+     * Метод получения текущего курса группы
+     * @return текущий курс
+     */
+    public int getCourse() {
+        return (int) name.charAt(4);
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

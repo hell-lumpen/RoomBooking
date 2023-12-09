@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.entities.UserInfo;
 import org.mai.roombooking.exceptions.UserNotFoundException;
+import org.mai.roombooking.repositories.UserInfoRepository;
 import org.mai.roombooking.security.requestDTO.AuthResponse;
 import org.mai.roombooking.security.requestDTO.UserLoginRequest;
 import org.mai.roombooking.security.requestDTO.UserRegistrationRequest;
@@ -27,23 +28,26 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserInfoRepository userInfoRepository;
 
     public AuthResponse registerUser(@NonNull UserRegistrationRequest registrationRequest) {
 
         UserInfo userInfo = UserInfo.builder()
                 .username(registrationRequest.getUsername())
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
-                .password(registrationRequest.getPhoneNumber())
+                .phoneNumber(registrationRequest.getPhoneNumber())
                 .role(User.UserRole.ADMINISTRATOR)
                 .isAccountLocked(false)
                 .build();
+        userInfoRepository.save(userInfo);
 
         User user = User.builder()
-                .fullName(registrationRequest.getUsername())
+                .fullName(registrationRequest.getFullName())
                 .info(userInfo)
                 .build();
-
         userRepository.save(user);
+
+
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("fullname", user.getFullName());
         extraClaims.put("role", user.getRole());

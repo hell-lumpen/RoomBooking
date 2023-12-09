@@ -71,6 +71,13 @@ public class BookingService {
         return bookingRepository.findByStaffContaining(staff).stream().map(RoomBookingDTO::new).toList();
     }
 
+    public List<Booking> getLastBookingsByOwner(Long ownerId, int limit) {
+        return bookingRepository.findByOwner(ownerId).stream()
+                .sorted((b1,b2)-> b1.getStartTime().compareTo(b2.getStartTime()))
+                .limit(limit)
+                .toList();
+    }
+
     /**
      * Получение детализированной информации по запрашиваемому мероприятию
      * @param bookingId идентификатор бронирования
@@ -168,8 +175,7 @@ public class BookingService {
     public Booking updateBooking(@NonNull Booking request)
             throws UsernameNotFoundException, RoomNotFoundException, BookingConflictException {
 
-        if (request.getId() != null && bookingRepository.findById(request.getId()).isEmpty() &&
-                !validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId()))
+        if (!validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId()))
             throw new BookingConflictException();
 
         return bookingRepository.save(request);

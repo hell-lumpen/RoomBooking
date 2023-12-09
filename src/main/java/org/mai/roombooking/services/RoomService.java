@@ -40,7 +40,7 @@ public class RoomService {
      * @param hasComputers  опциональный параметр компьютеров для фильтрации комнат
      * @return список доступных комнат, соответствующих указанным критериям, если он пуст доступных комнат нет
      */
-    public List<RoomDTO> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime,
+    public List<Room> getAvailableRooms(LocalDateTime startTime, LocalDateTime endTime,
                                            Integer capacity, Boolean hasProjector, Boolean hasComputers) {
 
         List<Room> rooms = bookingRepository.findBookingsInDateRange(startTime, endTime)
@@ -54,7 +54,6 @@ public class RoomService {
                 .filter(room -> hasComputers == null || hasComputers == room.getHasComputers())
                 .filter(room -> hasProjector == null || hasProjector == room.getHasProjector())
                 .filter(element -> !rooms.contains(element))
-                .map((RoomDTO::new))
                 .toList();
     }
 

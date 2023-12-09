@@ -33,7 +33,7 @@ public class ValidationUserDTOTest {
                 .id(1L)
                 .role(User.UserRole.TEACHER)
                 .fullName("Artem")
-                .phoneNumber("89297016633")
+                .phoneNumber("+79297016633")
                 .isAccountLocked(false)
                 .build();
         validationUtils.validationRequest(user);

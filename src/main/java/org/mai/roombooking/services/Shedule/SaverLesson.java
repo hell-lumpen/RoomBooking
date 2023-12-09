@@ -1,6 +1,7 @@
 package org.mai.roombooking.services.Shedule;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.BookingConflictException;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class SaverLesson {
 
@@ -55,6 +57,19 @@ public class SaverLesson {
         if (tag.isEmpty())
             tag = Optional.of(tagRepository.findByShortName("ЛК").get());
 
+        if (lesson.getRoom().equals("--каф") && lesson.getGroup().get(0).getName().charAt(1) == '8'){
+            var availableRooms = roomService.getAvailableRooms(lesson.getStart(),lesson.getEnd(),
+                    lesson.getGroup().stream().map(Group::getSize).mapToInt(Integer::intValue).sum(),
+                    null, null);
+
+            if (availableRooms.isEmpty()) {
+                log.error("Бронирование не распределено: "+ lesson);
+                //TODO: ошибка
+            }
+
+            room = Optional.of(availableRooms.get(0));
+        }
+
 
         Booking booking = Booking.builder()
                 .description("")
@@ -70,9 +85,11 @@ public class SaverLesson {
 
         try {
             bookingService.updateBooking(booking);
+            log.info("Course: " + lesson.getGroup().get(0).getCourse() + "Faculty: " +
+                    lesson.getGroup().get(0).getFaculty() + " saved");
         } catch (BookingConflictException ex) {
+            log.error("Конфликт при сохранении: "+ lesson);
             // TODO: разрешить конфликт
-            System.err.println("Conflict");
         }
     }
 }
