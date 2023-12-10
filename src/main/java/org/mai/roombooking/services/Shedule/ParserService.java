@@ -1,9 +1,6 @@
 package org.mai.roombooking.services.Shedule;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -35,7 +32,7 @@ public class ParserService {
         List<CompletableFuture<Void>> allFutures = new ArrayList<>();
 
         for (int department = 8; department <= 8; department++) {
-            for (int course = 1; course <= 6; course++) {
+            for (int course = 3; course <= 4; course++) {
                 int finalDepartment = department;
                 int finalCourse = course;
                 CompletableFuture<List<String>> parsedGroups = CompletableFuture.supplyAsync(() ->
@@ -130,6 +127,7 @@ public class ParserService {
         List<ScheduleLesson> result = new LinkedList<>();
         ConcurrentLinkedQueue<ParsingError> errors = new ConcurrentLinkedQueue<>();
 
+        // Парсинг
         var parser = new Parser(errors);
         for (Group group : groups) {
             for (int week = 0; week < 20; week++)
@@ -137,41 +135,58 @@ public class ParserService {
             log.info("Group parsed: name = " + group.getName());
         }
 
+        // Повторная попытка запроса в случае ошибки
+        while (!errors.isEmpty()) {
+            ParsingError currError = errors.poll();
+            result.addAll(parser.parse(currError.getGroup(), currError.getWeek()));
+        }
 
-       while (!errors.isEmpty()) {
-           ParsingError currError = errors.poll();
-           result.addAll(parser.parse(currError.getGroup(), currError.getWeek()));
-       }
+
+        // Группировка по времени и месту проведения
+        Map<ParserService.GroupingByGroupKey, ParserService.ScheduleLesson> grouped = new HashMap<>();
+        for (var lesson : result) {
+            ParserService.GroupingByGroupKey key = new ParserService.GroupingByGroupKey(lesson);
+            if (grouped.containsKey(key))
+                grouped.get(key).getGroup().addAll(lesson.group);
+            else
+                grouped.put(key, lesson);
+        }
 
        log.info("Parsed website");
-       return result;
+       return new ArrayList<>(grouped.values());
    }
 
     private @NonNull List<ScheduleLesson> groupLessons(@NonNull List<ScheduleLesson> lessons) {
-        System.out.println("Start grouping");
+        log.info("Start grouping");
         Map<GroupingByLessonNameKey, UUID> lessonsGroup = new HashMap<>();
+        List<ScheduleLesson> result = new ArrayList<>();
 
-        for (int i = 0; i < lessons.size(); i++) {
+        for(int i = 0; i < lessons.size(); i++) {
+            if (i%1000 == 0)
+                log.info("-*-*-*-*-*-*-*-*-*-*-*-");
+
             var lesson = lessons.get(i);
-            var key = new GroupingByLessonNameKey(lesson.group, lesson.name, lesson.tag, lesson.room);
+            var key = new GroupingByLessonNameKey(lesson.name, lesson.tag, lesson.room);
             if (lessonsGroup.containsKey(key)) {
                 lesson.groupId = lessonsGroup.get(key);
-                lessons.set(i, lesson);
+
             } else {
                 UUID newUUID = UUID.randomUUID();
                 lesson.groupId = newUUID;
-                lessons.set(i, lesson);
                 lessonsGroup.put(key, newUUID);
             }
+            result.add(i, lesson);
         }
-        System.out.println("End grouping");
-        return lessons;
+        log.info("End grouping");
+        return result;
     }
 
-   private void saveSchedule(@NonNull List<ScheduleLesson> lessons) {
-       for (ScheduleLesson lesson : lessons)
-           saver.run(lesson);
-   }
+    private void saveSchedule(@NonNull List<ScheduleLesson> lessons) {
+        log.info("Saving start");
+        for (ScheduleLesson lesson : lessons)
+            saver.run(lesson);
+        log.info("Saving end");
+    }
 
     @Getter
     @AllArgsConstructor
@@ -193,20 +208,25 @@ public class ParserService {
         private UUID groupId;
     }
 
-    @Getter
+    @Data
     @Builder
     @AllArgsConstructor
     static public class GroupingByGroupKey {
         private LocalDateTime start;
         private LocalDateTime end;
-        private String employee;
+        private String room;
+
+        public GroupingByGroupKey(@NonNull ScheduleLesson lesson) {
+            start = lesson.getStart();
+            end = lesson.getEnd();
+            room = lesson.getRoom();
+        }
     }
 
     @Getter
     @Builder
     @AllArgsConstructor
     static public class GroupingByLessonNameKey {
-        private List<Group> group;
         private String name;
         private String tag;
         private String room;
@@ -216,13 +236,13 @@ public class ParserService {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             GroupingByLessonNameKey that = (GroupingByLessonNameKey) o;
-            return Objects.equals(group, that.group) && Objects.equals(name, that.name) &&
+            return  Objects.equals(name, that.name) &&
                     Objects.equals(tag, that.tag) &&  Objects.equals(room, that.room);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(group, name, tag, room);
+            return Objects.hash(name, tag, room);
         }
     }
 }

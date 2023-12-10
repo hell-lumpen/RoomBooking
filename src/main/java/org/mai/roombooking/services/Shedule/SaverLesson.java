@@ -57,7 +57,7 @@ public class SaverLesson {
         if (tag.isEmpty())
             tag = Optional.of(tagRepository.findByShortName("ЛК").get());
 
-        if (lesson.getRoom().equals("--каф") && lesson.getGroup().get(0).getName().charAt(1) == '8'){
+        if (lesson.getRoom().equals("--каф.")) {
             var availableRooms = roomService.getAvailableRooms(lesson.getStart(),lesson.getEnd(),
                     lesson.getGroup().stream().map(Group::getSize).mapToInt(Integer::intValue).sum(),
                     null, null);

@@ -20,14 +20,14 @@ import java.util.concurrent.*;
 
 public class Parser {
         private final ConcurrentLinkedQueue<ParserService.ParsingError> errors;
-        Parser(ConcurrentLinkedQueue<ParserService.ParsingError> errors) {
+        public Parser(ConcurrentLinkedQueue<ParserService.ParsingError> errors) {
             this.errors = errors;
         }
 
 
         public List<ParserService.ScheduleLesson> parse(@NonNull Group group, int week) {
             String url = "https://mai.ru/education/studies/schedule/index.php?group=" + group.getName() + "&week=" + week;
-            Map<ParserService.GroupingByGroupKey, ParserService.ScheduleLesson> result = new HashMap<>();
+            List<ParserService.ScheduleLesson> result = new ArrayList<>();
             Document document = null;
 
             int count = 0;
@@ -71,9 +71,9 @@ public class Parser {
 
 
                     for (Element lesson : element.select("div.mb-4")) {
-                        var tmp = element.select("p").get(0).text();
+                        var tmp = lesson.select("p").get(0).text();
                         String name = tmp.substring(0,tmp.length() - 3).trim();
-                        //TODO: сплитуй все что движется !!!!
+                        //TODO: сплитуй все что движется (экзамен) !!!!
                         String tag = tmp.substring(tmp.length() - 3).trim();
 
                         String room;
@@ -92,27 +92,20 @@ public class Parser {
                         String employee = lesson.select("li.list-inline-item").select("a.text-body")
                                 .text().trim();
 
-
-                        ParserService.GroupingByGroupKey key = new ParserService.GroupingByGroupKey(LocalDateTime.of(date,start),
-                                                                LocalDateTime.of(date,end), employee);
-
-                        if (result.containsKey(key))
-                            result.get(key).getGroup().add(group);
-                        else
-                            result.put(key, ParserService.ScheduleLesson.builder()
-                                    .employee(employee)
-                                    .tag(tag)
-                                    .room(room)
-                                    .name(name)
-                                    .group(new ArrayList<>(List.of(group)))
-                                    .tag(tag)
-                                    .start(LocalDateTime.of(date,start))
-                                    .end(LocalDateTime.of(date,end))
-                                    .build());
+                        result.add(ParserService.ScheduleLesson.builder()
+                                .employee(employee)
+                                .tag(tag)
+                                .room(room)
+                                .name(name)
+                                .group(new ArrayList<>(List.of(group)))
+                                .tag(tag)
+                                .start(LocalDateTime.of(date, start))
+                                .end(LocalDateTime.of(date, end))
+                                .build());
                     }
                 }
 
-                return new ArrayList<>(result.values());
+                return result;
         }
 
     static Map<String, Month> month = new HashMap<>() {{

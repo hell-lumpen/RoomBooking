@@ -1,14 +1,14 @@
 INSERT INTO rooms (capacity, has_computers, has_projector, room_name)
 VALUES (10, true, true, 'Пространство самоподготовки IT-0'),
-    (15, true, false, 'IT-1'),
-    (20, false, true, 'IT-3'),
-    (25, true, true, 'Лекторий IT-5'),
+    (5, true, false, 'IT-1'),
+    (5, false, true, 'IT-3'),
+    (70, true, true, 'Лекторий IT-5'),
     (10, true, true, 'Переговорная IT-10'),
-    (10, true, true, 'IT-центр (IT-12)'),
-    (30, true, false, 'IT-11'),
-    (18, false, true, 'IT-15'),
-    (22, true, true, 'Учебная аудитория IT-16'),
-    (16, false, false, 'IT-17')
+    (5, true, true, 'IT-центр (IT-12)'),
+    (5, true, false, 'IT-11'),
+    (30, false, true, 'IT-15'),
+    (15, true, true, 'Учебная аудитория IT-16'),
+    (30, false, false, 'IT-17')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO user_info (is_account_locked, password, phone_number, role, username) VALUES
