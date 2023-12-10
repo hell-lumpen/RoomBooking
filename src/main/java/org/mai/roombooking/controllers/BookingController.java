@@ -45,17 +45,17 @@ public class BookingController {
     }
 
 
-    /**
-     * Метод получения детализированной информации по конкретному бронированию
-     * @param id идентификатор бронирования
-     * @return детализированная информация по бронированию
-     * @throws BookingNotFoundException попытка получения несуществующего бронирования
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<RoomBookingDetailsDTO> getBookingDetails(@PathVariable @NonNull Long id)
-            throws BookingNotFoundException {
-        return ResponseEntity.ok(bookingService.getBookingById(id));
-    }
+//    /**
+//     * Метод получения детализированной информации по конкретному бронированию
+//     * @param id идентификатор бронирования
+//     * @return детализированная информация по бронированию
+//     * @throws BookingNotFoundException попытка получения несуществующего бронирования
+//     */
+//    @GetMapping("/{id}")
+//    public ResponseEntity<RoomBookingDetailsDTO> getBookingDetails(@PathVariable @NonNull Long id)
+//            throws BookingNotFoundException {
+//        return ResponseEntity.ok(bookingService.getBookingById(id));
+//    }
 
 
     /**
@@ -188,7 +188,6 @@ public class BookingController {
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
         RoomBookingDetailsDTO booking = bookingService.getBookingById(bookingId);
-        Thread.sleep(2000);
         return ResponseEntity.ok(booking);
     }
 

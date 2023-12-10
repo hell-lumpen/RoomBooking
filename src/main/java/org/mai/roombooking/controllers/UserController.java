@@ -31,7 +31,7 @@ public class UserController {
      * Функция получения персонала кафедры
      * @return список активных преподавателей и администраторов
      */
-    @GetMapping("/get/all")
+    @GetMapping("/all")
     public List<UserDTO> getAll() {
         return userService.findAll();
     }
@@ -40,7 +40,7 @@ public class UserController {
      * Метод для получения списка не заблокированных пользователей
      * @return Список не заблокированных пользователей
      */
-    @GetMapping("/get/active")
+    @GetMapping("/active")
     public List<UserDTO> getActive() {
         return userService.findAll()
                 .stream()

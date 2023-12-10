@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -52,9 +53,12 @@ public class Booking {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tag_id", nullable = false)
-    private Tag tag;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "booking_tag",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 
     @Override
     public boolean equals(Object o) {
@@ -66,11 +70,11 @@ public class Booking {
                 Objects.equals(staff, booking.staff) && Objects.equals(groups, booking.groups) &&
                 Objects.equals(startTime, booking.startTime) && Objects.equals(endTime, booking.endTime)
                 && Objects.equals(title, booking.title) && Objects.equals(description, booking.description)
-                && Objects.equals(tag, booking.tag);
+                && Objects.equals(tags, booking.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, bookingGroupId, room, owner, staff, groups, startTime, endTime, title, description, tag);
+        return Objects.hash(id, bookingGroupId, room, owner, staff, groups, startTime, endTime, title, description, tags);
     }
 }

@@ -27,7 +27,7 @@ public class RoomBookingDTO {
     private LocalDateTime endTime;
     private String title;
     private String description;
-    private TagDTO tag;
+    private List<TagDTO> tags;
 
     public RoomBookingDTO(@NonNull Booking booking) {
         title = booking.getTitle();
@@ -37,7 +37,7 @@ public class RoomBookingDTO {
         startTime = booking.getStartTime();
         endTime = booking.getEndTime();
         owner = new PairDTO(booking.getOwner());
-        tag = new TagDTO(booking.getTag());
+        tags = booking.getTags().stream().map(TagDTO::new).toList();
         description = booking.getDescription();
     }
 }

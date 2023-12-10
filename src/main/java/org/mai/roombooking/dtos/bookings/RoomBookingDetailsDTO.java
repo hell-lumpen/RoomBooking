@@ -26,7 +26,7 @@ public class RoomBookingDetailsDTO {
     private String description;
     private List<UserDTO> staff;
     private List<GroupDTO> groups;
-    private TagDTO tag;
+    private List<TagDTO> tags;
 
     public RoomBookingDetailsDTO(@NonNull Booking booking) {
         id = booking.getId();
@@ -39,6 +39,6 @@ public class RoomBookingDetailsDTO {
         description = booking.getDescription();
         staff = booking.getStaff().stream().map(UserDTO::new).toList();
         groups = booking.getGroups().stream().map(GroupDTO::new).toList();
-        tag = new TagDTO(booking.getTag());
+        tags = booking.getTags().stream().map(TagDTO::new).toList();
     }
 }

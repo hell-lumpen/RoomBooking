@@ -12,7 +12,10 @@ import org.mai.roombooking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Slf4j
 @Service
@@ -77,7 +80,7 @@ public class SaverLesson {
                 .bookingGroupId(lesson.getGroupId())
                 .startTime(lesson.getStart())
                 .endTime(lesson.getEnd())
-                .tag(tag.get())
+                .tags(Set.of(tag.get()))
                 .owner(employee.get())
                 .groups(lesson.getGroup())
                 .room(room.get())

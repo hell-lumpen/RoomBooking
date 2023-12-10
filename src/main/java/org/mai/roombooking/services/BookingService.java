@@ -8,10 +8,7 @@ import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
-import org.mai.roombooking.repositories.BookingRepository;
-import org.mai.roombooking.repositories.GroupRepository;
-import org.mai.roombooking.repositories.RoomRepository;
-import org.mai.roombooking.repositories.UserRepository;
+import org.mai.roombooking.repositories.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -30,13 +27,16 @@ public class BookingService {
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
     private final GroupRepository groupRepository;
+    private final TagRepository tagRepository;
 
     BookingService(BookingRepository bookingRepository, UserRepository userRepository,
-                   RoomRepository roomRepository, GroupRepository groupRepository) {
+                   RoomRepository roomRepository, GroupRepository groupRepository,
+                   TagRepository tagRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
         this.groupRepository = groupRepository;
+        this.tagRepository = tagRepository;
     }
 
     // GETERS
@@ -225,7 +225,8 @@ public class BookingService {
                         .map(id -> groupRepository.findById(id)
                                 .orElseThrow(()->new GroupNotFoundException(id)))
                         .toList())
-                .tag(dto.getTag())
+                .tags(dto.getTagsId().stream().map((id) -> tagRepository.findById(id).orElseThrow(() ->
+                        new TagNotFoundException("tag whis id: " + id ))).collect(Collectors.toSet()))
                 .build();
     }
 

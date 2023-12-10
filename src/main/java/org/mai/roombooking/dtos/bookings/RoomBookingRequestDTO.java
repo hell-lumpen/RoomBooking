@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.mai.roombooking.dtos.TagDTO;
 import org.mai.roombooking.entities.Tag;
 
 import java.time.LocalDateTime;
@@ -35,5 +36,5 @@ public class RoomBookingRequestDTO {
     private String title;
     private List<Long> staffId;
     private List<Long> groupsId;
-    private Tag tag;
+    private List<Long> tagsId;
 }

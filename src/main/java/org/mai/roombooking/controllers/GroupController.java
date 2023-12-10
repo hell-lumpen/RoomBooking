@@ -20,7 +20,7 @@ public class GroupController {
         this.validationService = validationService;
     }
 
-    @GetMapping("/get/all")
+    @GetMapping("/all")
     public List<GroupDTO> getAll() {
         return groupRepository.findAll().stream().map(GroupDTO::new).toList();
     }
@@ -31,7 +31,7 @@ public class GroupController {
         return new GroupDTO(groupRepository.save(new Group(dto)));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public void delete(@NonNull @PathVariable Long id) {
         groupRepository.deleteById(id);
     }
