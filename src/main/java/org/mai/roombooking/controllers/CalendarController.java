@@ -37,25 +37,25 @@ public class CalendarController {
         return configureResponse(calendarService.getAllBookings());
     }
 
-    @GetMapping("/group/{id}")
-    public ResponseEntity<byte[]> getByGroup(@PathVariable @NonNull Long id) {
-        return configureResponse(calendarService.getByGroup(id));
-    }
+//    @GetMapping("/group/{id}")
+//    public ResponseEntity<byte[]> getByGroup(@PathVariable @NonNull Long id) {
+//        return configureResponse(calendarService.getByGroup(id));
+//    }
+//
+//    @GetMapping("/group/name/{name}")
+//    public ResponseEntity<byte[]> getByGroup(@PathVariable @NonNull String name) {
+//        return  configureResponse(calendarService.getByGroup(name));
+//    }
 
-    @GetMapping("/group/name/{name}")
-    public ResponseEntity<byte[]> getByGroup(@PathVariable @NonNull String name) {
-        return  configureResponse(calendarService.getByGroup(name));
-    }
-
-    @GetMapping("/staff/{id}")
-    public ResponseEntity<byte[]> getByStaff(@PathVariable @NonNull Long id,
-                                             @AuthenticationPrincipal @NonNull User user) {
-        if(!(Objects.equals(id, user.getUserId())
-                || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
-            throw new AccessDeniedException("Access denied: Not enough permissions");
-
-        return configureResponse(calendarService.getByStaff(id));
-    }
+//    @GetMapping("/staff/{id}")
+//    public ResponseEntity<byte[]> getByStaff(@PathVariable @NonNull Long id,
+//                                             @AuthenticationPrincipal @NonNull User user) {
+//        if(!(Objects.equals(id, user.getUserId())
+//                || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
+//            throw new AccessDeniedException("Access denied: Not enough permissions");
+//
+//        return configureResponse(calendarService.getByStaff(id));
+//    }
 
     private @NonNull ResponseEntity<byte[]> configureResponse(@NonNull String data) {
         HttpHeaders headers = new HttpHeaders();

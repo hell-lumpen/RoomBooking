@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.BookingConflictException;
+import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.TagRepository;
 import org.mai.roombooking.services.BookingService;
 import org.mai.roombooking.services.RoomService;
@@ -60,10 +61,10 @@ public class SaverLesson {
         if (tag.isEmpty())
             tag = Optional.of(tagRepository.findByShortName("ЛК").get());
 
-        if (lesson.getRoom().equals("--каф.")) {
+        if (lesson.getRoom().equals("--каф.") && lesson.getGroup().get(0).getCourse() == 8) {
             var availableRooms = roomService.getAvailableRooms(lesson.getStart(),lesson.getEnd(),
                     lesson.getGroup().stream().map(Group::getSize).mapToInt(Integer::intValue).sum(),
-                    null, null);
+                    null, null).stream().filter(Room::getIsCathedral).toList();
 
             if (availableRooms.isEmpty()) {
                 log.error("Бронирование не распределено: "+ lesson);
@@ -93,6 +94,8 @@ public class SaverLesson {
         } catch (BookingConflictException ex) {
             log.error("Конфликт при сохранении: "+ lesson);
             // TODO: разрешить конфликт
+        } catch (BookingException e) {
+            throw new RuntimeException(e);
         }
     }
 }

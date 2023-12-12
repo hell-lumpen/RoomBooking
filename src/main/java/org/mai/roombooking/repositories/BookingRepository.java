@@ -41,8 +41,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     void deleteAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
 
     List<Booking> findAllByBookingGroupId(@Param("periodicBookingId") UUID periodicBookingId);
-    List<Booking> findByGroupsContaining(Group group);
-    List<Booking> findByStaffContaining(User staff);
+
+    @Query("select b FROM Booking b JOIN FETCH b.staff s WHERE s.userId = :staffId " +
+            "AND b.endTime >= :startDateTime " +
+            "AND b.startTime <= :endDateTime")
+    List<Booking> findByStaffContains(Long staffId, LocalDateTime startDateTime, LocalDateTime endDateTime);
+
+    @Query("select b FROM Booking b JOIN FETCH b.groups g WHERE g.id = :groupId " +
+            "AND b.endTime >= :startDateTime " +
+            "AND b.startTime <= :endDateTime")
+    List<Booking> findByGroupsContains(Long groupId, LocalDateTime startDateTime, LocalDateTime endDateTime);
+
+//    List<Booking> findByGroupsContaining(Group group);
+//    List<Booking> findByStaffContaining(User staff);
 
     @Query("SELECT b FROM Booking b WHERE b.owner.userId = :ownerId")
     List<Booking> findByOwner(Long ownerId);

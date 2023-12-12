@@ -8,6 +8,7 @@ import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
+import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,41 +40,32 @@ public class BookingService {
         this.tagRepository = tagRepository;
     }
 
-    // GETERS
+    // Получение данных
 
-    /**
-     * Получение списка бронирований по идентификатору учебной группы
-     * @param groupId идентификатор учебной группы
-     * @return список бронирований, в которых участвует выбранная группа
-     */
-    public List<RoomBookingDTO> getBookingsByGroupId(Long groupId) {
-        var group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        return bookingRepository.findByGroupsContaining(group).stream().map(RoomBookingDTO::new).toList();
-    }
-
-    /**
-     * Получение списка бронирований по названию учебной группы
-     * @param groupName название учебной группы
-     * @return список бронирований, в которых участвует выбранная группа
-     */
-    public List<RoomBookingDTO> getBookingsByGroupName(String groupName) {
-        var group = groupRepository.findByName(groupName).orElseThrow();
-        return bookingRepository.findByGroupsContaining(group).stream().map(RoomBookingDTO::new).toList();
-    }
-
-    /**
-     * Получение списка бронирований по идентификатору участника (сотрудника)
-     * @param staffId идентификатор сотрудника
-     * @return список бронирований, в которых участвует выбранный сотрудник
-     */
-    public List<RoomBookingDTO> getBookingsByStaff(Long staffId) {
-        var staff = userRepository.findById(staffId).orElseThrow(() -> new UserNotFoundException(staffId));
-        return bookingRepository.findByStaffContaining(staff).stream().map(RoomBookingDTO::new).toList();
-    }
+//    /**
+//     * Получение списка бронирований по идентификатору учебной группы
+//     * @param groupId идентификатор учебной группы
+//     * @return список бронирований, в которых участвует выбранная группа
+//     */
+//    public List<RoomBookingDTO> getBookingsByGroupId(Long groupId) {
+//        var group = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+//        return bookingRepository.findByGroupsContaining(group).stream().map(RoomBookingDTO::new).toList();
+//    }
+//
+//
+//    /**
+//     * Получение списка бронирований по идентификатору участника (сотрудника)
+//     * @param staffId идентификатор сотрудника
+//     * @return список бронирований, в которых участвует выбранный сотрудник
+//     */
+//    public List<RoomBookingDTO> getBookingsByStaff(Long staffId) {
+//        var staff = userRepository.findById(staffId).orElseThrow(() -> new UserNotFoundException(staffId));
+//        return bookingRepository.findByStaffContaining(staff).stream().map(RoomBookingDTO::new).toList();
+//    }
 
     public List<Booking> getLastBookingsByOwner(Long ownerId, int limit) {
         return bookingRepository.findByOwner(ownerId).stream()
-                .sorted((b1,b2)-> b1.getStartTime().compareTo(b2.getStartTime()))
+                .sorted(Comparator.comparing(Booking::getStartTime))
                 .limit(limit)
                 .toList();
     }
@@ -107,7 +99,10 @@ public class BookingService {
     public List<Pair> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime,endTime);
 
-        Map<PairDTO, List<RoomBookingDTO>> groupedBookings = bookings.stream().map((RoomBookingDTO::new)).collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
+        Map<PairDTO, List<RoomBookingDTO>> groupedBookings = bookings.stream()
+                .map((RoomBookingDTO::new))
+                .collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
+
         var data = groupedBookings.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -131,7 +126,8 @@ public class BookingService {
      * @param endTime   дата и время окончания запроса
      * @return список бронирований для указанной комнаты в заданном временном диапазоне
      */
-    public List<RoomBookingDTO> getBookingsByRoomInTimeRange(Long roomId, LocalDateTime startTime, LocalDateTime endTime) {
+    public List<RoomBookingDTO> getBookingsByRoomInTimeRange(Long roomId, LocalDateTime startTime,
+                                                             LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRangeForRoom(startTime, endTime, roomId);
         return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
@@ -168,15 +164,15 @@ public class BookingService {
      * @throws RoomNotFoundException     аудитория с id, переданным клиентом, не найдена
      */
     public Booking updateBooking(@NonNull RoomBookingRequestDTO request)
-            throws UsernameNotFoundException, RoomNotFoundException, BookingConflictException {
+            throws UsernameNotFoundException, RoomNotFoundException, BookingException {
         return updateBooking(getBookingFromDTO(request));
     }
 
     public Booking updateBooking(@NonNull Booking request)
-            throws UsernameNotFoundException, RoomNotFoundException, BookingConflictException {
+            throws UsernameNotFoundException, RoomNotFoundException, BookingException {
 
-        if (!validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId()))
-            throw new BookingConflictException();
+        validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId());
+
 
         return bookingRepository.save(request);
     }
@@ -230,20 +226,19 @@ public class BookingService {
                 .build();
     }
 
-    @FunctionalInterface
-    private interface IncrementLocalDataTime {
-        LocalDateTime performOperation(LocalDateTime inputDateTime, int value);
-    }
-
-    private boolean validateBooking(@NonNull LocalDateTime start,
+    private void validateBooking(@NonNull LocalDateTime start,
                                     @NonNull LocalDateTime end,
-                                    @NonNull Long roomId) {
+                                    @NonNull Long roomId) throws BookingException {
         if (start.isAfter(end) || start.getDayOfYear() != end.getDayOfYear())
-            return false;
+            throw new BookingException("Booking exception");
 
-        boolean isPresent = bookingRepository.findBookingsInDateRange(start, end)
+        var conflicts = bookingRepository.findBookingsInDateRange(start, end)
                 .stream()
-                .anyMatch((bookingItem -> bookingItem.getRoom().getRoomId().equals(roomId)));
-        return !isPresent;
+                .filter((bookingItem -> bookingItem.getRoom().getRoomId().equals(roomId)))
+                .map(RoomBookingDTO::new)
+                .toList();
+
+        if (!conflicts.isEmpty())
+            throw new BookingConflictException(conflicts);
     }
 }

@@ -13,6 +13,7 @@ import org.mai.roombooking.exceptions.BookingConflictException;
 import org.mai.roombooking.exceptions.BookingNotFoundException;
 import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
+import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.services.BookingService;
 import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,19 +46,6 @@ public class BookingController {
     }
 
 
-//    /**
-//     * Метод получения детализированной информации по конкретному бронированию
-//     * @param id идентификатор бронирования
-//     * @return детализированная информация по бронированию
-//     * @throws BookingNotFoundException попытка получения несуществующего бронирования
-//     */
-//    @GetMapping("/{id}")
-//    public ResponseEntity<RoomBookingDetailsDTO> getBookingDetails(@PathVariable @NonNull Long id)
-//            throws BookingNotFoundException {
-//        return ResponseEntity.ok(bookingService.getBookingById(id));
-//    }
-
-
     /**
      * Метод получения всех бронирований, хранящихся в базе данных
      * @return список бронирований
@@ -65,6 +53,20 @@ public class BookingController {
     @GetMapping("/all")
     public ResponseEntity<List<RoomBookingDTO>> getAll() {
         return ResponseEntity.ok(bookingService.getAll());
+    }
+
+    /**
+     * Получение детализированной информации по бронированию
+     * @param bookingId идентификатор бронирования
+     * @return детализированная информация о бронировании
+     * @throws BookingNotFoundException бронирование с заданным идентификатором не найдено
+     */
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<RoomBookingDetailsDTO> getBooking(
+            @PathVariable Long bookingId) throws BookingNotFoundException {
+
+        RoomBookingDetailsDTO booking = bookingService.getBookingById(bookingId);
+        return ResponseEntity.ok(booking);
     }
 
 
@@ -140,21 +142,44 @@ public class BookingController {
     }
 
     /**
-     * Метод изменения или создания нового бронирования аудитории
+     * Создать бронирование.
+     * @param request DTO с информацией о создании бронирования
+     * @return ResponseEntity с созданным бронированием
+     * @throws RoomNotFoundException если комната не найдена по идентификатору
+     * @throws UserNotFoundException если пользователь не найден по идентификатору
+     */
+    @PostMapping
+    public ResponseEntity<RoomBookingDetailsDTO> createBooking(
+            @RequestBody @NonNull RoomBookingRequestDTO request,
+            @AuthenticationPrincipal @NonNull User user)
+            throws BookingException, RoomNotFoundException, UserNotFoundException {
+
+        if (request.getOwnerId() == null)
+            request.setOwnerId(user.getUserId());
+
+        if(!(Objects.equals(request.getOwnerId(), user.getUserId())
+                || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
+
+        Booking createdBooking = bookingService.updateBooking(request);
+
+        // TODO: не только добавление, но и изменение бронирования
+        messagingTemplate.convertAndSend("/topic/1", "add new");
+        return ResponseEntity.ok(new RoomBookingDetailsDTO(createdBooking));
+    }
+
+    /**
+     * Метод изменения бронирования
      * @param request DTO с информацией для изменения бронирования
      * @return ResponseEntity с обновленным бронированием
+     * @throws AccessDeniedException попытка добавления бронирования на другого пользователя без прав администратора
      */
     @PutMapping()
     public ResponseEntity<RoomBookingDetailsDTO> updateBooking(
             @RequestBody @NonNull RoomBookingRequestDTO request,
-            @AuthenticationPrincipal @NonNull User user) throws BookingConflictException {
+            @AuthenticationPrincipal @NonNull User user) throws BookingException {
 
-        if(request.getOwnerId() == null ||
-            !(Objects.equals(request.getOwnerId(), user.getUserId())
-                    || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
-            throw new AccessDeniedException("Access denied: Not enough permissions");
-
-        return ResponseEntity.ok(new RoomBookingDetailsDTO(bookingService.updateBooking(request)));
+        return createBooking(request, user);
     }
 
     /**
@@ -169,7 +194,9 @@ public class BookingController {
             @AuthenticationPrincipal @NonNull User user)
             throws BookingNotFoundException, AccessDeniedException {
 
-        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getId(), user.getUserId())
+        var booking  = bookingService.getBookingById(bookingId);
+
+        if(!Objects.equals(booking.getOwner().getId(), user.getUserId())
                 && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
@@ -178,66 +205,4 @@ public class BookingController {
         return ResponseEntity.ok("Booking deleted successfully");
     }
 
-    @GetMapping("/{bookingId}")
-    public ResponseEntity<RoomBookingDetailsDTO> getBooking(
-            @PathVariable Long bookingId,
-            @AuthenticationPrincipal User user) throws BookingNotFoundException, InterruptedException {
-
-        if(!Objects.equals(bookingService.getBookingById(bookingId).getOwner().getId(), user.getUserId())
-                && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
-            throw new AccessDeniedException("Access denied: Not enough permissions");
-
-        RoomBookingDetailsDTO booking = bookingService.getBookingById(bookingId);
-        return ResponseEntity.ok(booking);
-    }
-
-    /**
-     * Создать бронирование.
-     *
-     * @param request DTO с информацией о создании бронирования
-     * @return ResponseEntity с созданным бронированием
-     * @throws RoomNotFoundException если комната не найдена по идентификатору
-     * @throws UserNotFoundException если пользователь не найден по идентификатору
-     */
-    @PostMapping
-    public ResponseEntity<Booking> createBooking(
-            @RequestBody @NonNull RoomBookingRequestDTO request,
-            @AuthenticationPrincipal @NonNull User user)
-            throws BookingConflictException, RoomNotFoundException, UserNotFoundException {
-
-        if (request.getOwnerId() == null)
-            request.setOwnerId(user.getUserId());
-
-        if(!(Objects.equals(request.getOwnerId(), user.getUserId())
-                || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
-            throw new AccessDeniedException("Access denied: Not enough permissions");
-
-        Booking createdBooking = bookingService.updateBooking(request);
-
-        messagingTemplate.convertAndSend("/topic/1", "add new");
-        return ResponseEntity.ok(createdBooking);
-    }
-
-//    //TODO: Перенести в Room service
-//    /**
-//     * Получить список доступных комнат для бронирования в заданном временном диапазоне с учетом дополнительных параметров.
-//     *
-//     * @param startTime     Дата-время начала бронирования
-//     * @param endTime       Дата-время окончания бронирования
-//     * @param capacity      Вместимость комнаты (опционально)
-//     * @param hasProjector  Наличие проектора в комнате (опционально)
-//     * @param hasComputers  Наличие компьютеров в комнате (опционально)
-//     * @return ResponseEntity со списком доступных комнат
-//     */
-//    @GetMapping("/available-rooms")
-//    public ResponseEntity<List<RoomDTO>> getAvailableRooms(
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
-//            @RequestParam(required = false) Integer capacity,
-//            @RequestParam(required = false) Boolean hasProjector,
-//            @RequestParam(required = false) Boolean hasComputers) {
-//
-//        List<RoomDTO> availableRooms = roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers);
-//        return ResponseEntity.ok(availableRooms);
-//    }
 }

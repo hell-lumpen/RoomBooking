@@ -34,20 +34,20 @@ public class CalendarService {
         return convertToICalendar(bookingRepository.findAll());
     }
 
-    public String getByGroup(Long groupId) {
-        var group = groupRepository.findById(groupId).orElseThrow(()-> new GroupNotFoundException(groupId));
-        return convertToICalendar(bookingRepository.findByGroupsContaining(group));
-    }
-
-    public String getByStaff(Long staffId) {
-        var staff = userRepository.findById(staffId).orElseThrow(()-> new UserNotFoundException(staffId));
-        return convertToICalendar(bookingRepository.findByStaffContaining(staff));
-    }
-
-    public String getByGroup(String groupName) {
-        var group = groupRepository.findByName(groupName).orElseThrow();
-        return convertToICalendar(bookingRepository.findByGroupsContaining(group));
-    }
+//    public String getByGroup(Long groupId) {
+//        var group = groupRepository.findById(groupId).orElseThrow(()-> new GroupNotFoundException(groupId));
+//        return convertToICalendar(bookingRepository.findByGroupsContaining(group));
+//    }
+//
+//    public String getByStaff(Long staffId) {
+//        var staff = userRepository.findById(staffId).orElseThrow(()-> new UserNotFoundException(staffId));
+//        return convertToICalendar(bookingRepository.findByStaffContaining(staff));
+//    }
+//
+//    public String getByGroup(String groupName) {
+//        var group = groupRepository.findByName(groupName).orElseThrow();
+//        return convertToICalendar(bookingRepository.findByGroupsContaining(group));
+//    }
     private static @NonNull String convertToICalendar(@NonNull List<Booking> bookings) {
         StringBuilder builder = new StringBuilder();
 

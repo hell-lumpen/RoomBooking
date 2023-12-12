@@ -3,19 +3,14 @@ package org.mai.roombooking.controllers;
 import org.mai.roombooking.dtos.RoomDTO;
 import org.mai.roombooking.services.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-
-/**
- * /api/room (UPDATE CREATE)
- * /api/room/{id} (GET DELETE)
- * реализованно /api/room/all (GET)
- * /api/room/available?startTime&endTime&capacity&hasProjector&hasComputers (GET)
- * фильтрации
- */
 @RestController
 @RequestMapping("/api/room")
 public class RoomController {
@@ -45,5 +40,30 @@ public class RoomController {
     @DeleteMapping("/delete/{id}")
     public void deleteRoom(@NonNull @PathVariable Long id) {
         roomService.delete(id);
+    }
+
+    /**
+     * Получить список доступных комнат для бронирования в заданном временном диапазоне
+     * с учетом дополнительных параметров.
+     * @param startTime     Дата-время начала бронирования
+     * @param endTime       Дата-время окончания бронирования
+     * @param capacity      Вместимость комнаты (опционально)
+     * @param hasProjector  Наличие проектора в комнате (опционально)
+     * @param hasComputers  Наличие компьютеров в комнате (опционально)
+     * @return ResponseEntity со списком доступных комнат
+     */
+    @GetMapping("/available-rooms")
+    public ResponseEntity<List<RoomDTO>> getAvailableRooms(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+            @RequestParam(required = false) Integer capacity,
+            @RequestParam(required = false) Boolean hasProjector,
+            @RequestParam(required = false) Boolean hasComputers) {
+
+        List<RoomDTO> availableRooms =
+                roomService.getAvailableRooms(startTime, endTime, capacity, hasProjector, hasComputers).stream()
+                        .map(RoomDTO::new)
+                        .toList();
+        return ResponseEntity.ok(availableRooms);
     }
 }

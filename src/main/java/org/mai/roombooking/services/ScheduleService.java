@@ -8,6 +8,7 @@ import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.exceptions.BookingConflictException;
 import org.mai.roombooking.exceptions.GroupNotFoundException;
 import org.mai.roombooking.exceptions.TagNotFoundException;
+import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.GroupRepository;
 import org.mai.roombooking.repositories.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class ScheduleService {
         //TODO: реализация
     }
 
-    public RoomBookingDTO bookingLesson(LessonDTO dto) throws BookingConflictException {
+    public RoomBookingDTO bookingLesson(LessonDTO dto) throws BookingException {
         return new RoomBookingDTO(bookingService.updateBooking(getBookingFromLessonDTO(dto)));
     }
 

@@ -21,20 +21,21 @@ public class RoomBookingRequestDTO {
     private Long id;
     private UUID bookingGroupId;
 
+    private Long ownerId;
     @NotNull
     private Long roomId;
-    @NotNull
-    private Long ownerId;
     @NotNull
     private LocalDateTime startTime;
     @NotNull
     private LocalDateTime endTime;
     @NotNull
-    @NotBlank
     private String description;
-
+    @NotNull
     private String title;
+    @NotNull
     private List<Long> staffId;
+    @NotNull
     private List<Long> groupsId;
+    @NotNull
     private List<Long> tagsId;
 }

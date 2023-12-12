@@ -26,6 +26,7 @@ dependencies {
     // Parser
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.16.2'
 
+    testImplementation 'com.h2database:h2'
 
     // Validations
     implementation group: 'org.hibernate.validator', name: 'hibernate-validator', version: '8.0.1.Final'
