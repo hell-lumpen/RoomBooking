@@ -1,5 +1,5 @@
 INSERT INTO rooms (capacity, is_cathedral, has_computers, has_projector, room_name)
-VALUES (10, true, true, 'Пространство самоподготовки IT-0'),
+VALUES (10, true, true, true, 'Пространство самоподготовки IT-0'),
     (5, true,true, false, 'IT-1'),
     (5, false,true, true, 'IT-3'),
     (70, true,true, true, 'Лекторий IT-5'),

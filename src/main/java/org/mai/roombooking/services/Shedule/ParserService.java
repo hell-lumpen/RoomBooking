@@ -130,7 +130,7 @@ public class ParserService {
         // Парсинг
         var parser = new Parser(errors);
         for (Group group : groups) {
-            for (int week = 0; week < 20; week++)
+            for (int week = 14; week < 18; week++)
                 result.addAll(parser.parse(group, week));
             log.info("Group parsed: name = " + group.getName());
         }

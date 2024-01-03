@@ -14,13 +14,15 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         List<String> ips = Arrays.asList(
                 "localhost",
-                "10.10.74.166",
+                "10.10.50.213",
                 "192.168.1.8",
                 "10.10.67.118",
                 "10.10.71.185",
-                "10.9.8.193");
+                "10.9.8.193",
+                "172.19.112.1",
+                "192.168.3.3");
 
-        ips = ips.stream().map(element -> "http://" + element + ":3000").toList();
+        ips = ips.stream().map(element -> "http://" + element + ":5173").toList();
 
         registry.addMapping("/**")
 //                .allowedOrigins("http://localhost:3000", "http://192.168.1.8:3000", "http://10.10.67.118:3000", "http://10.10.71.185:3000")
