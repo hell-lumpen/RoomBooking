@@ -162,9 +162,6 @@ public class ParserService {
         List<ScheduleLesson> result = new ArrayList<>();
 
         for(int i = 0; i < lessons.size(); i++) {
-            if (i%1000 == 0)
-                log.info("-*-*-*-*-*-*-*-*-*-*-*-");
-
             var lesson = lessons.get(i);
             var key = new GroupingByLessonNameKey(lesson.name, lesson.tag, lesson.room);
             if (lessonsGroup.containsKey(key)) {
@@ -187,6 +184,7 @@ public class ParserService {
             saver.run(lesson);
         log.info("Saving end");
     }
+
 
     @Getter
     @AllArgsConstructor

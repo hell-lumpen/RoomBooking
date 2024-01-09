@@ -9,6 +9,7 @@ import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Group;
 import org.mai.roombooking.entities.Tag;
+import org.mai.roombooking.entities.UserInfo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +29,8 @@ public class RoomBookingDTO {
     private String title;
     private String description;
     private List<TagDTO> tags;
+    private List<GroupDTO> groups;
+    private List<UserDTO> staff;
 
     public RoomBookingDTO(@NonNull Booking booking) {
         title = booking.getTitle();
@@ -39,5 +42,7 @@ public class RoomBookingDTO {
         owner = new PairDTO(booking.getOwner());
         tags = booking.getTags().stream().map(TagDTO::new).toList();
         description = booking.getDescription();
+        groups = booking.getGroups().stream().map(GroupDTO::new).toList();
+        staff = booking.getStaff().stream().map(UserDTO::new).toList();
     }
 }

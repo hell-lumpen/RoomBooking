@@ -125,6 +125,19 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
+
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<List<RoomBookingDTO>> getBookingsByGroupInTimeRange(
+            @PathVariable @NonNull Long groupId,
+            @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime
+    ) {
+        return ResponseEntity.ok(bookingService.getBookingsByGroupInTimeRange(groupId, startTime, endTime)
+                .stream()
+                .map(RoomBookingDTO::new)
+                .toList());
+    }
+
     /**
      * Получение предстоящих событий авторизованного пользователя
      * @param limit количество запрашиваемых событий

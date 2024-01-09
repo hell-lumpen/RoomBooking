@@ -61,16 +61,15 @@ public class SaverLesson {
         if (tag.isEmpty())
             tag = Optional.of(tagRepository.findByShortName("ЛК").get());
 
-        if (lesson.getRoom().equals("--каф.") && lesson.getGroup().get(0).getCourse() == 8) {
+        if (lesson.getRoom().equals("--каф.") && lesson.getGroup().get(0).getFaculty() == 8) {
             var availableRooms = roomService.getAvailableRooms(lesson.getStart(),lesson.getEnd(),
                     lesson.getGroup().stream().map(Group::getSize).mapToInt(Integer::intValue).sum(),
                     null, null).stream().filter(Room::getIsCathedral).toList();
 
             if (availableRooms.isEmpty()) {
                 log.error("Бронирование не распределено: "+ lesson);
-                //TODO: ошибка
+                //TODO: обработка ошибки
             }
-
             room = Optional.of(availableRooms.get(0));
         }
 

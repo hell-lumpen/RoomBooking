@@ -154,6 +154,12 @@ public class BookingService {
         return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
 
+    public List<Booking> getBookingsByGroupInTimeRange(Long groupId,
+                                                       LocalDateTime startTime,
+                                                       LocalDateTime endTime) {
+        return bookingRepository.findByGroupsContains(groupId, startTime, endTime);
+    }
+
     // Обновление данных
 
     /**
