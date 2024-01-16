@@ -2,10 +2,12 @@ package org.mai.roombooking.controllers;
 
 import lombok.NonNull;
 import org.mai.roombooking.dtos.UserDTO;
+import org.mai.roombooking.entities.User;
 import org.mai.roombooking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -84,6 +86,11 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDTO> getUserById(@NonNull @PathVariable Long userId) {
         return ResponseEntity.ok(userService.findById(userId));
+    }
+
+    @GetMapping("/authorized")
+    public ResponseEntity<UserDTO> getAuthorizedUser(@AuthenticationPrincipal @NonNull User user) {
+        return ResponseEntity.ok(new UserDTO(user));
     }
 
 }
