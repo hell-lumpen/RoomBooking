@@ -2,6 +2,7 @@ package org.mai.roombooking.services;
 
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.entities.UserInfo;
 import org.mai.roombooking.exceptions.UserNotFoundException;
@@ -78,6 +79,7 @@ public class AuthService {
         System.out.println("---4");
 
         return AuthResponse.builder()
+                .user(new UserDTO(user.get(0)))
                 .token(jwtToken)
                 .build();
     }
