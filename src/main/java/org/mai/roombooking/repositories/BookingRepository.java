@@ -16,7 +16,7 @@ import java.util.UUID;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.owner " +
-            "WHERE b.endTime >= :startDateTime AND b.startTime <= :endDateTime")
+            "WHERE (b.endTime >= :startDateTime AND b.startTime <= :endDateTime) OR b.recurringInterval IS NOT NULL")
     List<Booking> findBookingsInDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
 

@@ -72,17 +72,19 @@ public class BookingService {
 
     /**
      * Получение детализированной информации по запрашиваемому мероприятию
+     *
      * @param bookingId идентификатор бронирования
      * @return детализированная информация по бронированию
      * @throws BookingNotFoundException бронирование, с заданным идентификатором, не найдено
      */
     public RoomBookingDetailsDTO getBookingById(Long bookingId) throws BookingNotFoundException {
         return new RoomBookingDetailsDTO(bookingRepository.findById(bookingId)
-                .orElseThrow(()->new BookingNotFoundException(bookingId)));
+                .orElseThrow(() -> new BookingNotFoundException(bookingId)));
     }
 
     /**
      * Получение списка всех бронирований
+     *
      * @return список всех бронирований
      */
     public List<RoomBookingDTO> getAll() {
@@ -97,11 +99,49 @@ public class BookingService {
      * @return список бронирований комнат в заданном временном диапазоне
      */
     public List<Pair> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
-        List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime,endTime);
+        List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime, endTime);
 
         Map<PairDTO, List<RoomBookingDTO>> groupedBookings = bookings.stream()
+                .filter(booking -> booking.getRecurringCount() == null)
                 .map((RoomBookingDTO::new))
                 .collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
+
+
+        bookings.stream()
+                .filter(booking -> booking.getRecurringCount() != null)
+                .toList()
+                .forEach(
+                booking -> {
+                    PairDTO key = new PairDTO(booking.getRoom());
+
+                    LocalDateTime s, e;
+                    long startCountRecurringDays = 0;
+                    if (booking.getRecurringUnit().equals("DAY"))
+                        startCountRecurringDays = 1;
+                    else if (booking.getRecurringUnit().equals("WEEK")) {
+                        startCountRecurringDays = 7;
+                    }
+
+                    startCountRecurringDays *= booking.getRecurringInterval();
+
+                    for (int i = 0; i < booking.getRecurringCount(); i++) {
+                        s = booking.getStartTime().plusDays(i * startCountRecurringDays);
+                        e = booking.getEndTime().plusDays(i * startCountRecurringDays);
+                        if (s.isAfter(startTime) && e.isBefore(endTime)) {
+                            var newBooking = new RoomBookingDTO(booking);
+                            newBooking.setStartTime(s);
+                            newBooking.setEndTime(e);
+                            if (!groupedBookings.containsKey(key)) {
+                                groupedBookings.put(key, new ArrayList<>(List.of(new RoomBookingDTO(booking))));
+                            } else {
+                                groupedBookings.get(key).add(new RoomBookingDTO(booking));
+                            }
+                        }
+                    }
+
+                }
+
+        );
 
         var data = groupedBookings.entrySet().stream()
                 .collect(Collectors.toMap(
@@ -140,16 +180,16 @@ public class BookingService {
      * @param endTime   дата и время окончания запроса
      * @return список бронирований для указанного пользователя в заданном временном диапазоне
      * @throws UsernameNotFoundException если пользователь не найден по идентификатору
-     * @throws AccessDeniedException если пользователю недостаточно прав для выполнения запроса
+     * @throws AccessDeniedException     если пользователю недостаточно прав для выполнения запроса
      */
     public List<RoomBookingDTO> getBookingsByUserInTimeRange(Long userId,
                                                              LocalDateTime startTime,
                                                              LocalDateTime endTime)
-                                                             throws UsernameNotFoundException{
+            throws UsernameNotFoundException {
         List<Booking> bookings = bookingRepository.findBookingsInDateRangeByUser(startTime, endTime, userId);
-            if (bookings.isEmpty())
-                userRepository.findById(userId).orElseThrow(() ->
-                        new UsernameNotFoundException("User with id" + userId + "not found"));
+        if (bookings.isEmpty())
+            userRepository.findById(userId).orElseThrow(() ->
+                    new UsernameNotFoundException("User with id" + userId + "not found"));
 
         return bookings.stream().map((RoomBookingDTO::new)).toList();
     }
@@ -198,10 +238,10 @@ public class BookingService {
      * @param dto - Дто запроса от клиента
      * @return объект для сохранения изменений в базу данных
      * @throws UsernameNotFoundException пользователь с указанным клиентом id не обнаружен
-     * @throws RoomNotFoundException аудитория с указанным клиентом id не обнаружен
+     * @throws RoomNotFoundException     аудитория с указанным клиентом id не обнаружен
      */
     private Booking getBookingFromDTO(@NonNull RoomBookingRequestDTO dto)
-            throws UsernameNotFoundException, RoomNotFoundException{
+            throws UsernameNotFoundException, RoomNotFoundException {
         User user = userRepository.findById(dto.getOwnerId())
                 .orElseThrow(() -> new UserNotFoundException(dto.getOwnerId()));
 
@@ -220,21 +260,21 @@ public class BookingService {
                 .staff(dto.getStaffId()
                         .stream()
                         .map(id -> userRepository.findById(id)
-                                .orElseThrow(()->new UserNotFoundException(id)))
+                                .orElseThrow(() -> new UserNotFoundException(id)))
                         .toList())
                 .groups(dto.getGroupsId()
                         .stream()
                         .map(id -> groupRepository.findById(id)
-                                .orElseThrow(()->new GroupNotFoundException(id)))
+                                .orElseThrow(() -> new GroupNotFoundException(id)))
                         .toList())
                 .tags(dto.getTagsId().stream().map((id) -> tagRepository.findById(id).orElseThrow(() ->
-                        new TagNotFoundException("tag whis id: " + id ))).collect(Collectors.toSet()))
+                        new TagNotFoundException("tag whis id: " + id))).collect(Collectors.toSet()))
                 .build();
     }
 
     private void validateBooking(@NonNull LocalDateTime start,
-                                    @NonNull LocalDateTime end,
-                                    @NonNull Long roomId) throws BookingException {
+                                 @NonNull LocalDateTime end,
+                                 @NonNull Long roomId) throws BookingException {
         if (start.isAfter(end) || start.getDayOfYear() != end.getDayOfYear())
             throw new BookingException("Booking exception");
 

@@ -29,7 +29,6 @@ public class ParserTest {
     @Test
     public void test() {
 
-
         var group = groupRepository.save(Group.builder().name("М8О-411Б-20").size(20).build());
         Parser parser = new Parser(new ConcurrentLinkedQueue<>());
 

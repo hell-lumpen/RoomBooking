@@ -32,7 +32,7 @@ public class ParserService {
         List<CompletableFuture<Void>> allFutures = new ArrayList<>();
 
         for (int department = 8; department <= 8; department++) {
-            for (int course = 3; course <= 4; course++) {
+            for (int course = 4; course <= 4; course++) {
                 int finalDepartment = department;
                 int finalCourse = course;
                 CompletableFuture<List<String>> parsedGroups = CompletableFuture.supplyAsync(() ->
@@ -130,7 +130,7 @@ public class ParserService {
         // Парсинг
         var parser = new Parser(errors);
         for (Group group : groups) {
-            for (int week = 14; week < 18; week++)
+            for (int week = 2; week < 4; week++)
                 result.addAll(parser.parse(group, week));
             log.info("Group parsed: name = " + group.getName());
         }

@@ -60,6 +60,16 @@ public class Booking {
     )
     private Set<Tag> tags;
 
+    @Column(name = "recurring_interval")
+    private Integer recurringInterval;
+
+    @Column(name = "recurring_unit")
+    private String recurringUnit;
+
+    @Column(name = "recurring_count")
+    private Integer recurringCount;
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
