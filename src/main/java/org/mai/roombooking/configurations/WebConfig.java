@@ -12,21 +12,9 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        List<String> ips = Arrays.asList(
-                "localhost",
-                "10.10.50.213",
-                "192.168.1.8",
-                "10.10.67.118",
-                "10.10.71.185",
-                "10.9.8.193",
-                "172.19.112.1",
-                "192.168.3.3");
-
-        ips = ips.stream().map(element -> "http://" + element + ":5173").toList();
 
         registry.addMapping("/**")
-//                .allowedOrigins("http://localhost:3000", "http://192.168.1.8:3000", "http://10.10.67.118:3000", "http://10.10.71.185:3000")
-                .allowedOrigins(ips.toArray(new String[0]))
+                .allowedOriginPatterns("http://10.10.*:[5173,5174]", "http://localhost:[5173,5174]")
                 .allowCredentials(true)
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Origin");

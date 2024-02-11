@@ -60,7 +60,7 @@ public class SaverLesson {
 
         if (tag.isEmpty())
             tag = Optional.of(tagRepository.findByShortName("ЛК").get());
-
+// todo: говно код. ты разыменовываешь null
         if (lesson.getRoom().equals("--каф.") && lesson.getGroup().get(0).getFaculty() == 8) {
             var availableRooms = roomService.getAvailableRooms(lesson.getStart(),lesson.getEnd(),
                     lesson.getGroup().stream().map(Group::getSize).mapToInt(Integer::intValue).sum(),

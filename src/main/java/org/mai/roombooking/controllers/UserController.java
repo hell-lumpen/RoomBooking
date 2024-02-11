@@ -88,7 +88,7 @@ public class UserController {
         return ResponseEntity.ok(userService.findById(userId));
     }
 
-    @GetMapping("/authorized")
+    @GetMapping("/me")
     public ResponseEntity<UserDTO> getAuthorizedUser(@AuthenticationPrincipal @NonNull User user) {
         return ResponseEntity.ok(new UserDTO(user));
     }

@@ -43,14 +43,14 @@ VALUES
     ('Совещание', 'Совещание', '#A8D8B9')
 ON CONFLICT DO NOTHING;
 
-
-INSERT INTO groups(name)
-VALUES
-    ('Группа 1'),
-    ('Группа 2'),
-    ('Группа 3'),
-    ('Группа 4')
-ON CONFLICT DO NOTHING;
+--
+-- INSERT INTO groups(name)
+-- VALUES
+--     ('Группа 1'),
+--     ('Группа 2'),
+--     ('Группа 3'),
+--     ('Группа 4')
+-- ON CONFLICT DO NOTHING;
 
 
 INSERT INTO bookings (booking_group_id, room_id, owner_id, start_time, end_time, title, description)

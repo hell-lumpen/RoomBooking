@@ -65,7 +65,7 @@ public class Parser {
                             .split(",")[1]
                             .trim()
                             .split(" ");
-                    LocalDate date = LocalDate.of(LocalDate.now().getYear(),
+                    LocalDate date = LocalDate.of(LocalDate.now().getYear()-1,
                             month.get(dateStr[1]),
                             Integer.parseInt(dateStr[0]));
 
