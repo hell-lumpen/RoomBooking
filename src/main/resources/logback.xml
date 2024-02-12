@@ -1,24 +1,15 @@
 <configuration>
 
-    <!-- Настройка консольного вывода -->
+    <!-- Console appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Настройка вывода в файл -->
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/mylog.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <!-- Уровень логирования для корневого логгера -->
+    <!-- Root logger level -->
     <root level="info">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE" />
     </root>
 
 </configuration>

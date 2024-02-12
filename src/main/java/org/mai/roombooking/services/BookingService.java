@@ -29,15 +29,17 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final GroupRepository groupRepository;
     private final TagRepository tagRepository;
+    private final ValidationService validationService;
 
     BookingService(BookingRepository bookingRepository, UserRepository userRepository,
                    RoomRepository roomRepository, GroupRepository groupRepository,
-                   TagRepository tagRepository) {
+                   TagRepository tagRepository, ValidationService validationService) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
         this.groupRepository = groupRepository;
         this.tagRepository = tagRepository;
+        this.validationService = validationService;
     }
 
     // Получение данных
@@ -216,10 +218,14 @@ public class BookingService {
 
     public Booking updateBooking(@NonNull Booking request)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
+        validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId());
+        return bookingRepository.save(request);
+    }
 
-        validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId());
-
-
+    public Booking updateBooking(@NonNull Booking request, boolean validation)
+            throws UsernameNotFoundException, RoomNotFoundException, BookingException {
+        if (validation)
+            validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId());
         return bookingRepository.save(request);
     }
 
@@ -265,10 +271,10 @@ public class BookingService {
                 .groups(dto.getGroupsId()
                         .stream()
                         .map(id -> groupRepository.findById(id)
-                                .orElseThrow(() -> new GroupNotFoundException(id)))
-                        .toList())
+                                .orElseThrow(()->new GroupNotFoundException(id)))
+                        .collect(Collectors.toSet()))
                 .tags(dto.getTagsId().stream().map((id) -> tagRepository.findById(id).orElseThrow(() ->
-                        new TagNotFoundException("tag whis id: " + id))).collect(Collectors.toSet()))
+                        new TagNotFoundException("tag whis id: " + id ))).collect(Collectors.toSet()))
                 .build();
     }
 

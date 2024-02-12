@@ -32,6 +32,11 @@ public class Tag {
         shortName = dto.getShortName();
         color = dto.getColor();
     }
+    public Tag(String _shortName, String _fullName, String _color) {
+        shortName = _shortName;
+        fullName = _fullName;
+        color = _color;
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @AllArgsConstructor
@@ -37,7 +38,7 @@ public class Booking {
     List<User> staff;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    List<Group> groups;
+    Set<Group> groups;
 
     @Column(name = "start_time", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -86,5 +87,19 @@ public class Booking {
     @Override
     public int hashCode() {
         return Objects.hash(id, bookingGroupId, room, owner, staff, groups, startTime, endTime, title, description, tags);
+    }
+
+    @Override
+    public String toString() {
+        return  "bookingGroupId=" + bookingGroupId +
+                "|| room=" + room.getRoomName() +
+                "|| owner=" + owner.getFullName() +
+                "|| staff=" + staff.stream().map(User::getFullName).collect(Collectors.joining(", ")) +
+                "|| groups=" + groups.stream().map(Group::getName).collect(Collectors.joining(", ")) +
+                "|| startTime=" + startTime +
+                "|| endTime=" + endTime +
+                "|| title='" + title + '\'' +
+                "|| description='" + description + '\'' +
+                "|| tags=" + tags.stream().map(Tag::getFullName).collect(Collectors.joining(", "));
     }
 }

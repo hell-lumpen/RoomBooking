@@ -12,7 +12,7 @@ import java.util.Objects;
 @Data
 @Builder
 @Table(name = "groups")
-public class Group {
+public class Group implements Comparable<Group> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,8 @@ public class Group {
 
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private int size;
+
+    private String specialty;
 
 
     public Group(@NonNull GroupDTO dto) {
@@ -60,4 +62,8 @@ public class Group {
         return Objects.hash(id, name);
     }
 
+    @Override
+    public int compareTo(Group o) {
+        return Integer.compare(this.hashCode(), o.hashCode());
+    }
 }

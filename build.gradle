@@ -23,6 +23,16 @@ repositories {
 
 dependencies {
 
+    // Log
+    implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.4.14'
+    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.14'
+
+
+    // Apache XML
+    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.5'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.5'
+
+
     // Parser
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.16.2'
 

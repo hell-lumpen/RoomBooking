@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CalendarService {
@@ -81,7 +82,7 @@ public class CalendarService {
             icsBuilder.append("Участники мероприятия: ");
 
             List<User> staff = booking.getStaff();
-            List<Group> groups = booking.getGroups();
+            Set<Group> groups = booking.getGroups();
 
             boolean isNotFirst = false;
 
