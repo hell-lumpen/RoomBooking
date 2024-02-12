@@ -1,6 +1,5 @@
 package org.mai.roombooking.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -61,9 +60,8 @@ public class Booking {
     )
     private Set<Tag> tags;
 
-
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "recurring_rule")
+    @JoinColumn(name = "recurring_rule", nullable = false)
     private RecurringRule recurringRule;
 
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.owner JOIN FETCH b.recurringRule " +
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.owner " +
             " WHERE b.startTime <= :endDateTime AND " +
             "(b.endTime >= :startDateTime AND b.recurringRule IS NULL) OR " +
             "(b.recurringRule IS NOT NULL)")
