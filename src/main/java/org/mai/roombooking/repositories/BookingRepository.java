@@ -1,8 +1,6 @@
 package org.mai.roombooking.repositories;
 
 import org.mai.roombooking.entities.Booking;
-import org.mai.roombooking.entities.Group;
-import org.mai.roombooking.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,8 +13,10 @@ import java.util.UUID;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.owner " +
-            "WHERE (b.endTime >= :startDateTime AND b.startTime <= :endDateTime) OR b.recurringInterval IS NOT NULL")
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.owner JOIN FETCH b.recurringRule " +
+            " WHERE b.startTime <= :endDateTime AND " +
+            "(b.endTime >= :startDateTime AND b.recurringRule IS NULL) OR " +
+            "(b.recurringRule IS NOT NULL)")
     List<Booking> findBookingsInDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
 
@@ -52,8 +52,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.startTime <= :endDateTime")
     List<Booking> findByGroupsContains(Long groupId, LocalDateTime startDateTime, LocalDateTime endDateTime);
 
-//    List<Booking> findByGroupsContaining(Group group);
-//    List<Booking> findByStaffContaining(User staff);
+
 
     @Query("SELECT b FROM Booking b WHERE b.owner.userId = :ownerId")
     List<Booking> findByOwner(Long ownerId);

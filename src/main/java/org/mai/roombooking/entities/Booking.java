@@ -61,14 +61,11 @@ public class Booking {
     )
     private Set<Tag> tags;
 
-    @Column(name = "recurring_interval")
-    private Integer recurringInterval;
 
-    @Column(name = "recurring_unit")
-    private String recurringUnit;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "recurring_rule")
+    private RecurringRule recurringRule;
 
-    @Column(name = "recurring_count")
-    private Integer recurringCount;
 
 
     @Override

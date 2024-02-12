@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -104,32 +105,40 @@ public class BookingService {
         List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime, endTime);
 
         Map<PairDTO, List<RoomBookingDTO>> groupedBookings = bookings.stream()
-                .filter(booking -> booking.getRecurringCount() == null)
+                .filter(booking -> booking.getRecurringRule() == null)
                 .map((RoomBookingDTO::new))
                 .collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
 
 
         bookings.stream()
-                .filter(booking -> booking.getRecurringCount() != null)
+                .filter(booking -> booking.getRecurringRule() != null)
                 .toList()
                 .forEach(
                 booking -> {
                     PairDTO key = new PairDTO(booking.getRoom());
-
+                    RecurringRule recurringRule = booking.getRecurringRule();
                     LocalDateTime s, e;
+                    boolean compareWithException;
                     long startCountRecurringDays = 0;
-                    if (booking.getRecurringUnit().equals("DAY"))
+                    if (recurringRule.getUnit().equals("DAY"))
                         startCountRecurringDays = 1;
-                    else if (booking.getRecurringUnit().equals("WEEK")) {
+                    else if (recurringRule.getUnit().equals("WEEK")) {
                         startCountRecurringDays = 7;
                     }
 
-                    startCountRecurringDays *= booking.getRecurringInterval();
+                    startCountRecurringDays *= recurringRule.getInterval();
 
-                    for (int i = 0; i < booking.getRecurringCount(); i++) {
+                    for (int i = 0; i < recurringRule.getCount(); i++) {
+                        compareWithException = false;
                         s = booking.getStartTime().plusDays(i * startCountRecurringDays);
                         e = booking.getEndTime().plusDays(i * startCountRecurringDays);
-                        if (s.isAfter(startTime) && e.isBefore(endTime)) {
+                        for (RecurringException exception : booking.getRecurringRule().getExceptions())
+                        {
+                            compareWithException |= (exception.getDate().isEqual(s.toLocalDate()));
+                        }
+
+
+                        if (s.isAfter(startTime) && e.isBefore(endTime) && !compareWithException) {
                             var newBooking = new RoomBookingDTO(booking);
                             newBooking.setStartTime(s);
                             newBooking.setEndTime(e);
