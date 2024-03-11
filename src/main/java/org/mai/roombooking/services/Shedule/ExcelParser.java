@@ -1,6 +1,7 @@
 package org.mai.roombooking.services.Shedule;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -12,13 +13,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 /**
  * Сервис для прасинга Excel файлов данных о группах, выгруженных из ИАСУ
  */
-@Service
+
+@Slf4j
 public class ExcelParser {
     FileInputStream fileInputStream;
     Workbook workbook;
@@ -26,8 +29,11 @@ public class ExcelParser {
     public List<Group> parseGroupFile(@NonNull String pathFile) {
         if (!openFile(pathFile))
             return new ArrayList<>();
-        else
-            return parseFile();
+
+        List<Group> groups = parseFile();
+        log.info("Groups parsed from local file: path = " + pathFile);
+
+        return groups;
     }
 
     public List<Group> parseGroupFile(@NonNull MultipartFile file) {
@@ -43,6 +49,9 @@ public class ExcelParser {
             workbook = new XSSFWorkbook(fileInputStream);
             return true;
         } catch (IOException e) {
+            log.error("Get groups error on open file: path = " + fileName + "/n"
+                    + e.getMessage() + "/n"
+                    + Arrays.toString(e.getStackTrace()));
             return false;
         }
     }
@@ -53,6 +62,9 @@ public class ExcelParser {
             workbook = new XSSFWorkbook(fileInputStream);
             return true;
         } catch (IOException e) {
+            log.error("Get groups error on open file: MultipartFile = " + file.getName() + "/n"
+                    + e.getMessage() + "/n"
+                    + Arrays.toString(e.getStackTrace()));
             return false;
         }
     }

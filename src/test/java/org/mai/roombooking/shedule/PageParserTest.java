@@ -9,6 +9,8 @@ import org.mai.roombooking.services.Shedule.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
+
 @SpringBootTest
 public class PageParserTest {
     @Autowired
@@ -18,12 +20,10 @@ public class PageParserTest {
     EnrichmentService enrichmentService;
 
     @Autowired
-    private ExcelParser excelParser;
-
-    @Autowired
     private ScheduleService scheduleService;
     @Test
     public void excelTest() {
+        ExcelParser excelParser = new ExcelParser();
         var groups = excelParser.parseGroupFile("src/main/resources/groups.xlsx");
         for (var group : groups){
             System.out.println(group.getName() + "  " + group.getSpecialty() + "  " + group.getSize());
@@ -55,5 +55,6 @@ public class PageParserTest {
     @Test
     public void scheduleTest() {
         scheduleService.updateSchedule("src/main/resources/groups.xlsx");
+        scheduleService.updateSchedule(List.of(1,2,3,4,5,6,7,9,10,11,12,14));
     }
 }

@@ -3,6 +3,11 @@ package org.mai.roombooking.services.Shedule;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Group;
 import org.mai.roombooking.entities.Room;
@@ -14,10 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,7 +31,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ScheduleService {
 
-    private final ExcelParser excelParser;
     private final GroupingService groupingService;
     private final GroupService groupService;
     private final PageParser pageParser;
@@ -36,18 +38,24 @@ public class ScheduleService {
     private final BookingService bookingService;
     private final RoomService roomService;
 
+    public void updateSchedule(List<Integer> departments) {
+        var groups = saveGroups(parseGroups(departments));
+        List<Booking> schedule = parseSchedule(groups);
+        List<Booking> groupedBookings = groupingService.group(schedule);
+        saveBookings(groupedBookings);
+    }
+
     public void updateSchedule(String groupsDataFilePath) {
+        ExcelParser excelParser = new ExcelParser();
         List<Group> groups = excelParser.parseGroupFile(groupsDataFilePath);
         groupService.saveGroups(groups);
         List<Booking> schedule = parseSchedule(groups);
-        System.gc();
         List<Booking> groupedBookings = groupingService.group(schedule);
-        System.gc();
         saveBookings(groupedBookings);
-        System.gc();
     }
 
     public void updateSchedule(MultipartFile groupsData) {
+        ExcelParser excelParser = new ExcelParser();
         List<Group> groups = excelParser.parseGroupFile(groupsData);
         groupService.saveGroups(groups);
         List<Booking> schedule = parseSchedule(groups);
@@ -65,7 +73,6 @@ public class ScheduleService {
                 var lessons = CompletableFuture.supplyAsync(() -> pageParser.parse(group, finalWeek),
                         executor);
                 completableFutures.add(lessons.thenApplyAsync(enrichmentService::enrichment, executor2));
-
             }
         }
         return completableFutures.stream()
@@ -114,5 +121,38 @@ public class ScheduleService {
                 return false;
         }
         return true;
+    }
+
+    private List<String> parseGroups(List<Integer> departments) {
+        List<String> result = new LinkedList<>();
+        for (int department : departments) {
+            for (int course = 1; course <= 6; course++) {
+                String url = "https://mai.ru/education/studies/schedule/groups.php?department=Институт+№" +
+                        department + "&course=" + course;
+                try {
+                    Thread.sleep(1000);
+                    Connection connection = Jsoup.connect(url)
+                            .cookie("BITRIX_SM_GUEST_ID", "%D0%9C8%D0%9E-101%D0%91-23");
+
+                    Document document = connection.get();
+                    Elements elements = document.getElementsByClass("btn btn-soft-secondary btn-xs mb-1 fw-medium btn-group");
+
+                    for (Element element : elements) {
+                        result.add(element.text());
+                    }
+                } catch (IOException ex) {
+                    System.err.println("Error parsing groups in course " + course + " and department " + department);
+                    System.err.println(ex.getMessage());
+                    return new LinkedList<>();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<Group> saveGroups(List<String> groups) {
+        return groupService.saveGroups(groups.stream().map(x -> Group.builder().name(x).size(25).specialty("").build()).toList());
     }
 }
