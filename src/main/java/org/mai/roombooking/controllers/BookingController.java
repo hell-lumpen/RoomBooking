@@ -191,7 +191,7 @@ public class BookingController {
     public ResponseEntity<RoomBookingDetailsDTO> updateBooking(
             @RequestBody @NonNull RoomBookingRequestDTO request,
             @AuthenticationPrincipal @NonNull User user) throws BookingException {
-
+        messagingTemplate.convertAndSend("/topic/1", "add new");
         return createBooking(request, user);
     }
 
@@ -214,7 +214,7 @@ public class BookingController {
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
         bookingService.deleteBooking(bookingId);
-
+        messagingTemplate.convertAndSend("/topic/1", "add new");
         return ResponseEntity.ok("Booking deleted successfully");
     }
 
