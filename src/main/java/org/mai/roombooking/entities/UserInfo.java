@@ -21,7 +21,7 @@ public class UserInfo {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "phone_number", unique = true, nullable = false)
+    @Column(name = "phone_number", unique = true)
     @Setter
     private String phoneNumber;
 

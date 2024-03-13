@@ -227,14 +227,15 @@ public class BookingService {
 
     public Booking updateBooking(@NonNull Booking request)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
-        validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId());
+
+        validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId(), request.getId());
         return bookingRepository.save(request);
     }
 
     public Booking updateBooking(@NonNull Booking request, boolean validation)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
         if (validation)
-            validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId());
+            validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId(), request.getId());
         return bookingRepository.save(request);
     }
 

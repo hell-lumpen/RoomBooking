@@ -47,6 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             System.out.println(userDetails.getUsername());
             if (jwtService.isTokenValid(jwt, userDetails) && userDetails.isAccountNonLocked()) {
+                System.out.println("User is valid");
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
@@ -59,8 +60,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
-            if (!userDetails.isAccountNonLocked()) {
+            else if (!userDetails.isAccountNonLocked()) {
+                System.out.println("user is blocked");
                 throw new LockedException("User account is locked");
+            }
+            else {
+                System.out.println("user JWT non valid");
             }
         }
         filterChain.doFilter(request, response);

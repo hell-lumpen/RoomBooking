@@ -187,7 +187,7 @@ public class BookingController {
      * @return ResponseEntity с обновленным бронированием
      * @throws AccessDeniedException попытка добавления бронирования на другого пользователя без прав администратора
      */
-    @PutMapping()
+    @PutMapping
     public ResponseEntity<RoomBookingDetailsDTO> updateBooking(
             @RequestBody @NonNull RoomBookingRequestDTO request,
             @AuthenticationPrincipal @NonNull User user) throws BookingException {

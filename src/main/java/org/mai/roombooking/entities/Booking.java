@@ -61,7 +61,7 @@ public class Booking {
     private Set<Tag> tags;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "recurring_rule", nullable = false)
+    @JoinColumn(name = "recurring_rule")
     private RecurringRule recurringRule;
 
 

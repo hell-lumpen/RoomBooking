@@ -37,7 +37,8 @@ public class ValidationService {
 
     public void validateBooking(@NonNull LocalDateTime start,
                                  @NonNull LocalDateTime end,
-                                 @NonNull Long roomId) throws BookingException {
+                                 @NonNull Long roomId,
+                                 Long bookingId) throws BookingException {
         if (start.isAfter(end))
             throw new BookingException("The start time of the booking must not be later than the end time.");
         else if (start.getDayOfYear() != end.getDayOfYear())
@@ -49,7 +50,7 @@ public class ValidationService {
                 .map(RoomBookingDTO::new)
                 .toList();
 
-        if (!conflicts.isEmpty())
+        if (!conflicts.isEmpty() && !(conflicts.size() == 1 && conflicts.get(0).getId().equals(bookingId)))
             throw new BookingConflictException(conflicts);
     }
 }
