@@ -96,8 +96,8 @@ public class BookingService {
      *
      * @return список всех бронирований
      */
-    public List<RoomBookingDTO> getAll() {
-        return bookingRepository.findAll().stream().map(RoomBookingDTO::new).toList();
+    public List<Booking> getAll() {
+        return bookingRepository.findAll();
     }
 
     /**
@@ -183,10 +183,9 @@ public class BookingService {
      * @param endTime   дата и время окончания запроса
      * @return список бронирований для указанной комнаты в заданном временном диапазоне
      */
-    public List<RoomBookingDTO> getBookingsByRoomInTimeRange(Long roomId, LocalDateTime startTime,
+    public List<Booking> getBookingsByRoomInTimeRange(Long roomId, LocalDateTime startTime,
                                                              LocalDateTime endTime) {
-        List<Booking> bookings = bookingRepository.findBookingsInDateRangeForRoom(startTime, endTime, roomId);
-        return bookings.stream().map((RoomBookingDTO::new)).toList();
+        return bookingRepository.findBookingsInDateRangeForRoom(startTime, endTime, roomId);
     }
 
     /**
@@ -199,7 +198,7 @@ public class BookingService {
      * @throws UsernameNotFoundException если пользователь не найден по идентификатору
      * @throws AccessDeniedException     если пользователю недостаточно прав для выполнения запроса
      */
-    public List<RoomBookingDTO> getBookingsByUserInTimeRange(Long userId,
+    public List<Booking> getBookingsByUserInTimeRange(Long userId,
                                                              LocalDateTime startTime,
                                                              LocalDateTime endTime)
             throws UsernameNotFoundException {
@@ -208,7 +207,7 @@ public class BookingService {
             userRepository.findById(userId).orElseThrow(() ->
                     new UsernameNotFoundException("User with id" + userId + "not found"));
 
-        return bookings.stream().map((RoomBookingDTO::new)).toList();
+        return bookings;
     }
 
     public List<Booking> getBookingsByGroupInTimeRange(Long groupId,
