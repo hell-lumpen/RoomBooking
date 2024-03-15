@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -68,6 +65,13 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingEquipment> bookingEquipments = new ArrayList<>();
+
+    public boolean needEquipment() {
+        return bookingEquipments != null && !bookingEquipments.isEmpty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,9 +104,5 @@ public class Booking {
                 "|| tags=" + tags.stream().map(Tag::getFullName).collect(Collectors.joining(", "));
     }
 
-     public enum Status {
-        REQUIRES_CONFIRMATION,
-        CONFIRMED
-
-    }
+     public enum Status {REQUIRES_CONFIRMATION, CONFIRMED }
 }
