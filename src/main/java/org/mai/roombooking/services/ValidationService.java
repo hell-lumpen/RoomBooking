@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -46,11 +47,12 @@ public class ValidationService {
 
         var conflicts = bookingRepository.findBookingsInDateRange(start, end)
                 .stream()
-                .filter((bookingItem -> bookingItem.getRoom().getRoomId().equals(roomId)))
+                .filter((booking -> booking.getRoom().getRoomId().equals(roomId)))
+                .filter(booking -> !Objects.equals(booking.getId(), bookingId))
                 .map(RoomBookingDTO::new)
                 .toList();
 
-        if (!conflicts.isEmpty() && !(conflicts.size() == 1 && conflicts.get(0).getId().equals(bookingId)))
+        if (!conflicts.isEmpty())
             throw new BookingConflictException(conflicts);
     }
 }
