@@ -5,7 +5,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.mai.roombooking.dtos.bookings.Pair;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
-import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.User;
@@ -46,7 +45,10 @@ public class BookingController {
      */ 
     @GetMapping("/all")
     public ResponseEntity<List<RoomBookingDTO>> getAll() {
-        return ResponseEntity.ok(bookingService.getAll());
+        return ResponseEntity.ok(bookingService.getAll()
+                .stream()
+                .map(RoomBookingDTO::new)
+                .toList());
     }
 
     /**
@@ -56,10 +58,10 @@ public class BookingController {
      * @throws BookingNotFoundException бронирование с заданным идентификатором не найдено
      */
     @GetMapping("/{bookingId}")
-    public ResponseEntity<RoomBookingDetailsDTO> getBooking(
+    public ResponseEntity<RoomBookingDTO> getBooking(
             @PathVariable Long bookingId) throws BookingNotFoundException {
 
-        RoomBookingDetailsDTO booking = new RoomBookingDetailsDTO(bookingService.getBookingById(bookingId));
+        RoomBookingDTO booking = new RoomBookingDTO(bookingService.getBookingById(bookingId));
         return ResponseEntity.ok(booking);
     }
 
@@ -104,7 +106,11 @@ public class BookingController {
             @PathVariable Long roomId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        List<RoomBookingDTO> bookings = bookingService.getBookingsByRoomInTimeRange(roomId, startTime, endTime);
+        List<RoomBookingDTO> bookings = bookingService
+                        .getBookingsByRoomInTimeRange(roomId, startTime, endTime)
+                        .stream()
+                        .map(RoomBookingDTO::new)
+                        .toList();
         return ResponseEntity.ok(bookings);
     }
 
@@ -127,7 +133,10 @@ public class BookingController {
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
-        List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime);
+        var bookings = bookingService.getBookingsByUserInTimeRange(userId, startTime, endTime)
+                .stream()
+                .map(RoomBookingDTO::new)
+                .toList();
         return ResponseEntity.ok(bookings);
     }
 
@@ -168,7 +177,7 @@ public class BookingController {
      * @throws UserNotFoundException если пользователь не найден по идентификатору
      */
     @PostMapping
-    public ResponseEntity<RoomBookingDetailsDTO> createBooking(
+    public ResponseEntity<RoomBookingDTO> createBooking(
             @RequestBody @NonNull RoomBookingRequestDTO request,
             @AuthenticationPrincipal @NonNull User user)
             throws BookingException, RoomNotFoundException, UserNotFoundException {
@@ -188,7 +197,7 @@ public class BookingController {
         Booking createdBooking = bookingService.updateBooking(request);
 
         messagingTemplate.convertAndSend("/topic/1", "add new");
-        return ResponseEntity.ok(new RoomBookingDetailsDTO(createdBooking));
+        return ResponseEntity.ok(new RoomBookingDTO(createdBooking));
     }
 
     /**
@@ -198,7 +207,7 @@ public class BookingController {
      * @throws AccessDeniedException попытка добавления бронирования на другого пользователя без прав администратора
      */
     @PutMapping
-    public ResponseEntity<RoomBookingDetailsDTO> updateBooking(
+    public ResponseEntity<RoomBookingDTO> updateBooking(
             @RequestBody @NonNull RoomBookingRequestDTO request,
             @AuthenticationPrincipal @NonNull User user) throws BookingException {
 
@@ -214,7 +223,7 @@ public class BookingController {
         var booking = bookingService.updateBooking(request);
 
         messagingTemplate.convertAndSend("/topic/1", "add new");
-        return ResponseEntity.ok(new RoomBookingDetailsDTO(booking));
+        return ResponseEntity.ok(new RoomBookingDTO(booking));
     }
 
     /**

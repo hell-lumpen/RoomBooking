@@ -29,22 +29,22 @@ public class RoomBookingDTO {
     private String title;
     private String description;
     private List<TagDTO> tags;
-    private List<GroupDTO> groups;
     private List<UserDTO> staff;
+    private List<GroupDTO> groups;
     private String status;
 
     public RoomBookingDTO(@NonNull Booking booking) {
-        title = booking.getTitle();
-        room = new PairDTO(booking.getRoom());
         id = booking.getId();
         bookingGroupId = booking.getBookingGroupId();
+        title = booking.getTitle();
+        description = booking.getDescription();
+        room = new PairDTO(booking.getRoom());
+        owner = new PairDTO(booking.getOwner());
         startTime = booking.getStartTime();
         endTime = booking.getEndTime();
-        owner = new PairDTO(booking.getOwner());
-        tags = booking.getTags().stream().map(TagDTO::new).toList();
-        description = booking.getDescription();
-        groups = booking.getGroups().stream().map(GroupDTO::new).toList();
         staff = booking.getStaff().stream().map(UserDTO::new).toList();
+        groups = booking.getGroups().stream().map(GroupDTO::new).toList();
+        tags = booking.getTags().stream().map(TagDTO::new).toList();
         status = booking.getStatus().name();
     }
 }
