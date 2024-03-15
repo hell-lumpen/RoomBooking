@@ -83,7 +83,11 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getBookingsInTimeRange(startTime, endTime));
     }
 
-
+    /**
+     * Получение списка бронирований по статусу
+     * @param status текущий статус бронирования
+     * @return список бронирований
+     */
     @GetMapping("/status")
     public List<RoomBookingDTO> getBookingsByStatus(@RequestParam String status) {
         return bookingService.getBookingsByStatus(Booking.Status.valueOf(status)).stream()
