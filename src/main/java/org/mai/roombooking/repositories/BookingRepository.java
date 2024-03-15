@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -40,6 +41,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("DELETE FROM Booking b WHERE b.bookingGroupId = :periodicBookingId")
     void deleteAllByPeriodicBookingId(@Param("periodicBookingId") UUID periodicBookingId);
 
+
+    List<Booking> findByStatus(Booking.Status status);
     List<Booking> findAllByBookingGroupId(@Param("periodicBookingId") UUID periodicBookingId);
 
     @Query("select b FROM Booking b JOIN FETCH b.staff s WHERE s.userId = :staffId " +

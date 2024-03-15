@@ -63,7 +63,7 @@ public class BookingController {
     public ResponseEntity<RoomBookingDetailsDTO> getBooking(
             @PathVariable Long bookingId) throws BookingNotFoundException {
 
-        RoomBookingDetailsDTO booking = bookingService.getBookingById(bookingId);
+        RoomBookingDetailsDTO booking = new RoomBookingDetailsDTO(bookingService.getBookingById(bookingId));
         return ResponseEntity.ok(booking);
     }
 
@@ -81,6 +81,14 @@ public class BookingController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
 
         return ResponseEntity.ok(bookingService.getBookingsInTimeRange(startTime, endTime));
+    }
+
+
+    @GetMapping("/status")
+    public List<RoomBookingDTO> getBookingsByStatus(@RequestParam String status) {
+        return bookingService.getBookingsByStatus(Booking.Status.valueOf(status)).stream()
+                .map(RoomBookingDTO::new)
+                .toList();
     }
 
     /**
@@ -173,11 +181,11 @@ public class BookingController {
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
-        Booking createdBooking;
         if ( userService.findById(request.getOwnerId()).getRole().equals(User.UserRole.AUTHORISED))
-            createdBooking = bookingService.updateBooking(request, Booking.Status.REQUIRES_CONFIRMATION);
+            request.setStatus(Booking.Status.REQUIRES_CONFIRMATION);
         else
-            createdBooking = bookingService.updateBooking(request, Booking.Status.CONFIRMED);
+            request.setStatus(Booking.Status.CONFIRMED);
+        Booking createdBooking = bookingService.updateBooking(request);
 
         messagingTemplate.convertAndSend("/topic/1", "add new");
         return ResponseEntity.ok(new RoomBookingDetailsDTO(createdBooking));
@@ -199,11 +207,13 @@ public class BookingController {
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
+        var savedBooking = bookingService.getBookingById(request.getId());
+        if (!savedBooking.getStatus().equals(request.getStatus()) && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
+            throw new AccessDeniedException("Попытка изменения статуса бронирования без роли администратора");
+
+        var booking = bookingService.updateBooking(request);
+
         messagingTemplate.convertAndSend("/topic/1", "add new");
-        Booking.Status status = null;
-        if (user.getRole().equals(User.UserRole.ADMINISTRATOR))
-            status = request.getStatus();
-        var booking = bookingService.updateBooking(request, status);
         return ResponseEntity.ok(new RoomBookingDetailsDTO(booking));
     }
 
@@ -221,7 +231,7 @@ public class BookingController {
 
         var booking  = bookingService.getBookingById(bookingId);
 
-        if(!Objects.equals(booking.getOwner().getId(), user.getUserId())
+        if(!Objects.equals(booking.getOwner().getUserId(), user.getUserId())
                 && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 

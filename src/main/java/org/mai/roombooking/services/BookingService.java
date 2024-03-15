@@ -4,19 +4,21 @@ import lombok.NonNull;
 import org.mai.roombooking.dtos.PairDTO;
 import org.mai.roombooking.dtos.bookings.Pair;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
-import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
+import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.*;
-import org.springframework.lang.Nullable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -66,6 +68,10 @@ public class BookingService {
 //        return bookingRepository.findByStaffContaining(staff).stream().map(RoomBookingDTO::new).toList();
 //    }
 
+    public List<Booking> getBookingsByStatus(Booking.Status status) {
+        return bookingRepository.findByStatus(status);
+    }
+
     public List<Booking> getLastBookingsByOwner(Long ownerId, int limit) {
         return bookingRepository.findByOwner(ownerId).stream()
                 .sorted(Comparator.comparing(Booking::getStartTime))
@@ -80,9 +86,9 @@ public class BookingService {
      * @return детализированная информация по бронированию
      * @throws BookingNotFoundException бронирование, с заданным идентификатором, не найдено
      */
-    public RoomBookingDetailsDTO getBookingById(Long bookingId) throws BookingNotFoundException {
-        return new RoomBookingDetailsDTO(bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new BookingNotFoundException(bookingId)));
+    public Booking getBookingById(Long bookingId) throws BookingNotFoundException {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException(bookingId));
     }
 
     /**
@@ -220,31 +226,17 @@ public class BookingService {
      * @throws UsernameNotFoundException пользователь с id, переданным клиентом, не найдена
      * @throws RoomNotFoundException     аудитория с id, переданным клиентом, не найдена
      */
-    public Booking updateBooking(@NonNull RoomBookingRequestDTO request, @Nullable Booking.Status status)
+    public Booking updateBooking(@NonNull RoomBookingRequestDTO request)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
-        Booking booking = getBookingFromDTO(request);
-        if (status != null)
-            booking.setStatus(status);
-        else
-            booking.setStatus(bookingRepository.findById(booking.getId()).orElseThrow().getStatus());
-        return updateBooking(booking);
+        return updateBooking(getBookingFromDTO(request), true);
     }
 
-    public Booking updateBooking(@NonNull Booking request)
-            throws UsernameNotFoundException, RoomNotFoundException, BookingException {
-
-        validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId(), request.getId());
-        return bookingRepository.save(request);
-    }
-
-    // служебный метод для сервиса расписания, нужно убрать
-    public void updateBooking(@NonNull Booking request, boolean validation)
+    public Booking updateBooking(@NonNull Booking request, boolean validation)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
         if (validation)
             validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId(), request.getId());
-        bookingRepository.save(request);
+        return bookingRepository.save(request);
     }
-
 
     /**
      * Удаляет отдельное бронирование на основе предоставленного идентификатора.
@@ -292,21 +284,5 @@ public class BookingService {
                 .tags(dto.getTagsId().stream().map((id) -> tagRepository.findById(id).orElseThrow(() ->
                         new TagNotFoundException("tag whis id: " + id ))).collect(Collectors.toSet()))
                 .build();
-    }
-
-    private void validateBooking(@NonNull LocalDateTime start,
-                                 @NonNull LocalDateTime end,
-                                 @NonNull Long roomId) throws BookingException {
-        if (start.isAfter(end) || start.getDayOfYear() != end.getDayOfYear())
-            throw new BookingException("Booking exception");
-
-        var conflicts = bookingRepository.findBookingsInDateRange(start, end)
-                .stream()
-                .filter((bookingItem -> bookingItem.getRoom().getRoomId().equals(roomId)))
-                .map(RoomBookingDTO::new)
-                .toList();
-
-        if (!conflicts.isEmpty())
-            throw new BookingConflictException(conflicts);
     }
 }
