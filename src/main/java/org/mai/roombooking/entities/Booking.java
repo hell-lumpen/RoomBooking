@@ -64,7 +64,9 @@ public class Booking {
     @JoinColumn(name = "recurring_rule")
     private RecurringRule recurringRule;
 
-
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @Override
     public boolean equals(Object o) {
@@ -96,5 +98,11 @@ public class Booking {
                 "|| title='" + title + '\'' +
                 "|| description='" + description + '\'' +
                 "|| tags=" + tags.stream().map(Tag::getFullName).collect(Collectors.joining(", "));
+    }
+
+     public enum Status {
+        REQUIRES_CONFIRMATION,
+        CONFIRMED
+
     }
 }

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.mai.roombooking.dtos.TagDTO;
+import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.Tag;
 
 import java.time.LocalDateTime;
@@ -38,4 +39,6 @@ public class RoomBookingRequestDTO {
     private List<Long> groupsId;
     @NotNull
     private List<Long> tagsId;
+
+    private Booking.Status status;
 }

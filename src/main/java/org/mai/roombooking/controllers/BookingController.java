@@ -1,5 +1,6 @@
 package org.mai.roombooking.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.mai.roombooking.dtos.bookings.Pair;
@@ -16,6 +17,7 @@ import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.services.BookingService;
 import org.mai.roombooking.services.RoomService;
+import org.mai.roombooking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -33,17 +35,13 @@ import java.util.Objects;
  */
 @Slf4j
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/bookings")
 public class BookingController {
 
     private final BookingService bookingService;
     private final SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
-    public BookingController(BookingService bookingService, SimpMessagingTemplate messagingTemplate) {
-        this.bookingService = bookingService;
-        this.messagingTemplate = messagingTemplate;
-    }
+    private final UserService userService;
 
 
     /**
@@ -167,16 +165,20 @@ public class BookingController {
             @AuthenticationPrincipal @NonNull User user)
             throws BookingException, RoomNotFoundException, UserNotFoundException {
 
-        if (request.getOwnerId() == null)
-            request.setOwnerId(user.getUserId());
+        // Добавление создателя брони, если он не установлен в запросе
+        if (request.getOwnerId() == null) request.setOwnerId(user.getUserId());
 
+        // Попытка брони на другого человека без прав администратора
         if(!(Objects.equals(request.getOwnerId(), user.getUserId())
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
-        Booking createdBooking = bookingService.updateBooking(request);
+        Booking createdBooking;
+        if ( userService.findById(request.getOwnerId()).getRole().equals(User.UserRole.AUTHORISED))
+            createdBooking = bookingService.updateBooking(request, Booking.Status.REQUIRES_CONFIRMATION);
+        else
+            createdBooking = bookingService.updateBooking(request, Booking.Status.CONFIRMED);
 
-        // TODO: не только добавление, но и изменение бронирования
         messagingTemplate.convertAndSend("/topic/1", "add new");
         return ResponseEntity.ok(new RoomBookingDetailsDTO(createdBooking));
     }
@@ -191,8 +193,18 @@ public class BookingController {
     public ResponseEntity<RoomBookingDetailsDTO> updateBooking(
             @RequestBody @NonNull RoomBookingRequestDTO request,
             @AuthenticationPrincipal @NonNull User user) throws BookingException {
+
+        // Попытка брони на другого человека без прав администратора
+        if(!(Objects.equals(request.getOwnerId(), user.getUserId())
+                || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
+            throw new AccessDeniedException("Access denied: Not enough permissions");
+
         messagingTemplate.convertAndSend("/topic/1", "add new");
-        return createBooking(request, user);
+        Booking.Status status = null;
+        if (user.getRole().equals(User.UserRole.ADMINISTRATOR))
+            status = request.getStatus();
+        var booking = bookingService.updateBooking(request, status);
+        return ResponseEntity.ok(new RoomBookingDetailsDTO(booking));
     }
 
     /**

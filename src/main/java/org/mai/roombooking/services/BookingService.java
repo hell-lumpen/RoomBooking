@@ -10,11 +10,11 @@ import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
 import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.*;
+import org.springframework.lang.Nullable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -220,9 +220,14 @@ public class BookingService {
      * @throws UsernameNotFoundException пользователь с id, переданным клиентом, не найдена
      * @throws RoomNotFoundException     аудитория с id, переданным клиентом, не найдена
      */
-    public Booking updateBooking(@NonNull RoomBookingRequestDTO request)
+    public Booking updateBooking(@NonNull RoomBookingRequestDTO request, @Nullable Booking.Status status)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
-        return updateBooking(getBookingFromDTO(request));
+        Booking booking = getBookingFromDTO(request);
+        if (status != null)
+            booking.setStatus(status);
+        else
+            booking.setStatus(bookingRepository.findById(booking.getId()).orElseThrow().getStatus());
+        return updateBooking(booking);
     }
 
     public Booking updateBooking(@NonNull Booking request)
@@ -232,11 +237,12 @@ public class BookingService {
         return bookingRepository.save(request);
     }
 
-    public Booking updateBooking(@NonNull Booking request, boolean validation)
+    // служебный метод для сервиса расписания, нужно убрать
+    public void updateBooking(@NonNull Booking request, boolean validation)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
         if (validation)
             validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId(), request.getId());
-        return bookingRepository.save(request);
+        bookingRepository.save(request);
     }
 
 
