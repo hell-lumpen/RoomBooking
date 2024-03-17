@@ -149,6 +149,22 @@ VALUES ('ivan_ivanov', '1234567890', 'Иван Иванов', 'hashed_password_1
        ('marina_kuznetsova', '6666666666', 'Марина Кузнецова', 'hashed_password_10', 'директор');
 
 
+--Вставка тегов
+INSERT INTO tag (color, full_name, short_name)
+VALUES ('', 'Лекция', 'ЛК'),
+       ('', 'Практика', 'ПЗ'),
+       ('', 'Экзамен', 'ЭКЗ'),
+       ('', 'Совещание', 'СВ'),
+       ('', 'Встреча', 'ВС');
+
+INSERT INTO tag (color, full_name, short_name)
+VALUES ('', 'Лекция', 'ЛК'),
+       ('', 'Практика', 'ПЗ'),
+       ('', 'Экзамен', 'ЭКЗ'),
+       ('', 'Совещание', 'СВ'),
+       ('', 'Встреча', 'ВС');
+
+
 -- Вставка тестовых данных для таблицы Rooms
 INSERT INTO Rooms (room_name, capacity, has_computers, has_projector)
 VALUES ('Комната 101', 10, true, true),

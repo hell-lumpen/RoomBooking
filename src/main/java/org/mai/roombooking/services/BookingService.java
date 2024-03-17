@@ -10,6 +10,7 @@ import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
 import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.*;
+import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -32,15 +33,19 @@ public class BookingService {
     private final TagRepository tagRepository;
     private final ValidationService validationService;
 
+    private final RecurringRuleRepository recurringRuleRepository;
+
+
     BookingService(BookingRepository bookingRepository, UserRepository userRepository,
                    RoomRepository roomRepository, GroupRepository groupRepository,
-                   TagRepository tagRepository, ValidationService validationService) {
+                   TagRepository tagRepository, ValidationService validationService, RecurringRuleRepository recurringRuleRepository) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
         this.groupRepository = groupRepository;
         this.tagRepository = tagRepository;
         this.validationService = validationService;
+        this.recurringRuleRepository = recurringRuleRepository;
     }
 
     // Получение данных
@@ -104,55 +109,11 @@ public class BookingService {
     public List<Pair> getBookingsInTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRange(startTime, endTime);
 
-        Map<PairDTO, List<RoomBookingDTO>> groupedBookings = bookings.stream()
-                .filter(booking -> booking.getRecurringRule() == null)
-                .map((RoomBookingDTO::new))
-                .collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
-
-
-        bookings.stream()
-                .filter(booking -> booking.getRecurringRule() != null)
-                .toList()
-                .forEach(
-                booking -> {
-                    PairDTO key = new PairDTO(booking.getRoom());
-                    RecurringRule recurringRule = booking.getRecurringRule();
-                    LocalDateTime s, e;
-                    boolean compareWithException;
-                    long startCountRecurringDays = 0;
-                    if (recurringRule.getUnit().equals("DAY"))
-                        startCountRecurringDays = 1;
-                    else if (recurringRule.getUnit().equals("WEEK")) {
-                        startCountRecurringDays = 7;
-                    }
-
-                    startCountRecurringDays *= recurringRule.getInterval();
-
-                    for (int i = 0; i < recurringRule.getCount(); i++) {
-                        compareWithException = false;
-                        s = booking.getStartTime().plusDays(i * startCountRecurringDays);
-                        e = booking.getEndTime().plusDays(i * startCountRecurringDays);
-                        for (RecurringException exception : booking.getRecurringRule().getExceptions())
-                        {
-                            compareWithException |= (exception.getDate().isEqual(s.toLocalDate()));
-                        }
-
-
-                        if (s.isAfter(startTime) && e.isBefore(endTime) && !compareWithException) {
-                            var newBooking = new RoomBookingDTO(booking);
-                            newBooking.setStartTime(s);
-                            newBooking.setEndTime(e);
-                            if (!groupedBookings.containsKey(key)) {
-                                groupedBookings.put(key, new ArrayList<>(List.of(new RoomBookingDTO(booking))));
-                            } else {
-                                groupedBookings.get(key).add(new RoomBookingDTO(booking));
-                            }
-                        }
-                    }
-
-                }
-
-        );
+        Map<PairDTO, List<RoomBookingDTO>> groupedBookings =
+                validationService.checkBookingRecurring(bookings, startTime, endTime, true)
+                        .stream()
+                        .map((RoomBookingDTO::new))
+                        .collect(Collectors.groupingBy(RoomBookingDTO::getRoom, Collectors.toList()));
 
         var data = groupedBookings.entrySet().stream()
                 .collect(Collectors.toMap(
@@ -180,7 +141,8 @@ public class BookingService {
     public List<RoomBookingDTO> getBookingsByRoomInTimeRange(Long roomId, LocalDateTime startTime,
                                                              LocalDateTime endTime) {
         List<Booking> bookings = bookingRepository.findBookingsInDateRangeForRoom(startTime, endTime, roomId);
-        return bookings.stream().map((RoomBookingDTO::new)).toList();
+        return validationService.checkBookingRecurring(bookings, startTime, endTime, true)
+                .stream().map((RoomBookingDTO::new)).toList();
     }
 
     /**
@@ -202,7 +164,8 @@ public class BookingService {
             userRepository.findById(userId).orElseThrow(() ->
                     new UsernameNotFoundException("User with id" + userId + "not found"));
 
-        return bookings.stream().map((RoomBookingDTO::new)).toList();
+        return validationService.checkBookingRecurring(bookings, startTime, endTime, true)
+                .stream().map((RoomBookingDTO::new)).toList();
     }
 
     public List<Booking> getBookingsByGroupInTimeRange(Long groupId,
@@ -222,6 +185,8 @@ public class BookingService {
      */
     public Booking updateBooking(@NonNull RoomBookingRequestDTO request)
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
+
+
         return updateBooking(getBookingFromDTO(request));
     }
 
@@ -229,6 +194,8 @@ public class BookingService {
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
 
         validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId(), request.getId());
+        if (request.getRecurringRule() != null)
+            recurringRuleRepository.save(request.getRecurringRule());
         return bookingRepository.save(request);
     }
 
@@ -264,6 +231,16 @@ public class BookingService {
         Room room = roomRepository.findById(dto.getRoomId())
                 .orElseThrow(() -> new RoomNotFoundException(dto.getRoomId()));
 
+        RecurringRule recurringRule = null;
+        if (dto.getRecurringInterval() != null) {
+            recurringRule = RecurringRule.builder()
+                    .count(dto.getRecurringCount())
+                    .unit(dto.getRecurringUnit())
+                    .endTime(dto.getEndTime())
+                    .interval(dto.getRecurringInterval())
+                    .build();
+        }
+
         return Booking.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())
@@ -281,12 +258,14 @@ public class BookingService {
                 .groups(dto.getGroupsId()
                         .stream()
                         .map(id -> groupRepository.findById(id)
-                                .orElseThrow(()->new GroupNotFoundException(id)))
+                                .orElseThrow(() -> new GroupNotFoundException(id)))
                         .collect(Collectors.toSet()))
                 .tags(dto.getTagsId().stream().map((id) -> tagRepository.findById(id).orElseThrow(() ->
-                        new TagNotFoundException("tag whis id: " + id ))).collect(Collectors.toSet()))
+                        new TagNotFoundException("tag whis id: " + id))).collect(Collectors.toSet()))
+                .recurringRule(recurringRule)
                 .build();
     }
+
 
     private void validateBooking(@NonNull LocalDateTime start,
                                  @NonNull LocalDateTime end,
