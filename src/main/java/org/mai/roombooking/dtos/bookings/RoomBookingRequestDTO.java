@@ -38,4 +38,12 @@ public class RoomBookingRequestDTO {
     private List<Long> groupsId;
     @NotNull
     private List<Long> tagsId;
+
+    private Long recurringInterval;
+
+    private String recurringUnit;
+
+    private Long recurringCount;
+
+    private LocalDateTime recurringEndDate;
 }

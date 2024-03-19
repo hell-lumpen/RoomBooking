@@ -22,13 +22,13 @@ public class RecurringRule {
     private Long id;
 
     @Column(name = "interval")
-    private Integer interval;
+    private Long interval;
 
     @Column(name = "unit")
     private String unit;
 
     @Column(name = "count")
-    private Integer count;
+    private Long count;
 
     @Column(name = "end_time")
     private LocalDateTime endTime;

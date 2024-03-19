@@ -15,23 +15,27 @@ import java.util.UUID;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b FROM Booking b JOIN FETCH b.room JOIN FETCH b.owner " +
             " WHERE b.startTime <= :endDateTime AND " +
-            "(b.endTime >= :startDateTime AND b.recurringRule IS NULL) OR " +
-            "(b.recurringRule IS NOT NULL)")
+            "((b.endTime >= :startDateTime AND b.recurringRule IS NULL) OR " +
+            "(b.recurringRule IS NOT NULL))")
     List<Booking> findBookingsInDateRange(@Param("startDateTime") LocalDateTime startDateTime,
                                           @Param("endDateTime") LocalDateTime endDateTime);
 
     @Query("SELECT b FROM Booking b " +
-            "WHERE b.endTime >= :startDateTime " +
-            "   AND b.startTime <= :endDateTime" +
-            "   AND b.room.roomId = :roomId")
+            "WHERE " +
+            " b.startTime <= :endDateTime" +
+            " AND b.room.roomId = :roomId" +
+            " AND ((b.endTime >= :startDateTime AND b.recurringRule IS NULL) OR " +
+            " (b.recurringRule IS NOT NULL))")
     List<Booking> findBookingsInDateRangeForRoom(@Param("startDateTime") LocalDateTime startDateTime,
                                                  @Param("endDateTime") LocalDateTime endDateTime,
                                                  @Param("roomId") Long roomId);
 
     @Query("SELECT b FROM Booking b " +
-            "WHERE b.endTime >= :startDateTime " +
-            "   AND b.startTime <= :endDateTime " +
-            "   AND b.owner.userId = :userId")
+            "WHERE " +
+            " b.startTime <= :endDateTime " +
+            " AND b.owner.userId = :userId" +
+            " AND ((b.endTime >= :startDateTime AND b.recurringRule IS NULL) OR " +
+            " (b.recurringRule IS NOT NULL))")
     List<Booking> findBookingsInDateRangeByUser(@Param("startDateTime") LocalDateTime startDateTime,
                                                 @Param("endDateTime") LocalDateTime endDateTime,
                                                 @Param("userId") Long userId);
@@ -48,10 +52,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByStaffContains(Long staffId, LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     @Query("select b FROM Booking b JOIN FETCH b.groups g WHERE g.id = :groupId " +
-            "AND b.endTime >= :startDateTime " +
-            "AND b.startTime <= :endDateTime")
+            "AND b.startTime <= :endDateTime"+
+            " AND ((b.endTime >= :startDateTime AND b.recurringRule IS NULL) OR " +
+            " (b.recurringRule IS NOT NULL))")
     List<Booking> findByGroupsContains(Long groupId, LocalDateTime startDateTime, LocalDateTime endDateTime);
-
 
 
     @Query("SELECT b FROM Booking b WHERE b.owner.userId = :ownerId")
