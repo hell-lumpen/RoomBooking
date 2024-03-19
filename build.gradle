@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'org.mai'
-version = '0.0.1-SNAPSHOT'
+version = '0.1'
 
 java {
     sourceCompatibility = '17'
@@ -72,4 +72,23 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    duplicatesStrategy = 'exclude' // Устанавливаем стратегию обработки дубликатов (дубликаты будут исключены из сборки JAR)
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes(
+                'Implementation-Title': 'Jar Making Exaple',
+                'Main-Class': 'org.mai.roombooking.RoomBookingApplication',
+                'Spring-Boot-Classes': '',
+                'Spring-Boot-Lib': ''
+        )
+        attributes 'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+
+    }
+    destinationDirectory = file("$rootDir/build")
+    archivesBaseName = 'smart_campus'
 }
