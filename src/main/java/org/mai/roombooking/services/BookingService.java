@@ -1,5 +1,6 @@
 package org.mai.roombooking.services;
 
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.mai.roombooking.dtos.PairDTO;
 import org.mai.roombooking.dtos.bookings.Pair;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * Сервисный класс для управления бронированиями.
  */
 @Service
+@AllArgsConstructor
 public class BookingService {
 
     private final BookingRepository bookingRepository;
@@ -35,18 +37,6 @@ public class BookingService {
 
     private final RecurringRuleRepository recurringRuleRepository;
 
-
-    BookingService(BookingRepository bookingRepository, UserRepository userRepository,
-                   RoomRepository roomRepository, GroupRepository groupRepository,
-                   TagRepository tagRepository, ValidationService validationService, RecurringRuleRepository recurringRuleRepository) {
-        this.bookingRepository = bookingRepository;
-        this.userRepository = userRepository;
-        this.roomRepository = roomRepository;
-        this.groupRepository = groupRepository;
-        this.tagRepository = tagRepository;
-        this.validationService = validationService;
-        this.recurringRuleRepository = recurringRuleRepository;
-    }
 
     // Получение данных
 
