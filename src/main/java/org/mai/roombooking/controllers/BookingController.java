@@ -102,6 +102,25 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
+
+    /**
+     * Получить бронирования по конкретному пользователю в заданном временном диапазоне.
+     *
+     * @param startTime Дата-время начала выгрузки
+     * @param endTime   Дата-время конца выгрузки
+     * @return ResponseEntity со списком бронирований для конкретного пользователя
+     */
+    @GetMapping("/user")
+    public ResponseEntity<List<RoomBookingDTO>> getBookingsByCUserInTimeRange(
+            @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
+            @AuthenticationPrincipal @NonNull User user) {
+
+        List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(user.getUserId(), startTime, endTime);
+        return ResponseEntity.ok(bookings);
+    }
+
+
     /**
      * Получить бронирования по конкретному пользователю в заданном временном диапазоне.
      *

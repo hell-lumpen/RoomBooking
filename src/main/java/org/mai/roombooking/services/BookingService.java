@@ -11,12 +11,10 @@ import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
 import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.*;
-import org.springframework.boot.autoconfigure.jersey.ResourceConfigCustomizer;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,7 +34,8 @@ public class BookingService {
     private final ValidationService validationService;
 
     private final RecurringRuleRepository recurringRuleRepository;
-
+    private final RecurringExceptionRepository recurringExceptionRepository;
+    private final RuleExceptionRepository ruleExceptionRepository;
 
     // Получение данных
 
@@ -184,8 +183,23 @@ public class BookingService {
             throws UsernameNotFoundException, RoomNotFoundException, BookingException {
 
         validationService.validateBooking(request.getStartTime(), request.getEndTime(), request.getRoom().getRoomId(), request.getId());
-        if (request.getRecurringRule() != null)
+        if (request.getRecurringRule() != null && request.getId() == null)
             recurringRuleRepository.save(request.getRecurringRule());
+        else if (request.getRecurringRule() != null) {
+            RecurringRule rule = request.getRecurringRule();
+            RecurringException exception;
+            if (rule.getExceptions() == null){
+                rule.setExceptions(new HashSet<>());
+            }
+            exception = RecurringException.builder().date(request.getStartTime().toLocalDate()).build();
+            exception = recurringExceptionRepository.save(exception);
+            ruleExceptionRepository.insertWithQuery(rule.getId(), exception.getId());
+
+            request.setId(null);
+            request.setRecurringRule(null);
+            return bookingRepository.save(request);
+        }
+
         return bookingRepository.save(request);
     }
 
@@ -224,6 +238,7 @@ public class BookingService {
         RecurringRule recurringRule = null;
         if (dto.getRecurringInterval() != null) {
             recurringRule = RecurringRule.builder()
+                    .id(dto.getRecurringId())
                     .count(dto.getRecurringCount())
                     .unit(dto.getRecurringUnit())
                     .endTime(dto.getEndTime())

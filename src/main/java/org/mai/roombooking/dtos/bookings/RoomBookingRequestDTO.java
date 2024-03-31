@@ -39,6 +39,7 @@ public class RoomBookingRequestDTO {
     @NotNull
     private List<Long> tagsId;
 
+    private Long recurringId;
     private Long recurringInterval;
 
     private String recurringUnit;
