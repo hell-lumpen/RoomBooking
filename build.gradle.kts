@@ -61,6 +61,10 @@ dependencies {
     // Преобразование объектов
     implementation("org.modelmapper:modelmapper:3.2.0")
 
+    // Kafka
+    implementation("org.springframework.kafka:spring-kafka:3.1.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
+
 }
 
 tasks.test  {

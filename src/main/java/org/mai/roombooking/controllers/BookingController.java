@@ -1,12 +1,14 @@
 package org.mai.roombooking.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.mai.roombooking.dtos.bookings.Pair;
 import org.mai.roombooking.dtos.bookings.RoomBookingDTO;
-import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
+import org.mai.roombooking.dtos.notifications.BookingNotificationDTO;
 import org.mai.roombooking.entities.Booking;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.exceptions.BookingNotFoundException;
@@ -14,9 +16,10 @@ import org.mai.roombooking.exceptions.RoomNotFoundException;
 import org.mai.roombooking.exceptions.UserNotFoundException;
 import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.services.BookingService;
-import org.mai.roombooking.services.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,7 +39,11 @@ import java.util.Objects;
 public class BookingController {
     private final BookingService bookingService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final UserService userService;
+    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
+    @Value("${kafka.notification.topic}")
+    private String notificationTopic;
 
     /**
      * Метод получения всех бронирований, хранящихся в базе данных
@@ -193,6 +200,13 @@ public class BookingController {
         Booking createdBooking = bookingService.updateBooking(request);
 
         messagingTemplate.convertAndSend("/topic/1", "add new");
+        try {
+            var bookingNotification = new BookingNotificationDTO(BookingNotificationDTO.Action.CREATE,
+                    new RoomBookingDTO(createdBooking));
+            kafkaTemplate.send(notificationTopic, objectMapper.writeValueAsString(bookingNotification));
+        } catch (JsonProcessingException e) {
+            log.error("Error on parsing booking object. " + e.getMessage());
+        }
         return ResponseEntity.ok(new RoomBookingDTO(createdBooking));
     }
 
@@ -221,6 +235,13 @@ public class BookingController {
 
         Booking createdBooking = bookingService.updateBooking(request);
         messagingTemplate.convertAndSend("/topic/1", "add new");
+        try {
+            var bookingNotification = new BookingNotificationDTO(BookingNotificationDTO.Action.UPDATE,
+                    new RoomBookingDTO(createdBooking));
+            kafkaTemplate.send(notificationTopic, objectMapper.writeValueAsString(bookingNotification));
+        } catch (JsonProcessingException e) {
+            log.error("Error on parsing booking object. " + e.getMessage());
+        }
         return ResponseEntity.ok(new RoomBookingDTO(createdBooking));
     }
 
@@ -244,6 +265,13 @@ public class BookingController {
 
         bookingService.deleteBooking(bookingId);
         messagingTemplate.convertAndSend("/topic/1", "add new");
+        try {
+            var bookingNotification = new BookingNotificationDTO(BookingNotificationDTO.Action.DELETE,
+                                                                  new RoomBookingDTO(booking));
+            kafkaTemplate.send(notificationTopic, objectMapper.writeValueAsString(bookingNotification));
+        } catch (JsonProcessingException e) {
+            log.error("Error on parsing booking object. " + e.getMessage());
+        }
         return ResponseEntity.ok("Booking deleted successfully");
     }
 

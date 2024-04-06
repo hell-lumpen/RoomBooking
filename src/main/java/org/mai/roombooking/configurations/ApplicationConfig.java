@@ -1,5 +1,6 @@
 package org.mai.roombooking.configurations;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -39,6 +40,10 @@ public class ApplicationConfig {
         return new ModelMapper();
     }
 
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
     @Bean
     public UserDetailsService userDetailsService () {
         return username -> userRepository.findByUsername(username).get(0);
