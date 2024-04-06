@@ -1,5 +1,6 @@
 package org.mai.roombooking.services;
 
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.User;
@@ -12,50 +13,28 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class UserService {
+    private final UserRepository userRepository;
 
-    UserRepository userRepository;
-
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    public UserDTO updateUser(@NonNull UserDTO request) {
-        User user = userRepository.findById(request.getId())
-                .orElseThrow(() -> new UserNotFoundException(request.getId()));
-
-        user.setRole(request.getRole());
-        user.setFullName(request.getFullName());
-        user.setPhoneNumber(request.getPhoneNumber());
-        user.setIsAccountLocked(request.getIsAccountLocked());
-
-        userRepository.save(user);
-
-        return new UserDTO(user);
+    public User updateUser(@NonNull User newUser) {
+        return userRepository.save(newUser);
     }
 
     public void deleteUser(@NonNull Long userId) {
         userRepository.deleteById(userId);
     }
 
-    public List<UserDTO> findAll() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserDTO::new)
-                .toList();
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
-    public List<UserDTO> findUsernameLike(String like) {
-        return userRepository.findByFullNameLikeIgnoreCase(like)
-                .stream()
-                .map(UserDTO::new)
-                .toList();
+    public List<User> findUsernameLike(String like) {
+        return userRepository.findByFullNameLikeIgnoreCase(like);
     }
 
-    public UserDTO findById(Long id) {
-        return new UserDTO(userRepository.findById(id)
-                .orElseThrow(()-> new UserNotFoundException(id)));
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 
     public Optional<User> getUserByFullName(String fullName) {

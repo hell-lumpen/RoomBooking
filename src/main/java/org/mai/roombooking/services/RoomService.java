@@ -57,8 +57,8 @@ public class RoomService {
                 .toList();
     }
 
-    public List<RoomDTO> getAllRooms() {
-        return roomRepository.findAll().stream().map(RoomDTO::new).toList();
+    public List<Room> getAllRooms() {
+        return roomRepository.findAll();
     }
 
     public Room update(RoomDTO dto) {
@@ -66,8 +66,8 @@ public class RoomService {
 
     }
 
-    public List<RoomDTO> getCathedralRooms() {
-        return roomRepository.getCathedralRooms().stream().map(RoomDTO::new).toList();
+    public List<Room> getCathedralRooms() {
+        return roomRepository.getCathedralRooms();
     }
 
     public void delete(@NonNull Long roomId) {

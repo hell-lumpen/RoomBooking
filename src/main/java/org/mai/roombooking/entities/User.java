@@ -8,20 +8,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
-@Entity
 @NoArgsConstructor
+@Data
 @AllArgsConstructor
-@Getter
-@Setter
 @Builder
+@Entity
 @Table(name = "users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long userId;
+    private Long id;
 
     @Column(name = "fullname", nullable = false)
     @Setter
@@ -31,6 +29,12 @@ public class User implements UserDetails {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "info")
     private UserInfo info;
+
+    public enum UserRole {
+        AUTHORISED,
+        ADMINISTRATOR,
+        TEACHER
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -65,12 +69,6 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public enum UserRole {
-        AUTHORISED,
-        ADMINISTRATOR,
-        TEACHER
     }
 
     public String getPhoneNumber() {

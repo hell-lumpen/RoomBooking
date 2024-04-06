@@ -13,7 +13,7 @@ public class PairDTO {
     private String value;
 
     public PairDTO(@NonNull User user) {
-        id = user.getUserId();
+        id = user.getId();
         value = user.getFullName();
     }
 

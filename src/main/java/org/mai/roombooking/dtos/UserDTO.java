@@ -33,7 +33,7 @@ public class UserDTO {
     public UserDTO(@NonNull User user) {
         fullName = user.getFullName();
         phoneNumber = user.getPhoneNumber();
-        id = user.getUserId();
+        id = user.getId();
         role = user.getRole();
         isAccountLocked = user.getIsAccountLocked();
     }
