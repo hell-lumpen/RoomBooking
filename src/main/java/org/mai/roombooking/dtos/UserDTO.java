@@ -12,7 +12,6 @@ import org.mai.roombooking.entities.User;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
-    @NotNull(message = "Id should not be empty")
     private Long id;
 
     @NotEmpty(message = "Full name should not be empty")

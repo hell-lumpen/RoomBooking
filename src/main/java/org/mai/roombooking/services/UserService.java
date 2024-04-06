@@ -5,6 +5,7 @@ import lombok.NonNull;
 import org.mai.roombooking.dtos.UserDTO;
 import org.mai.roombooking.entities.User;
 import org.mai.roombooking.exceptions.UserNotFoundException;
+import org.mai.roombooking.repositories.UserInfoRepository;
 import org.mai.roombooking.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,9 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-
+    private final UserInfoRepository userInfoRepository;
     public User updateUser(@NonNull User newUser) {
+        newUser.setInfo(userInfoRepository.save(newUser.getInfo()));
         return userRepository.save(newUser);
     }
 
