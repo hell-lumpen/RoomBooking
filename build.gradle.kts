@@ -63,26 +63,10 @@ tasks.test  {
     useJUnitPlatform()
 }
 
-//tasks.jar {
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//    from(configurations.runtimeClasspath.get().filter { it.isDirectory() }.map { it })
-//    manifest {
-//        attributes(
-//                "Implementation-Title" to "Jar Making Exaple",
-//                "Main-Class" to "org.mai.roombooking.RoomBookingApplication",
-//                "Spring-Boot-Classes" to "",
-//                "Spring-Boot-Lib" to ""
-//        )
-//        attributes("Class-Path" to configurations.runtimeClasspath.get().map { it.name }.joinToString(" "))
-//    }
-//    destinationDirectory = file("$rootDir/build")
-//    archiveBaseName.set("smart_campus")
-//}
-
 tasks {
     // Конфигурация задачи сборки JAR
     withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-        archiveFileName.set("your-application-name.jar") // Имя вашего JAR-файла
+        archiveFileName.set("smartCampus.jar") // Имя вашего JAR-файла
         enabled = true
     }
 }
