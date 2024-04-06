@@ -64,7 +64,16 @@ public class Booking {
     @JoinColumn(name = "recurring_rule")
     private RecurringRule recurringRule;
 
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
+    public enum Status {
+        REQUIRES_CONFIRMATION,
+        CONFIRMED,
+        REJECTED
+
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -31,6 +31,7 @@ public class RoomBookingDTO {
     private List<TagDTO> tags;
     private List<GroupDTO> groups;
     private List<UserDTO> staff;
+    private Booking.Status status;
     private Long recurringId = null;
     private Long recurringInterval = null;
     private String recurringUnit = null;
