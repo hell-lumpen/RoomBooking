@@ -1,6 +1,7 @@
 package org.mai.roombooking.services;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.mai.roombooking.dtos.PairDTO;
 import org.mai.roombooking.dtos.bookings.Pair;

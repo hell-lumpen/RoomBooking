@@ -116,7 +116,7 @@ public class BookingController {
             @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
             @AuthenticationPrincipal @NonNull User user) {
 
-        List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(user.getUserId(), startTime, endTime);
+        List<RoomBookingDTO> bookings = bookingService.getBookingsByUserInTimeRange(user.getId(), startTime, endTime);
         return ResponseEntity.ok(bookings);
     }
 
@@ -136,7 +136,7 @@ public class BookingController {
             @RequestParam @NonNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime,
             @AuthenticationPrincipal @NonNull User user) {
 
-        if(!(Objects.equals(userId, user.getUserId())
+        if(!(Objects.equals(userId, user.getId())
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
@@ -167,7 +167,7 @@ public class BookingController {
     public List<RoomBookingDTO> getLimitBookingsByUser(
             @PathVariable @NonNull Integer limit,
             @AuthenticationPrincipal @NonNull User user) {
-        return bookingService.getLastBookingsByOwner(user.getUserId(), limit)
+        return bookingService.getLastBookingsByOwner(user.getId(), limit)
                 .stream()
                 .map(RoomBookingDTO::new)
                 .toList();
@@ -187,9 +187,9 @@ public class BookingController {
             throws BookingException, RoomNotFoundException, UserNotFoundException {
 
         if (request.getOwnerId() == null)
-            request.setOwnerId(user.getUserId());
+            request.setOwnerId(user.getId());
 
-        if(!(Objects.equals(request.getOwnerId(), user.getUserId())
+        if(!(Objects.equals(request.getOwnerId(), user.getId())
                 || user.getRole().equals(User.UserRole.ADMINISTRATOR)))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
@@ -228,7 +228,7 @@ public class BookingController {
 
         var booking  = bookingService.getBookingById(bookingId);
 
-        if(!Objects.equals(booking.getOwner().getId(), user.getUserId())
+        if(!Objects.equals(booking.getOwner().getId(), user.getId())
                 && !user.getRole().equals(User.UserRole.ADMINISTRATOR))
             throw new AccessDeniedException("Access denied: Not enough permissions");
 
