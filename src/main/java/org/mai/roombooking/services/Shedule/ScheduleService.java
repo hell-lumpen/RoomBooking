@@ -15,6 +15,7 @@ import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.services.BookingService;
 import org.mai.roombooking.services.GroupService;
 import org.mai.roombooking.services.RoomService;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,7 @@ public class ScheduleService {
     private final BookingService bookingService;
     private final RoomService roomService;
 
+    @Async
     public void updateSchedule(List<Integer> departments) {
         var groups = saveGroups(parseGroups(departments));
         List<Booking> schedule = parseSchedule(groups);
@@ -45,6 +47,7 @@ public class ScheduleService {
         saveBookings(groupedBookings);
     }
 
+    @Async
     public void updateSchedule(String groupsDataFilePath) {
         ExcelParser excelParser = new ExcelParser();
         List<Group> groups = excelParser.parseGroupFile(groupsDataFilePath);
@@ -93,7 +96,7 @@ public class ScheduleService {
                             null)
                         .stream().
                         filter(Room::getIsCathedral)
-                        .sorted((a,b) -> a.getCapacity().compareTo(b.getCapacity()))
+                        .sorted(Comparator.comparing(Room::getCapacity))
                         .toList();
 
                 if (availableRooms.isEmpty()) {

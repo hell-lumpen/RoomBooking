@@ -18,9 +18,16 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final UserInfoRepository userInfoRepository;
+
     public User updateUser(@NonNull User newUser) {
         newUser.setInfo(userInfoRepository.save(newUser.getInfo()));
         return userRepository.save(newUser);
+    }
+
+    public List<User> findAllAdmins() {
+        return userRepository.findAll().stream()
+            .filter((user)-> user.getRole().equals(User.UserRole.ADMINISTRATOR))
+            .toList();
     }
 
     public void deleteUser(@NonNull Long userId) {

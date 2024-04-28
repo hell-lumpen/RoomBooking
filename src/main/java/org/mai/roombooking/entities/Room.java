@@ -13,7 +13,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter
 @Builder
-@Table(name = "Rooms", indexes = {
+@Table(name = "rooms", indexes = {
         @Index(name = "cathedral_index", columnList = "is_cathedral")})
 public class Room {
 

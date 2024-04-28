@@ -1,5 +1,10 @@
 package org.mai.roombooking.dtos.bookings;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.mai.roombooking.dtos.GroupDTO;
@@ -23,8 +28,14 @@ public class RoomBookingDTO {
     private Long id;
     private UUID bookingGroupId;
     private PairDTO room;
-    private PairDTO owner;
+    private UserDTO owner;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'")
     private LocalDateTime startTime;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'hh:mm:ss.SSS'Z'")
     private LocalDateTime endTime;
     private String title;
     private String description;
@@ -45,11 +56,12 @@ public class RoomBookingDTO {
         bookingGroupId = booking.getBookingGroupId();
         startTime = booking.getStartTime();
         endTime = booking.getEndTime();
-        owner = new PairDTO(booking.getOwner());
+        owner = new UserDTO(booking.getOwner());
         tags = booking.getTags().stream().map(TagDTO::new).toList();
         description = booking.getDescription();
         groups = booking.getGroups().stream().map(GroupDTO::new).toList();
         staff = booking.getStaff().stream().map(UserDTO::new).toList();
+        status = booking.getStatus();
         if  (booking.getRecurringRule() != null) {
             recurringId = booking.getRecurringRule().getId();
             recurringInterval = booking.getRecurringRule().getInterval();

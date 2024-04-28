@@ -42,11 +42,9 @@ public class RoomBookingRequestDTO {
 
     private Long recurringId;
     private Long recurringInterval;
-
     private String recurringUnit;
-
     private Long recurringCount;
-
     private LocalDateTime recurringEndDate;
+
     private Booking.Status status;
 }

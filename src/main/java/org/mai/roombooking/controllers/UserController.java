@@ -63,6 +63,12 @@ public class UserController {
                 .toList();
     }
 
+    @GetMapping("/admins")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    public List<UserDTO> getAllAdmins() {
+        return userService.findAllAdmins().stream().map(UserDTO::new).toList();
+    }
+
     /**
      * Метод обновления данных о пользователях
      * @param userDTO dto пользователя содержащее поля открытые для редактирования

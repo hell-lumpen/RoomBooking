@@ -211,6 +211,14 @@ public class BookingService {
     }
 
 
+    public Optional<Booking> setStatus(Booking.Status status, Long bookingId) {
+        Optional<Booking> booking = bookingRepository.findById(bookingId);
+        if (booking.isEmpty()) return Optional.empty();
+
+        booking.get().setStatus(status);
+        return Optional.of(bookingRepository.save(booking.get()));
+    }
+
     /**
      * Удаляет отдельное бронирование на основе предоставленного идентификатора.
      *
@@ -272,20 +280,4 @@ public class BookingService {
                 .build();
     }
 
-
-    private void validateBooking(@NonNull LocalDateTime start,
-                                 @NonNull LocalDateTime end,
-                                 @NonNull Long roomId) throws BookingException {
-        if (start.isAfter(end) || start.getDayOfYear() != end.getDayOfYear())
-            throw new BookingException("Booking exception");
-
-        var conflicts = bookingRepository.findBookingsInDateRange(start, end)
-                .stream()
-                .filter((bookingItem -> bookingItem.getRoom().getRoomId().equals(roomId)))
-                .map(RoomBookingDTO::new)
-                .toList();
-
-        if (!conflicts.isEmpty())
-            throw new BookingConflictException(conflicts);
-    }
 }

@@ -41,16 +41,20 @@ public class AuthService {
                 .isAccountLocked(false)
                 .build();
 
+        userInfo = userInfoRepository.save(userInfo);
+
         User user = User.builder()
                 .fullName(registrationRequest.getFullName())
                 .info(userInfo)
                 .build();
+
         userRepository.save(user);
 
 
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("fullname", user.getFullName());
         extraClaims.put("role", user.getRole());
+        extraClaims.put("id", user.getId());
         var jwtToken = jwtService.generateToken(extraClaims, user);
         return AuthResponse.builder()
                 .token(jwtToken)
@@ -70,6 +74,7 @@ public class AuthService {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("fullName", user.get(0).getFullName());
         extraClaims.put("role", user.get(0).getRole());
+        extraClaims.put("id", user.get(0).getId());
         var jwtToken = jwtService.generateToken(extraClaims, user.get(0));
 
         return AuthResponse.builder()

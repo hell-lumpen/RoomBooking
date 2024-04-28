@@ -43,12 +43,12 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.info.getPassword();
+        return this.info != null ? this.info.getPassword(): null;
     }
 
     @Override
     public String getUsername() {
-        return this.info.getUsername();
+        return this.info != null ? this.info.getUsername() : null;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !this.info.getIsAccountLocked();
+        return this.info == null || !this.info.getIsAccountLocked();
     }
 
     @Override

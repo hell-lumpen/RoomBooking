@@ -93,7 +93,6 @@ public class ExcelParser {
                         .specialty(currentRow.getCell(specialtyCell).toString())
                         .size((int) Math.round(Double.parseDouble(currentRow.getCell(groupSizeCell).toString())))
                         .build());
-
             currentRow = sheet.getRow(++currentRowInd);
         }
 

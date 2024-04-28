@@ -14,6 +14,8 @@ import org.mai.roombooking.entities.User;
 public class UserDTO {
     private Long id;
 
+    private  String username;
+
     @NotEmpty(message = "Full name should not be empty")
     @NotBlank(message = "The phone number should not be empty")
     private String fullName;
@@ -31,9 +33,10 @@ public class UserDTO {
 
     public UserDTO(@NonNull User user) {
         fullName = user.getFullName();
-        phoneNumber = user.getPhoneNumber();
+        phoneNumber =  user.getPhoneNumber();
         id = user.getId();
         role = user.getRole();
         isAccountLocked = user.getIsAccountLocked();
+        username = user.getUsername();
     }
 }

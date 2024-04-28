@@ -6,11 +6,12 @@ import org.mai.roombooking.dtos.TagDTO;
 
 import java.util.Objects;
 
-@Entity(name = "tag")
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Entity(name = "tag")
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
