@@ -45,6 +45,7 @@ public class AuthService {
                 .fullName(registrationRequest.getFullName())
                 .info(userInfo)
                 .build();
+        userInfoRepository.save(userInfo);
         userRepository.save(user);
 
 

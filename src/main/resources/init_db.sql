@@ -1,187 +1,182 @@
 create database RoomBooking;
 
-
-CREATE TABLE IF NOT EXISTS RecurringException
+create table tag
 (
-    -- Идентификатор исключения
-    id   SERIAL PRIMARY KEY,
-
-    date TIMESTAMP
+    id serial primary key,
+    full_name text,
+    short_name text,
+    color text
 );
 
-CREATE TABLE IF NOT EXISTS Rule_Exception
+create table user_info
 (
-
-    rule_id      INTEGER,
-    exception_id INTEGER
+    id serial primary key,
+    username text,
+    phone_number text,
+    password text,
+    is_account_locked boolean,
+    role integer
 );
 
-
-
-INSERT INTO RecurringException (date)
-VALUES ('2024-02-23 12:00:00'),
-       ('2024-03-08 12:00:00');
-
-
-CREATE TABLE IF NOT EXISTS RecurringRule
+create table users
 (
-    -- Идентификатор правила
-    id           SERIAL PRIMARY KEY,
-
-    -- Интервал повторения для периодических бронирований
-    interval     INT,
-
-    -- Единица измерения периода повторения (например, "week" или "month")
-    unit         VARCHAR(10),
-
-    -- Количество повторений для периодических бронирований (например для "каждые 2 недели, каждые 5 дней и тп")
-    count        INT,
-
-    end_time     TIMESTAMP,
-
-    exception_id INT
+    user_id serial primary key,
+    fullname text,
+    info integer references user_info(id)
 );
 
-INSERT INTO RecurringRule (interval, unit, count)
-VALUES (8, 'WEEK', 1),
-       (4, 'DAY', 1),
-       (3, 'DAY', 1),
-       (6, 'WEEK', 1);
-
-
-CREATE TABLE IF NOT EXISTS Users
+create table Rooms
 (
-    -- Идентификатор пользователя
-    user_id       SERIAL PRIMARY KEY,
+    room_id serial primary key,
+    room_name text,
+    capacity integer,
+    has_computers boolean,
+    has_projector boolean,
+    is_cathedral boolean
+);
 
-    -- Имя пользователя
-    username      VARCHAR(50)        NOT NULL,
-
-    -- Номер телефона пользователя (уникальный)
-    phone_number  VARCHAR(15) UNIQUE NOT NULL,
-
-    -- Полное имя пользователя
-    fullname      VARCHAR(100)       NOT NULL,
-
-    -- Хеш пароля пользователя
-    password_hash VARCHAR(255)       NOT NULL,
-
-    -- Роль пользователя
-    role          VARCHAR(50)        NOT NULL,
-
-    -- Время создания пользователя (по умолчанию текущее время)
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+create table recurringexception
+(
+    id serial primary key,
+    date timestamp
 );
 
 
 
-CREATE TABLE IF NOT EXISTS Rooms
+create table recurringrule
 (
-    -- Идентификатор комнаты
-    room_id       SERIAL PRIMARY KEY,
-
-    -- Название комнаты
-    room_name     VARCHAR(50) NOT NULL,
-
-    -- Вместимость комнаты
-    capacity      INT         NOT NULL,
-
-    -- Наличие компьютеров в комнате
-    has_computers BOOLEAN     NOT NULL,
-
-    -- Время создания комнаты (по умолчанию текущее время)
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id serial primary key,
+    interval integer,
+    unit text,
+    count integer,
+    end_time timestamp
 );
 
-CREATE TABLE IF NOT EXISTS Bookings
+create table rule_exception
 (
-    -- Идентификатор бронирования
-    booking_id      SERIAL PRIMARY KEY,
+    rule_id integer references recurringrule(id),
+    exception_id integer references recurringexception(id)
+);
 
-    -- Идентификатор комнаты
-    room_id         INT       NOT NULL,
+create table groups
+(
+    id serial primary key,
+    name text,
+    size integer
+);
 
-    -- Идентификатор пользователя
-    user_id         INT       NOT NULL,
-
-    -- Время начала бронирования
-    start_time      TIMESTAMP NOT NULL,
-
-    -- Время окончания бронирования
-    end_time        TIMESTAMP NOT NULL,
-
-    -- Цель бронирования (просто строка, например "Лекция по базам данных" у группы м8о-410б-20 по расписанию)
-    booking_purpose VARCHAR(255),
-
-    recurring_rule  INT,
-
-    -- Внешний ключ для связи с таблицей комнат
-    CONSTRAINT fk_room FOREIGN KEY (room_id) REFERENCES Rooms (room_id),
-
-    -- Внешний ключ для связи с таблицей пользователей
-    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES Users (user_id),
-
-    -- Условие проверки, что начальное время меньше конечного времени
-    CHECK (start_time < end_time),
-
-    -- Условие проверки, что если есть интервал повторения, то указаны и единица, и количество
-    CHECK (
-        (recurring_interval IS NOT NULL AND recurring_unit IS NOT NULL AND recurring_count IS NOT NULL) OR
-        (recurring_interval IS NULL AND recurring_unit IS NULL AND recurring_count IS NULL)
-        ),
-
-    -- Время создания бронирования (по умолчанию текущее время)
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+create table equipment
+(
+    id serial primary key,
+    type integer,
+    inv_num bigserial
 );
 
 
--- Вставка тестовых данных для таблицы Users
-INSERT INTO Users (username, phone_number, fullname, password_hash, role)
-VALUES ('ivan_ivanov', '1234567890', 'Иван Иванов', 'hashed_password_1', 'начальник'),
-       ('anna_petrova', '9876543210', 'Анна Петрова', 'hashed_password_2', 'администратор'),
-       ('sergey_smirnov', '5555555555', 'Сергей Смирнов', 'hashed_password_3', 'техник'),
-       ('elena_kozlova', '1111111111', 'Елена Козлова', 'hashed_password_4', 'преподаватель'),
-       ('dmitry_melnikov', '9999999999', 'Дмитрий Мельников', 'hashed_password_5', 'директор'),
-       ('natalia_ivanova', '7777777777', 'Наталья Иванова', 'hashed_password_6', 'начальник'),
-       ('alexander_kovalev', '4444444444', 'Александр Ковалев', 'hashed_password_7', 'администратор'),
-       ('olga_nikolaeva', '2222222222', 'Ольга Николаева', 'hashed_password_8', 'техник'),
-       ('vladimir_petrov', '8888888888', 'Владимир Петров', 'hashed_password_9', 'преподаватель'),
-       ('marina_kuznetsova', '6666666666', 'Марина Кузнецова', 'hashed_password_10', 'директор');
+create table bookings
+(
+    id serial primary key,
+    bookingGroupId integer,
+    room_id integer references Rooms(room_id),
+    owner_id integer references users(user_id),
+    start_time timestamp,
+    end_time timestamp,
+    title text,
+    descrition text,
+    recurring_rule integer references recurringrule(id),
+    status integer
+);
+
+create table bookings_staff
+(
+    booking_id integer references bookings(id),
+    staff_id integer references users(user_id)
+);
+
+create table bookings_groups
+(
+    booking_id integer references bookings(id),
+    groups_id integer references groups(id)
+);
+
+create table bookings_tag
+(
+    booking_id integer references bookings(id),
+    tag_id integer references tag(id)
+);
+
+create table bookings_equipment
+(
+    booking_id integer references bookings(id),
+    equipment_id integer references equipment(id)
+);
+
 
 
 --Вставка тегов
 INSERT INTO tag (color, full_name, short_name)
-VALUES ('', 'Лекция', 'ЛК'),
-       ('', 'Практика', 'ПЗ'),
-       ('', 'Экзамен', 'ЭКЗ'),
-       ('', 'Совещание', 'СВ'),
-       ('', 'Встреча', 'ВС');
+VALUES ('#bde0fe', 'Лекция', 'ЛК'),
+       ('#ff8fab', 'Практика', 'ПЗ'),
+       ('#fcf6bd', 'Экзамен', 'ЭКЗ'),
+       ('#ded6d1', 'Совещание', 'СВ'),
+       ('#ff91f2', 'Встреча', 'ВС');
 
-INSERT INTO tag (color, full_name, short_name)
-VALUES ('', 'Лекция', 'ЛК'),
-       ('', 'Практика', 'ПЗ'),
-       ('', 'Экзамен', 'ЭКЗ'),
-       ('', 'Совещание', 'СВ'),
-       ('', 'Встреча', 'ВС');
+
 
 
 -- Вставка тестовых данных для таблицы Rooms
-INSERT INTO Rooms (room_name, capacity, has_computers, has_projector)
-VALUES ('Комната 101', 10, true, true),
-       ('Комната 102', 8, false, true),
-       ('Комната 103', 12, true, true),
-       ('Комната 201', 6, false, true),
-       ('Комната 202', 15, true, true),
-       ('Комната 203', 10, true, true),
-       ('Комната 301', 20, false, true),
-       ('Комната 302', 8, false, true),
-       ('Комната 303', 12, true, true),
-       ('Комната 401', 10, false, true),
-       ('Комната 402', 15, true, true),
-       ('Комната 403', 8, false, true),
-       ('Комната 501', 25, true, true),
-       ('Комната 502', 10, true, true),
-       ('Комната 503', 15, true, true);
+INSERT INTO Rooms (room_name, capacity, has_computers, has_projector, is_cathedral)
+VALUES ('It-5', 40, true, true, true),
+        ('It-9', 7, true, true, true),
+        ('It-10', 8, true, true, true),
+        ('It-11', 25, true, true, true),
+        ('It-15', 25, true, true, true),
+        ('It-16', 40, true, true, true),
+        ('It-17', 40, true, true, true);
+
+
+insert into equipment (type, inv_num)
+values (0, 845216),
+       (0, 845217),
+       (0, 845218),
+       (0, 845219),
+       (0, 845220),
+       (0, 845221),
+       (0, 845222),
+       (0, 845223),
+       (0, 845224),
+       (0, 845225),
+       (0, 845226),
+       (0, 845227),
+       (0, 845228),
+       (0, 845229),
+       (0, 845230),
+       (0, 845231),
+       (0, 845232),
+       (0, 845233),
+       (0, 845234),
+       (0, 845235),
+       (1, 845236),
+       (1, 845237),
+       (1, 845238),
+       (1, 845239),
+       (1, 845240),
+       (1, 845241),
+       (2, 845242),
+       (2, 845243);
+
+insert into groups (name, size)
+values ('М8О-401Б-20', 20),
+('М8О-402Б-20', 16),
+('М8О-403Б-20', 22),
+('М8О-404Б-20', 21),
+('М8О-405Б-20', 20),
+('М8О-406Б-20', 17),
+('М8О-407Б-20', 19),
+('М8О-408Б-20', 16),
+('М8О-409Б-20', 21),
+('М8О-410Б-20', 18),
+('М8О-411Б-20', 22);
 
 
 -- Вставка тестовых данных для таблицы Bookings (одиночные бронирования)

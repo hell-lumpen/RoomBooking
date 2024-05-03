@@ -10,6 +10,7 @@ import org.mai.roombooking.dtos.bookings.RoomBookingDetailsDTO;
 import org.mai.roombooking.dtos.bookings.RoomBookingRequestDTO;
 import org.mai.roombooking.entities.*;
 import org.mai.roombooking.exceptions.*;
+import org.mai.roombooking.repositories.BookingRepository;
 import org.mai.roombooking.exceptions.base.BookingException;
 import org.mai.roombooking.repositories.*;
 import org.springframework.security.access.AccessDeniedException;
@@ -60,6 +61,10 @@ public class BookingService {
 //        var staff = userRepository.findById(staffId).orElseThrow(() -> new UserNotFoundException(staffId));
 //        return bookingRepository.findByStaffContaining(staff).stream().map(RoomBookingDTO::new).toList();
 //    }
+
+    public List<Booking> getBookingsByStatus(Booking.Status status) {
+        return bookingRepository.findByStatus(status);
+    }
 
     public List<Booking> getLastBookingsByOwner(Long ownerId, int limit) {
         return bookingRepository.findByOwner(ownerId).stream()
@@ -211,7 +216,6 @@ public class BookingService {
         return bookingRepository.save(request);
     }
 
-
     /**
      * Удаляет отдельное бронирование на основе предоставленного идентификатора.
      *
@@ -269,6 +273,7 @@ public class BookingService {
                 .tags(dto.getTagsId().stream().map((id) -> tagRepository.findById(id).orElseThrow(() ->
                         new TagNotFoundException("tag whis id: " + id))).collect(Collectors.toSet()))
                 .recurringRule(recurringRule)
+                .status(dto.getStatus())
                 .build();
     }
 

@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 @AllArgsConstructor
 @Getter
 @Builder
+@Data
 @Table(name = "user_info")
 public class UserInfo {
 

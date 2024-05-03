@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -34,9 +31,17 @@ public class Booking {
     private User owner;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "bookings_staff",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "staff_id")
+    )
     List<User> staff;
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "bookings_groups",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "groups_id")
+    )
     Set<Group> groups;
 
     @Column(name = "start_time", nullable = false)
@@ -47,7 +52,7 @@ public class Booking {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime endTime;
 
-    @Column(name="title", nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "description")
@@ -64,7 +69,21 @@ public class Booking {
     @JoinColumn(name = "recurring_rule")
     private RecurringRule recurringRule;
 
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
+    //    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "bookings_equipment",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "equipment_id")
+    )
+    private List<Equipment> bookingEquipments;
+
+    public boolean needEquipment() {
+        return bookingEquipments != null && !bookingEquipments.isEmpty();
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -86,7 +105,7 @@ public class Booking {
 
     @Override
     public String toString() {
-        return  "bookingGroupId=" + bookingGroupId +
+        return "bookingGroupId=" + bookingGroupId +
                 "|| room=" + room.getRoomName() +
                 "|| owner=" + owner.getFullName() +
                 "|| staff=" + staff.stream().map(User::getFullName).collect(Collectors.joining(", ")) +
@@ -97,4 +116,6 @@ public class Booking {
                 "|| description='" + description + '\'' +
                 "|| tags=" + tags.stream().map(Tag::getFullName).collect(Collectors.joining(", "));
     }
+
+    public enum Status {REQUIRES_CONFIRMATION, CONFIRMED}
 }

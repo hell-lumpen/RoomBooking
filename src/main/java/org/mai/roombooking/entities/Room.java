@@ -1,10 +1,7 @@
 package org.mai.roombooking.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Objects;
 
@@ -13,6 +10,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Getter
 @Builder
+@Data
 @Table(name = "Rooms", indexes = {
         @Index(name = "cathedral_index", columnList = "is_cathedral")})
 public class Room {

@@ -31,11 +31,12 @@ public class RoomBookingDTO {
     private List<TagDTO> tags;
     private List<GroupDTO> groups;
     private List<UserDTO> staff;
-    private Long recurringId = null;
-    private Long recurringInterval = null;
-    private String recurringUnit = null;
-    private Long recurringCount = null;
-    private LocalDateTime recurringEndDate = null;
+    private Long recurringId;
+    private Long recurringInterval;
+    private String recurringUnit;
+    private Long recurringCount;
+    private LocalDateTime recurringEndDate;
+    private String status;
 
     public RoomBookingDTO(@NonNull Booking booking) {
         title = booking.getTitle();
@@ -56,5 +57,6 @@ public class RoomBookingDTO {
             recurringCount = booking.getRecurringRule().getCount();
             recurringEndDate = booking.getRecurringRule().getEndTime();
         }
+        status = booking.getStatus().name();
     }
 }

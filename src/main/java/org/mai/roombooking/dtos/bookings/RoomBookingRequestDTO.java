@@ -49,4 +49,6 @@ public class RoomBookingRequestDTO {
 
     private LocalDateTime recurringEndDate;
 //    private Booking.Status status;
+
+    private Booking.Status status;
 }
