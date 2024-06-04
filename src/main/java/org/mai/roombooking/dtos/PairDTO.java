@@ -7,7 +7,7 @@ import org.mai.roombooking.entities.Room;
 import org.mai.roombooking.entities.User;
 
 @Data
-public class PairDTO {
+public class dPairDTO {
 
     private long id;
     private String value;
